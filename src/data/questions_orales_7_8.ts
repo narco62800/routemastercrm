@@ -1,0 +1,447 @@
+import { Question } from '../types';
+
+export const ORAL_QUESTIONS_7_8: Question[] = [
+  // FICHE 7: Vitesse.
+  {
+    id: "fo7_1",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 7",
+    text: "La vitesse est un facteur :",
+    options: ["Atténuant", "Aggravant", "Négligeable", "Inutile"],
+    correct: 1,
+    explanation: "La vitesse est un facteur aggravant en cas d'accident à cause de l'énergie cinétique."
+  },
+  {
+    id: "fo7_2",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 7",
+    text: "Quelle est la vitesse max sur autoroute pour un camion de marchandises > 12t ?",
+    options: ["80 km/h", "90 km/h", "100 km/h", "110 km/h"],
+    correct: 1,
+    explanation: "La vitesse maximale autorisée sur autoroute pour les véhicules de marchandises de plus de 12t est de 90 km/h."
+  },
+  {
+    id: "fo7_3",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 7",
+    text: "Quelle est la vitesse max en agglomération pour un poids lourd ?",
+    options: ["30 km/h", "50 km/h", "70 km/h", "80 km/h"],
+    correct: 1,
+    explanation: "La vitesse maximale en agglomération est de 50 km/h pour tous les poids lourds."
+  },
+  {
+    id: "fo7_4",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 7",
+    text: "Quelle est la limitation de vitesse si la visibilité est inférieure à 50m ?",
+    options: ["30 km/h", "50 km/h", "70 km/h", "90 km/h"],
+    correct: 1,
+    explanation: "Si la visibilité est inférieure à 50m, la vitesse est limitée à 50 km/h sur tout le réseau routier."
+  },
+  {
+    id: "fo7_5",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 7",
+    text: "Quel dispositif est obligatoire sur les véhicules de catégorie C et CE ?",
+    options: ["Régulateur de vitesse", "Limiteur de vitesse", "GPS", "Radio"],
+    correct: 1,
+    explanation: "Le limiteur de vitesse est un dispositif obligatoire sur les catégories C, CE, D et DE."
+  },
+  {
+    id: "fo7_6",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 7",
+    text: "Quel est l'effet de la vitesse sur le champ visuel ?",
+    options: ["Il s'élargit", "Il se réduit", "Il ne change pas", "Il devient plus net"],
+    correct: 1,
+    explanation: "La vitesse entraîne une réduction du champ visuel."
+  },
+  {
+    id: "fo7_7",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 7",
+    text: "La vitesse augmente-t-elle la fatigue ?",
+    options: ["Non", "Oui", "Seulement la nuit", "Seulement le jour"],
+    correct: 1,
+    explanation: "Oui, la vitesse augmente la fatigue et le stress."
+  },
+  {
+    id: "fo7_8",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 7",
+    text: "Quelle distance est impactée par l'augmentation de la vitesse ?",
+    options: ["Distance de réaction", "Distance de freinage", "Distance d'arrêt", "Toutes ces distances"],
+    correct: 3,
+    explanation: "La vitesse augmente les distances de réaction, de freinage et d'arrêt."
+  },
+  {
+    id: "fo7_9",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 7",
+    text: "Quelle force s'exerce sur le véhicule en virage ?",
+    options: ["Force de frappe", "Force centrifuge", "Force de vente", "Force tranquille"],
+    correct: 1,
+    explanation: "La force centrifuge tend à déporter le véhicule vers l'extérieur du virage."
+  },
+  {
+    id: "fo7_10",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 7",
+    text: "Quelle sanction peut-on avoir pour un excès de vitesse ?",
+    options: ["Amende uniquement", "Retrait de points uniquement", "Amende, retrait points, suspension permis", "Rien"],
+    correct: 2,
+    explanation: "Les sanctions incluent l'amende, le retrait de points, la suspension du permis et l'immobilisation."
+  },
+  {
+    id: "fo7_11",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 7",
+    text: "Quelle est la vitesse max sur route pour un camion > 12t ?",
+    options: ["70 km/h", "80 km/h", "90 km/h", "100 km/h"],
+    correct: 1,
+    explanation: "La vitesse maximale sur route est de 80 km/h pour les véhicules de marchandises > 12t."
+  },
+  {
+    id: "fo7_12",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 7",
+    text: "Le régulateur de vitesse est-il obligatoire ?",
+    options: ["Oui", "Non, c'est une aide à la conduite", "Seulement en ville", "Seulement sur autoroute"],
+    correct: 1,
+    explanation: "Non, le régulateur est une aide à la conduite, contrairement au limiteur qui est obligatoire."
+  },
+  {
+    id: "fo7_13",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 7",
+    text: "L'énergie cinétique augmente avec :",
+    options: ["Le carré de la vitesse", "La couleur du véhicule", "Le prix du gazole", "Le nombre de pneus"],
+    correct: 0,
+    explanation: "L'énergie cinétique est proportionnelle au carré de la vitesse."
+  },
+  {
+    id: "fo7_14",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 7",
+    text: "Un conducteur novice a-t-il des limitations spécifiques ?",
+    options: ["Non", "Oui", "Seulement s'il conduit un petit camion", "Seulement s'il conduit un bus"],
+    correct: 1,
+    explanation: "Oui, les conducteurs novices ont des limitations de vitesse spécifiques."
+  },
+  {
+    id: "fo7_15",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 7",
+    text: "La pluie impose-t-elle une réduction de vitesse ?",
+    options: ["Non", "Oui", "Seulement si on n'a pas d'essuie-glaces", "Seulement de nuit"],
+    correct: 1,
+    explanation: "Oui, les conditions météorologiques comme la pluie imposent des limitations spécifiques."
+  },
+  {
+    id: "fo7_16",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 7",
+    text: "Quelle est la vitesse max pour un transport de matières dangereuses > 12t sur autoroute ?",
+    options: ["70 km/h", "80 km/h", "90 km/h", "100 km/h"],
+    correct: 1,
+    explanation: "La vitesse est limitée à 80 km/h sur autoroute pour les transports de matières dangereuses > 12t."
+  },
+  {
+    id: "fo7_17",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 7",
+    text: "Quelle est la vitesse max pour un transport de matières dangereuses > 12t sur route ?",
+    options: ["60 km/h", "70 km/h", "80 km/h", "90 km/h"],
+    correct: 1,
+    explanation: "La vitesse est limitée à 70 km/h sur route pour les transports de matières dangereuses > 12t."
+  },
+  {
+    id: "fo7_18",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 7",
+    text: "La force centrifuge dépend-elle de la vitesse ?",
+    options: ["Non", "Oui", "Seulement si le virage est serré", "Seulement si le camion est lourd"],
+    correct: 1,
+    explanation: "Oui, la force centrifuge augmente avec la vitesse."
+  },
+  {
+    id: "fo7_19",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 7",
+    text: "Le poids du véhicule influence-t-il l'énergie cinétique ?",
+    options: ["Non", "Oui", "Seulement à haute vitesse", "Seulement à basse vitesse"],
+    correct: 1,
+    explanation: "Oui, l'énergie cinétique dépend de la masse et de la vitesse."
+  },
+  {
+    id: "fo7_20",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 7",
+    text: "Les limitations de vitesse sont définies par :",
+    options: ["Le patron", "Le code de la route", "Le conducteur", "Le client"],
+    correct: 1,
+    explanation: "Les limitations sont fixées par les articles du code de la route."
+  },
+
+  // FICHE 8: Organisation des transports.
+  {
+    id: "fo8_1",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 8",
+    text: "Quel mode de transport est prépondérant en France ?",
+    options: ["Ferroviaire", "Routier", "Fluvial", "Aérien"],
+    correct: 1,
+    explanation: "Le transport routier est le mode de transport prépondérant."
+  },
+  {
+    id: "fo8_2",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 8",
+    text: "Qu'est-ce que le transport pour 'compte propre' ?",
+    options: ["Transporter pour un client", "Transporter ses propres marchandises", "Louer son camion", "Travailler seul"],
+    correct: 1,
+    explanation: "C'est le transport effectué par une entreprise pour ses propres besoins."
+  },
+  {
+    id: "fo8_3",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 8",
+    text: "Qu'est-ce que le transport pour 'compte d'autrui' ?",
+    options: ["Transporter ses propres marchandises", "Transport public contre rémunération", "Prêter son camion", "Travailler gratuitement"],
+    correct: 1,
+    explanation: "C'est le transport effectué pour le compte d'un client contre rémunération."
+  },
+  {
+    id: "fo8_4",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 8",
+    text: "Quel document matérialise le contrat de transport de marchandises ?",
+    options: ["Une facture", "La lettre de voiture", "Un ticket de caisse", "Un bon de commande"],
+    correct: 1,
+    explanation: "Le contrat est matérialisé par la lettre de voiture (nationale ou internationale CMR)."
+  },
+  {
+    id: "fo8_5",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 8",
+    text: "Qu'est-ce qu'un service régulier en transport de voyageurs ?",
+    options: ["Un voyage surprise", "Itinéraires, horaires et tarifs fixés", "Un voyage à la demande", "Un voyage gratuit"],
+    correct: 1,
+    explanation: "Ce sont des services dont les itinéraires, horaires et tarifs sont fixés à l'avance."
+  },
+  {
+    id: "fo8_6",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 8",
+    text: "Qu'est-ce qu'un service occasionnel en transport de voyageurs ?",
+    options: ["Un bus de ville", "Groupes constitués à la demande", "Un transport scolaire", "Un transport gratuit"],
+    correct: 1,
+    explanation: "Ce sont des services qui assurent le transport de groupes constitués à la demande."
+  },
+  {
+    id: "fo8_7",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 8",
+    text: "Quel organisme gère le registre des transporteurs ?",
+    options: ["La police", "La DREAL", "La mairie", "La préfecture"],
+    correct: 1,
+    explanation: "L'inscription au registre des transporteurs se fait auprès de la DREAL."
+  },
+  {
+    id: "fo8_8",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 8",
+    text: "Quel document doit être présent à bord du véhicule ?",
+    options: ["L'original de la licence", "Copie conforme de la licence de transport", "Une photo du patron", "Le contrat de travail"],
+    correct: 1,
+    explanation: "Une copie conforme de la licence de transport doit être à bord."
+  },
+  {
+    id: "fo8_9",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 8",
+    text: "Peut-on louer un véhicule avec conducteur ?",
+    options: ["Non", "Oui", "Seulement le week-end", "Seulement pour les déménagements"],
+    correct: 1,
+    explanation: "Oui, la location peut se faire avec ou sans conducteur."
+  },
+  {
+    id: "fo8_10",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 8",
+    text: "Qu'est-ce qu'un service privé de transport de voyageurs ?",
+    options: ["Un taxi", "Transport gratuit pour besoins propres", "Un bus payant", "Un avion"],
+    correct: 1,
+    explanation: "Ce sont des transports gratuits effectués par des associations ou entreprises pour leurs besoins propres."
+  },
+  {
+    id: "fo8_11",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 8",
+    text: "La CMR est une lettre de voiture :",
+    options: ["Nationale", "Internationale", "Régionale", "Urbaine"],
+    correct: 1,
+    explanation: "La CMR est la lettre de voiture internationale."
+  },
+  {
+    id: "fo8_12",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 8",
+    text: "Le contrat de transport doit-il être écrit ?",
+    options: ["Non", "Oui", "Seulement s'il est cher", "Seulement s'il est long"],
+    correct: 1,
+    explanation: "Oui, le contrat de transport est généralement écrit."
+  },
+  {
+    id: "fo8_13",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 8",
+    text: "Quel est l'avantage du transport routier ?",
+    options: ["Le prix élevé", "Souplesse et porte-à-porte", "La lenteur", "Le bruit"],
+    correct: 1,
+    explanation: "Ses principaux avantages sont sa souplesse et le service porte-à-porte."
+  },
+  {
+    id: "fo8_14",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 8",
+    text: "En compte propre, le véhicule doit appartenir à :",
+    options: ["Le conducteur", "L'entreprise", "Le client", "L'État"],
+    correct: 1,
+    explanation: "En compte propre, le véhicule appartient à l'entreprise ou a été loué par elle."
+  },
+  {
+    id: "fo8_15",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 8",
+    text: "En compte propre, le conducteur doit être :",
+    options: ["Indépendant", "Salarié de l'entreprise", "Bénévole", "Le client"],
+    correct: 1,
+    explanation: "En compte propre, le conducteur est le chef d'entreprise ou un salarié."
+  },
+  {
+    id: "fo8_16",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 8",
+    text: "Quel document est utilisé pour les services occasionnels de voyageurs ?",
+    options: ["Un ticket", "Billet collectif ou feuille de route", "Une carte d'identité", "Un passeport"],
+    correct: 1,
+    explanation: "On utilise un billet collectif ou une feuille de route."
+  },
+  {
+    id: "fo8_17",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 8",
+    text: "Le transport ferroviaire est un mode de transport :",
+    options: ["Routier", "Concurrent ou complémentaire", "Inexistant", "Uniquement pour les voyageurs"],
+    correct: 1,
+    explanation: "C'est l'un des modes de transport cités dans l'organisation globale."
+  },
+  {
+    id: "fo8_18",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 8",
+    text: "La lettre de voiture précise :",
+    options: ["La météo", "Nature, poids, volume des marchandises", "La couleur du camion", "Le nom du chien du patron"],
+    correct: 1,
+    explanation: "Elle précise les caractéristiques de la marchandise transportée."
+  },
+  {
+    id: "fo8_19",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 8",
+    text: "Le transport fluvial utilise :",
+    options: ["Les routes", "Les voies navigables", "Les rails", "Les airs"],
+    correct: 1,
+    explanation: "Le transport fluvial se fait sur les fleuves et canaux."
+  },
+  {
+    id: "fo8_20",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 8",
+    text: "L'organisation des transports vise à :",
+    options: ["Perdre du temps", "Optimiser les flux de marchandises et voyageurs", "Augmenter les prix", "Polluer plus"],
+    correct: 1,
+    explanation: "Elle vise à organiser efficacement les déplacements."
+  }
+];

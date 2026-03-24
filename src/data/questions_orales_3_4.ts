@@ -1,0 +1,447 @@
+import { Question } from '../types';
+
+export const ORAL_QUESTIONS_3_4: Question[] = [
+  // FICHE 3: Conduite en montagne ou zones accidentées.
+  {
+    id: "fo3_1",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 3",
+    text: "En montagne, quel danger est lié à la déclivité ?",
+    options: ["Manque d'oxygène", "Augmentation de l'énergie cinétique", "Usure des pneus", "Bruit du moteur"],
+    correct: 1,
+    explanation: "La déclivité entraîne des risques liés à l'énergie cinétique et à l'augmentation de la vitesse."
+  },
+  {
+    id: "fo3_2",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 3",
+    text: "Pourquoi les croisements sont-ils délicats en montagne ?",
+    options: ["À cause des fleurs", "Largeur de la voie et méconnaissance des règles", "Il n'y a pas de panneaux", "Les routes sont droites"],
+    correct: 1,
+    explanation: "La largeur de la voie et la méconnaissance des règles du code de la route rendent les croisements difficiles."
+  },
+  {
+    id: "fo3_3",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 3",
+    text: "Quel risque guette les freins en descente prolongée ?",
+    options: ["Le gel", "L'échauffement important", "La rouille", "La perte de liquide"],
+    correct: 1,
+    explanation: "Une mauvaise utilisation du ralentisseur ou du frein moteur peut entraîner un échauffement important des freins."
+  },
+  {
+    id: "fo3_4",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 3",
+    text: "Que peut-il arriver au moteur lors des montées ?",
+    options: ["Il gèle", "Il surchauffe", "Il s'arrête", "Il consomme moins"],
+    correct: 1,
+    explanation: "Le moteur peut surchauffer lors des montées prolongées."
+  },
+  {
+    id: "fo3_5",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 3",
+    text: "Quelle précaution prendre concernant la vitesse en montagne ?",
+    options: ["L'augmenter", "La réduire et l'adapter à la déclivité", "Garder la même", "Ne pas freiner"],
+    correct: 1,
+    explanation: "Il faut réduire et adapter sa vitesse à la déclivité."
+  },
+  {
+    id: "fo3_6",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 3",
+    text: "Comment utiliser les rapports de boîte en descente ?",
+    options: ["Rester en 6ème", "Adapter les rapports en fonction de la déclivité", "Passer au point mort", "Éteindre le moteur"],
+    correct: 1,
+    explanation: "Il faut adapter les rapports pour utiliser le frein moteur."
+  },
+  {
+    id: "fo3_7",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 3",
+    text: "Comment utiliser les freins et ralentisseurs ?",
+    options: ["Séparément", "Correctement et de façon combinée", "Uniquement les freins", "Uniquement le ralentisseur"],
+    correct: 1,
+    explanation: "Il faut savoir utiliser les possibilités techniques des ralentisseurs et freins combinés."
+  },
+  {
+    id: "fo3_8",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 3",
+    text: "Quels équipements antidérapants faut-il posséder ?",
+    options: ["Des gants", "Des chaînes ou pneus à crampons", "Une pelle", "Du sel"],
+    correct: 1,
+    explanation: "Il faut posséder des dispositifs adaptés selon la réglementation et les prévisions."
+  },
+  {
+    id: "fo3_9",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 3",
+    text: "Que faut-il faire avant de s'engager sur une route de montagne ?",
+    options: ["S'informer de l'état des routes", "Changer de camion", "Dormir 2h", "Rien"],
+    correct: 0,
+    explanation: "Il est nécessaire de s'informer de l'état des routes et des ouvertures/fermetures."
+  },
+  {
+    id: "fo3_10",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 3",
+    text: "En montagne, que vaut-il mieux préférer ?",
+    options: ["Les cols", "Les tunnels routiers", "Les chemins de terre", "Les autoroutes"],
+    correct: 1,
+    explanation: "Il est préférable d'utiliser les tunnels routiers aux passages des cols."
+  },
+  {
+    id: "fo3_11",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 3",
+    text: "Comment prévenir les autres usagers en montagne ?",
+    options: ["En criant", "Avertisseur sonore et appels de feux", "En s'arrêtant", "Avec un drapeau"],
+    correct: 1,
+    explanation: "On prévient par l'avertisseur sonore ou des appels de feux."
+  },
+  {
+    id: "fo3_12",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 3",
+    text: "Quels autres usagers peut-on croiser en montagne ?",
+    options: ["Uniquement des voitures", "Véhicules légers, lourds, déneigement", "Uniquement des vélos", "Personne"],
+    correct: 1,
+    explanation: "On peut croiser des véhicules légers, lourds ou des véhicules spéciaux de déneigement."
+  },
+  {
+    id: "fo3_13",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 3",
+    text: "L'énergie cinétique est liée à :",
+    options: ["La couleur", "La masse et la vitesse", "Le prix", "La marque"],
+    correct: 1,
+    explanation: "L'énergie cinétique dépend de la masse du véhicule et de sa vitesse."
+  },
+  {
+    id: "fo3_14",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 3",
+    text: "La nature du chargement influence-t-elle la conduite en montagne ?",
+    options: ["Oui", "Non", "Seulement s'il est lourd", "Seulement s'il est fragile"],
+    correct: 0,
+    explanation: "Oui, la masse et la nature du chargement sont des facteurs de danger."
+  },
+  {
+    id: "fo3_15",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 3",
+    text: "Le brouillard est-il un danger en montagne ?",
+    options: ["Oui", "Non", "Seulement en hiver", "Seulement la nuit"],
+    correct: 0,
+    explanation: "Oui, le brouillard, la neige et le verglas sont des risques météorologiques."
+  },
+  {
+    id: "fo3_16",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 3",
+    text: "Les trajectoires en virages sont-elles un danger ?",
+    options: ["Non", "Oui", "Seulement pour les voitures", "Seulement pour les vélos"],
+    correct: 1,
+    explanation: "Oui, les trajectoires en virages font partie des dangers listés."
+  },
+  {
+    id: "fo3_17",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 3",
+    text: "Faut-il adapter sa vitesse à la déclivité ?",
+    options: ["Non", "Oui", "Seulement en montée", "Seulement en descente"],
+    correct: 1,
+    explanation: "Oui, il faut adapter sa vitesse à la déclivité."
+  },
+  {
+    id: "fo3_18",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 3",
+    text: "Le frein moteur est-il utile en montagne ?",
+    options: ["Non", "Oui", "Seulement pour se garer", "Seulement en ville"],
+    correct: 1,
+    explanation: "Oui, il est essentiel pour retenir le véhicule en descente."
+  },
+  {
+    id: "fo3_19",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 3",
+    text: "Les ralentisseurs peuvent-ils provoquer un incendie ?",
+    options: ["Non", "Oui, par échauffement", "Seulement s'il pleut", "Seulement s'ils sont neufs"],
+    correct: 1,
+    explanation: "Une mauvaise utilisation peut entraîner un échauffement important."
+  },
+  {
+    id: "fo3_20",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 3",
+    text: "La conduite d'un véhicule lourd en montagne requiert :",
+    options: ["Aucune attention", "Une attention toute particulière", "De rouler vite", "De ne pas s'arrêter"],
+    correct: 1,
+    explanation: "Elle requiert une attention toute particulière."
+  },
+
+  // FICHE 4: Gestes et postures – Accident du travail.
+  {
+    id: "fo4_1",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 4",
+    text: "Quel est le risque lors de la montée ou descente de cabine ?",
+    options: ["S'endormir", "Chute, foulure, entorse, fracture", "Se salir", "Perdre ses clés"],
+    correct: 1,
+    explanation: "Les risques sont la chute, la foulure, l'entorse ou la fracture."
+  },
+  {
+    id: "fo4_2",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 4",
+    text: "Peut-on sauter de la cabine pour descendre plus vite ?",
+    options: ["Oui", "Non", "Seulement s'il y a un tapis", "Seulement en urgence"],
+    correct: 1,
+    explanation: "Il ne faut pas sauter de la cabine."
+  },
+  {
+    id: "fo4_3",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 4",
+    text: "Quelle est la règle des points d'appui pour monter/descendre ?",
+    options: ["1 point", "2 points", "3 points d'appui", "4 points"],
+    correct: 2,
+    explanation: "Il faut conserver les trois points d'appui."
+  },
+  {
+    id: "fo4_4",
+    text: "Comment doit-on se positionner par rapport aux marchepieds pour descendre ?",
+    options: ["De dos", "Face aux marchepieds", "De profil", "En courant"],
+    correct: 1,
+    explanation: "Il faut descendre face aux marchepieds.",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 4"
+  },
+  {
+    id: "fo4_5",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 4",
+    text: "Quels équipements de protection individuelle (EPI) utiliser ?",
+    options: ["Casque audio", "Gants, chaussures sécurité, imperméable", "Lunettes de soleil", "Short et baskets"],
+    correct: 1,
+    explanation: "Il faut utiliser gants, chaussures de sécurité, imperméable selon les cas."
+  },
+  {
+    id: "fo4_6",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 4",
+    text: "Quelle est l'importance du réglage du siège ?",
+    options: ["Pour le confort uniquement", "Pour une bonne position de conduite et sécurité", "Pour mieux voir la radio", "C'est inutile"],
+    correct: 1,
+    explanation: "Adopter une bonne position de conduite passe par le réglage du siège et l'utilisation de la ceinture."
+  },
+  {
+    id: "fo4_7",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 4",
+    text: "Où surviennent la majorité des accidents du travail en transport ?",
+    options: ["En roulant", "À l'arrêt (hors circulation)", "Au bureau", "À la maison"],
+    correct: 1,
+    explanation: "Les accidents surviennent à l'arrêt mais aussi en circulation."
+  },
+  {
+    id: "fo4_8",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 4",
+    text: "Combien de fois y a-t-il plus d'accidents à l'arrêt qu'en circulation ?",
+    options: ["2 fois", "5 fois", "13 fois plus", "20 fois"],
+    correct: 2,
+    explanation: "Il y a 13 fois plus d'accidents du travail à l'arrêt qu'en circulation."
+  },
+  {
+    id: "fo4_9",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 4",
+    text: "Quels sont les risques liés aux manutentions ?",
+    options: ["Rhume", "Hernies, ankylose, écrasement", "Faim", "Soif"],
+    correct: 1,
+    explanation: "Les manutentions peuvent causer des hernies, ankylose ou écrasement."
+  },
+  {
+    id: "fo4_10",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 4",
+    text: "Quel danger présentent les matières transportées ?",
+    options: ["Leur prix", "Brûlures, respirations de vapeurs toxiques", "Leur couleur", "Leur nom"],
+    correct: 1,
+    explanation: "Elles peuvent causer des brûlures ou l'aspiration de vapeurs toxiques."
+  },
+  {
+    id: "fo4_11",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 4",
+    text: "Quel risque lors de l'utilisation d'un hayon élévateur ?",
+    options: ["S'envoler", "Chute, écrasement, blessure", "Se salir", "Perdre du temps"],
+    correct: 1,
+    explanation: "L'utilisation des hayons présente des risques de chute, écrasement ou blessure."
+  },
+  {
+    id: "fo4_12",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 4",
+    text: "Quel risque lors de la manoeuvre d'une cabine basculante ?",
+    options: ["Elle s'envole", "Écrasement, membre coincé", "Elle change de couleur", "Rien"],
+    correct: 1,
+    explanation: "Il y a un risque d'écrasement ou de membre coincé."
+  },
+  {
+    id: "fo4_13",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 4",
+    text: "Quel risque lors de l'ouverture/fermeture des portes ?",
+    options: ["Se salir", "Coincement de la main", "Perdre ses clés", "Casser la vitre"],
+    correct: 1,
+    explanation: "Il y a un risque de coincement de la main."
+  },
+  {
+    id: "fo4_14",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 4",
+    text: "En 2010, combien de décès en transport routier de marchandises ?",
+    options: ["10", "25", "45 décès", "100"],
+    correct: 2,
+    explanation: "Le document cite 45 décès pour le transport routier de marchandises en 2010."
+  },
+  {
+    id: "fo4_15",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 4",
+    text: "En 2011, combien de tués en transport routier de marchandises (ONISR) ?",
+    options: ["10", "30", "60 tués", "90"],
+    correct: 2,
+    explanation: "Le document cite 60 tués pour le transport routier de marchandises en 2011."
+  },
+  {
+    id: "fo4_16",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 4",
+    text: "Faut-il être vigilant lors du nettoyage du véhicule ?",
+    options: ["Non", "Oui, risque de glissade", "Seulement s'il fait froid", "Seulement s'il pleut"],
+    correct: 1,
+    explanation: "Oui, il y a un risque de glissade avec le sol mouillé."
+  },
+  {
+    id: "fo4_17",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 4",
+    text: "Que faut-il éviter en descendant de cabine ?",
+    options: ["De regarder le sol", "De sauter des marches", "De tenir la poignée", "De descendre doucement"],
+    correct: 1,
+    explanation: "Il ne faut pas sauter de marches en descendant."
+  },
+  {
+    id: "fo4_18",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 4",
+    text: "Le port de la ceinture de sécurité est-il obligatoire ?",
+    options: ["Non", "Oui", "Seulement sur autoroute", "Seulement en ville"],
+    correct: 1,
+    explanation: "Oui, l'utilisation de la ceinture de sécurité est obligatoire."
+  },
+  {
+    id: "fo4_19",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 4",
+    text: "Les manutentions peuvent-elles causer des ankyloses ?",
+    options: ["Non", "Oui", "Seulement si on est vieux", "Seulement si on est fatigué"],
+    correct: 1,
+    explanation: "Oui, c'est l'un des risques cités."
+  },
+  {
+    id: "fo4_20",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 4",
+    text: "Combien d'accidents par an environ lors de l'accès en cabine ?",
+    options: ["1 000", "5 000", "10 000 accidents", "50 000"],
+    correct: 2,
+    explanation: "Le document cite l'exemple de l'accès en cabine avec 10 000 accidents par an."
+  }
+];

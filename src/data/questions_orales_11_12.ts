@@ -1,0 +1,447 @@
+import { Question } from '../types';
+
+export const ORAL_QUESTIONS_11_12: Question[] = [
+  // FICHE 11: Comportement en cas d'accident.
+  {
+    id: "fo11_1",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 11",
+    text: "Quel est l'ordre des actions à mener en cas d'accident ?",
+    options: ["Secourir, Alerter, Protéger", "Protéger, Alerter, Secourir", "Alerter, Protéger, Secourir", "Secourir, Protéger, Alerter"],
+    correct: 1,
+    explanation: "La règle d'or est PAS : Protéger, Alerter, Secourir."
+  },
+  {
+    id: "fo11_2",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 11",
+    text: "Quel est le but de 'Protéger' ?",
+    options: ["Réparer le camion", "Éviter le suraccident", "Prendre des photos", "Appeler son patron"],
+    correct: 1,
+    explanation: "Protéger sert à sécuriser les lieux pour éviter qu'un autre accident ne survienne."
+  },
+  {
+    id: "fo11_3",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 11",
+    text: "Quel équipement doit-on porter avant de sortir du véhicule ?",
+    options: ["Des gants", "Le gilet de haute visibilité", "Un casque", "Des lunettes"],
+    correct: 1,
+    explanation: "Le port du gilet jaune est obligatoire avant de descendre du véhicule sur la chaussée."
+  },
+  {
+    id: "fo11_4",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 11",
+    text: "Où faut-il mettre les usagers en sécurité sur autoroute ?",
+    options: ["Dans le camion", "Derrière les barrières de sécurité", "Sur la bande d'arrêt d'urgence", "Sur le toit du véhicule"],
+    correct: 1,
+    explanation: "Il faut mettre tout le monde à l'abri derrière les barrières de sécurité."
+  },
+  {
+    id: "fo11_5",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 11",
+    text: "Quel est le numéro d'urgence européen ?",
+    options: ["15", "17", "18", "112"],
+    correct: 3,
+    explanation: "Le 112 est le numéro d'appel d'urgence unique européen."
+  },
+  {
+    id: "fo11_6",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 11",
+    text: "Quelle information est capitale lors de l'alerte ?",
+    options: ["La couleur des voitures", "Le lieu précis de l'accident", "Le prix du chargement", "La marque des pneus"],
+    correct: 1,
+    explanation: "La localisation précise est indispensable pour que les secours arrivent vite."
+  },
+  {
+    id: "fo11_7",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 11",
+    text: "Peut-on déplacer un blessé ?",
+    options: ["Oui, toujours", "Non, sauf en cas de danger immédiat", "Seulement s'il a mal", "Seulement s'il le demande"],
+    correct: 1,
+    explanation: "Il ne faut jamais déplacer un blessé, sauf risque d'incendie ou d'explosion imminent."
+  },
+  {
+    id: "fo11_8",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 11",
+    text: "Peut-on donner à boire à un blessé ?",
+    options: ["Oui, de l'eau", "Non, jamais", "Seulement s'il a soif", "Seulement du soda"],
+    correct: 1,
+    explanation: "Il ne faut jamais donner à boire ou à manger à un blessé."
+  },
+  {
+    id: "fo11_9",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 11",
+    text: "Faut-il retirer le casque d'un motard accidenté ?",
+    options: ["Oui, pour qu'il respire", "Non, jamais", "Seulement s'il est conscient", "Seulement s'il pleut"],
+    correct: 1,
+    explanation: "Le retrait du casque est réservé aux secouristes formés car il peut aggraver des lésions cervicales."
+  },
+  {
+    id: "fo11_10",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 11",
+    text: "Quel document remplir après l'accident ?",
+    options: ["Une lettre au patron", "Le constat amiable", "Un poème", "Rien"],
+    correct: 1,
+    explanation: "Le constat amiable permet de déclarer l'accident aux assurances."
+  },
+  {
+    id: "fo11_11",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 11",
+    text: "Quel est le numéro du SAMU ?",
+    options: ["15", "17", "18", "112"],
+    correct: 0,
+    explanation: "Le 15 est le numéro du SAMU."
+  },
+  {
+    id: "fo11_12",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 11",
+    text: "Quel est le numéro des Pompiers ?",
+    options: ["15", "17", "18", "112"],
+    correct: 2,
+    explanation: "Le 18 est le numéro des Pompiers."
+  },
+  {
+    id: "fo11_13",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 11",
+    text: "Faut-il couvrir un blessé ?",
+    options: ["Non", "Oui", "Seulement s'il neige", "Seulement s'il pleut"],
+    correct: 1,
+    explanation: "Oui, un blessé en état de choc se refroidit vite, il faut le couvrir."
+  },
+  {
+    id: "fo11_14",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 11",
+    text: "Que faire si on transporte des matières dangereuses ?",
+    options: ["S'enfuir", "Le préciser lors de l'alerte", "Cacher les plaques", "Rien de spécial"],
+    correct: 1,
+    explanation: "Il faut impérativement signaler la présence de matières dangereuses aux secours."
+  },
+  {
+    id: "fo11_15",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 11",
+    text: "Comment baliser l'accident ?",
+    options: ["Avec des fleurs", "Triangles de présignalisation et feux de détresse", "En criant", "Avec un drapeau"],
+    correct: 1,
+    explanation: "Le balisage se fait avec les feux de détresse et les triangles."
+  },
+  {
+    id: "fo11_16",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 11",
+    text: "Peut-on fumer près d'un accident ?",
+    options: ["Oui", "Non, risque d'incendie", "Seulement si on est stressé", "Seulement dehors"],
+    correct: 1,
+    explanation: "Il est strictement interdit de fumer à cause des risques de fuite de carburant."
+  },
+  {
+    id: "fo11_17",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 11",
+    text: "Faut-il parler aux blessés ?",
+    options: ["Non", "Oui, pour les rassurer", "Seulement s'ils nous parlent", "Seulement s'ils crient"],
+    correct: 1,
+    explanation: "Parler et rassurer les blessés est une action importante du secours."
+  },
+  {
+    id: "fo11_18",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 11",
+    text: "Le constat amiable doit-il être signé ?",
+    options: ["Non", "Oui, par les deux conducteurs", "Seulement par le responsable", "Seulement par la police"],
+    correct: 1,
+    explanation: "Il doit être signé par les deux parties pour être valable."
+  },
+  {
+    id: "fo11_19",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 11",
+    text: "Que faire si l'autre conducteur refuse de signer ?",
+    options: ["Se battre", "Le noter dans les observations", "Déchirer le constat", "Appeler ses parents"],
+    correct: 1,
+    explanation: "En cas de désaccord, il faut le noter dans la partie observations et ne pas signer si on n'est pas d'accord avec les faits relatés."
+  },
+  {
+    id: "fo11_20",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 11",
+    text: "Le gilet jaune doit être :",
+    options: ["Dans le coffre", "À portée de main dans la cabine", "À la maison", "Sur le siège passager"],
+    correct: 1,
+    explanation: "Il doit être accessible sans sortir du véhicule."
+  },
+
+  // FICHE 12: Conducteur – Santé et conduite.
+  {
+    id: "fo12_1",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 12",
+    text: "Quel est le taux d'alcoolémie limite pour un conducteur de transport de voyageurs ?",
+    options: ["0.0 g/l", "0.2 g/l", "0.5 g/l", "0.8 g/l"],
+    correct: 1,
+    explanation: "La limite est de 0.2 g/l de sang pour les conducteurs de transport de voyageurs et les permis probatoires."
+  },
+  {
+    id: "fo12_2",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 12",
+    text: "Quel est l'effet de l'alcool sur le temps de réaction ?",
+    options: ["Il diminue", "Il augmente", "Il ne change pas", "Il disparaît"],
+    correct: 1,
+    explanation: "L'alcool augmente le temps de réaction (on met plus de temps à décider de freiner)."
+  },
+  {
+    id: "fo12_3",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 12",
+    text: "L'usage de drogues est-il autorisé ?",
+    options: ["Oui, le week-end", "Non, interdiction totale", "Seulement si on est fatigué", "Seulement si c'est légal"],
+    correct: 1,
+    explanation: "L'usage de stupéfiants est strictement interdit et sévèrement sanctionné."
+  },
+  {
+    id: "fo12_4",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 12",
+    text: "Que signifie le pictogramme de niveau 3 sur un médicament ?",
+    options: ["Soyez prudent", "Ne pas conduire", "Demandez à votre médecin", "C'est bon pour la santé"],
+    correct: 1,
+    explanation: "Le niveau 3 interdit formellement la conduite."
+  },
+  {
+    id: "fo12_5",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 12",
+    text: "Quel est un signe de fatigue ?",
+    options: ["Avoir faim", "Picotements dans les yeux", "Avoir soif", "Chanter"],
+    correct: 1,
+    explanation: "Les picotements des yeux, les bâillements et la raideur de la nuque sont des signes d'alerte."
+  },
+  {
+    id: "fo12_6",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 12",
+    text: "Que faire dès les premiers signes de somnolence ?",
+    options: ["Ouvrir la fenêtre", "S'arrêter et faire une sieste", "Mettre la musique plus fort", "Boire un café"],
+    correct: 1,
+    explanation: "Le seul remède efficace contre la somnolence est le sommeil (sieste de 20 min)."
+  },
+  {
+    id: "fo12_7",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 12",
+    text: "La visite médicale est-elle obligatoire pour le permis C ?",
+    options: ["Non", "Oui", "Seulement après 60 ans", "Seulement si on est malade"],
+    correct: 1,
+    explanation: "Oui, une visite médicale périodique est obligatoire pour les permis du groupe lourd."
+  },
+  {
+    id: "fo12_8",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 12",
+    text: "L'alcool rétrécit-il le champ visuel ?",
+    options: ["Non", "Oui", "Seulement de nuit", "Seulement de jour"],
+    correct: 1,
+    explanation: "Oui, l'alcool provoque une vision 'en tunnel'."
+  },
+  {
+    id: "fo12_9",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 12",
+    text: "Quel sentiment l'alcool peut-il provoquer ?",
+    options: ["La peur", "Une fausse sensation de sécurité", "La tristesse", "La faim"],
+    correct: 1,
+    explanation: "L'alcool désinhibe et donne une fausse confiance en soi, poussant à prendre des risques."
+  },
+  {
+    id: "fo12_10",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 12",
+    text: "Une alimentation équilibrée est-elle conseillée ?",
+    options: ["Non", "Oui", "Seulement pour maigrir", "Seulement pour les sportifs"],
+    correct: 1,
+    explanation: "Une bonne hygiène de vie, incluant l'alimentation, favorise la vigilance."
+  },
+  {
+    id: "fo12_11",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 12",
+    text: "Le tabac est-il déconseillé pour la conduite ?",
+    options: ["Non", "Oui", "Seulement s'il n'y a pas de cendrier", "Seulement si on a des passagers"],
+    correct: 1,
+    explanation: "Le tabac est déconseillé car il peut nuire à l'oxygénation et à la vigilance."
+  },
+  {
+    id: "fo12_12",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 12",
+    text: "La somnolence est-elle une cause d'accident sur autoroute ?",
+    options: ["Non", "Oui, une cause majeure", "Seulement en hiver", "Seulement en été"],
+    correct: 1,
+    explanation: "La somnolence est l'une des premières causes de mortalité sur autoroute."
+  },
+  {
+    id: "fo12_13",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 12",
+    text: "L'alcoolémie est-elle plus sévère pour les permis probatoires ?",
+    options: ["Non", "Oui (0.2 g/l)", "Seulement pour les jeunes", "Seulement pour les voitures"],
+    correct: 1,
+    explanation: "Oui, le taux est abaissé à 0.2 g/l pour les jeunes conducteurs."
+  },
+  {
+    id: "fo12_14",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 12",
+    text: "Les drogues peuvent-elles provoquer des hallucinations ?",
+    options: ["Non", "Oui", "Seulement si on en prend beaucoup", "Seulement la nuit"],
+    correct: 1,
+    explanation: "Certains stupéfiants ont des effets hallucinogènes très dangereux."
+  },
+  {
+    id: "fo12_15",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 12",
+    text: "Faut-il lire la notice des médicaments avant de conduire ?",
+    options: ["Non", "Oui", "Seulement si on se sent mal", "Seulement si on est vieux"],
+    correct: 1,
+    explanation: "Il est impératif de vérifier la compatibilité des médicaments avec la conduite."
+  },
+  {
+    id: "fo12_16",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 12",
+    text: "La raideur de la nuque est un signe de :",
+    options: ["Faim", "Fatigue", "Froid", "Soif"],
+    correct: 1,
+    explanation: "C'est un signe physique de fatigue musculaire et nerveuse."
+  },
+  {
+    id: "fo12_17",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 12",
+    text: "L'alcool augmente-t-il l'agressivité ?",
+    options: ["Non", "Oui", "Seulement si on nous cherche", "Seulement si on perd"],
+    correct: 1,
+    explanation: "L'alcool peut modifier le comportement et rendre le conducteur agressif."
+  },
+  {
+    id: "fo12_18",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 12",
+    text: "Le sommeil est-il le seul remède à la somnolence ?",
+    options: ["Non, il y a le café", "Oui", "Non, il y a la musique", "Non, il y a le vent"],
+    correct: 1,
+    explanation: "Rien ne remplace le sommeil pour récupérer de la somnolence."
+  },
+  {
+    id: "fo12_19",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 12",
+    text: "La périodicité de la visite médicale dépend de :",
+    options: ["La taille", "L'âge", "Le poids", "La couleur des yeux"],
+    correct: 1,
+    explanation: "La validité de la visite médicale est plus courte à mesure que l'on vieillit."
+  },
+  {
+    id: "fo12_20",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 12",
+    text: "Un conducteur en bonne santé est :",
+    options: ["Plus rapide", "Plus sûr", "Plus riche", "Plus beau"],
+    correct: 1,
+    explanation: "Un bon état de santé est la base d'une conduite en sécurité."
+  }
+];

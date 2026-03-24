@@ -1,0 +1,447 @@
+import { Question } from '../types';
+
+export const ORAL_QUESTIONS_1_2: Question[] = [
+  // FICHE 1: Conduite dans des conditions atmosphériques difficiles, route de nuit.
+  {
+    id: "fo1_1",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 1",
+    text: "Par temps de pluie, quelle est la première mesure à prendre concernant la vitesse ?",
+    options: ["La maintenir", "La réduire", "L'augmenter", "S'arrêter"],
+    correct: 1,
+    explanation: "Il faut réduire la vitesse et respecter la réglementation spécifique."
+  },
+  {
+    id: "fo1_2",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 1",
+    text: "En cas de pluie, comment doit-on utiliser le frein moteur ?",
+    options: ["Ne pas l'utiliser", "L'utiliser au maximum", "L'utiliser avec précaution", "Le débrancher"],
+    correct: 1,
+    explanation: "Le document préconise d'utiliser au maximum le frein moteur par temps de pluie."
+  },
+  {
+    id: "fo1_3",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 1",
+    text: "Quels feux est-il interdit d'allumer par temps de pluie ?",
+    options: ["Feux de croisement", "Feux de position", "Brouillard arrière", "Feux de route"],
+    correct: 2,
+    explanation: "Il faut allumer les feux sauf le(s) brouillard arrière(s) par temps de pluie."
+  },
+  {
+    id: "fo1_4",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 1",
+    text: "Quels accessoires sont utiles par temps de pluie pour la visibilité ?",
+    options: ["La radio", "La ventilation et le dégivrage", "Le régulateur", "L'avertisseur sonore"],
+    correct: 1,
+    explanation: "L'utilisation de la ventilation, climatisation et du dégivrage des rétroviseurs est conseillée."
+  },
+  {
+    id: "fo1_5",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 1",
+    text: "Par temps de brouillard, quels feux peut-on utiliser ?",
+    options: ["Feux de route", "Croisement ou brouillard", "Position seuls", "Aucun"],
+    correct: 1,
+    explanation: "On doit allumer les feux de croisement ou de brouillard."
+  },
+  {
+    id: "fo1_6",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 1",
+    text: "Comment se guider par manque de visibilité (brouillard) ?",
+    options: ["En suivant le véhicule devant de près", "À l'aide du marquage au sol", "Au GPS uniquement", "En regardant le ciel"],
+    correct: 1,
+    explanation: "Le marquage au sol aide à se guider en cas de mauvaise visibilité."
+  },
+  {
+    id: "fo1_7",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 1",
+    text: "Par vent fort, quel type de véhicule subit le plus d'écarts de direction ?",
+    options: ["Un véhicule chargé", "Un véhicule circulant à vide", "Un véhicule articulé", "Une voiture"],
+    correct: 1,
+    explanation: "Les écarts de direction sont plus importants lorsque le véhicule circule à vide."
+  },
+  {
+    id: "fo1_8",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 1",
+    text: "Sur neige et verglas, comment doit-on utiliser les commandes ?",
+    options: ["Avec force", "Avec souplesse", "Très rapidement", "Par saccades"],
+    correct: 1,
+    explanation: "Il faut utiliser les commandes avec souplesse sur sol glissant."
+  },
+  {
+    id: "fo1_9",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 1",
+    text: "Que sont les 'barrières de dégel' ?",
+    options: ["Des protections contre la neige", "Une réglementation à respecter", "Des obstacles sur la route", "Des systèmes de chauffage"],
+    correct: 1,
+    explanation: "Les barrières de dégel font partie de la réglementation à respecter sur neige et verglas."
+  },
+  {
+    id: "fo1_10",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 1",
+    text: "Pourquoi les accidents de nuit sont-ils plus graves ?",
+    options: ["Vitesse supérieure et manque de visibilité", "Les routes sont plus sales", "Il n'y a pas de police", "Les phares sont trop puissants"],
+    correct: 0,
+    explanation: "Ils sont la conséquence d'une vitesse supérieure, du manque de visibilité, de la fatigue et de l'alcool."
+  },
+  {
+    id: "fo1_11",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 1",
+    text: "L'éblouissement de nuit réduit particulièrement :",
+    options: ["L'ouïe", "Le champ visuel", "Le toucher", "L'odorat"],
+    correct: 1,
+    explanation: "L'éblouissement réduit le champ visuel et altère la vision des couleurs."
+  },
+  {
+    id: "fo1_12",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 1",
+    text: "Que faut-il contrôler concernant les feux avant le départ ?",
+    options: ["Leur couleur", "Leur bon fonctionnement et réglage", "Leur marque", "Leur prix"],
+    correct: 1,
+    explanation: "Il faut contrôler le bon état, la propreté, le réglage et le bon fonctionnement des feux."
+  },
+  {
+    id: "fo1_13",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 1",
+    text: "Que doit contenir la boîte de secours électrique du véhicule ?",
+    options: ["Des pansements", "Des ampoules de rechange et des fusibles", "Des piles", "Des câbles de démarrage"],
+    correct: 1,
+    explanation: "Il faut s'assurer d'avoir une boîte d'ampoules de rechange et des fusibles."
+  },
+  {
+    id: "fo1_14",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 1",
+    text: "De nuit, que faut-il faire en virage ?",
+    options: ["Accélérer", "Ralentir davantage", "Éteindre les feux", "Klaxonner"],
+    correct: 1,
+    explanation: "Il faut ralentir davantage en virage car l'importance de la courbe est plus difficile à apprécier."
+  },
+  {
+    id: "fo1_15",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 1",
+    text: "En cas d'éblouissement la nuit, où faut-il fixer son regard ?",
+    options: ["Le véhicule en face", "Le bord droit de la route", "Le ciel", "Le tableau de bord"],
+    correct: 1,
+    explanation: "Il faut fixer le bord droit de la route le plus loin possible."
+  },
+  {
+    id: "fo1_16",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 1",
+    text: "À quel moment de la nuit faut-il particulièrement se méfier du 'coup de pompe' ?",
+    options: ["En début de soirée", "À minuit", "Au petit matin", "À midi"],
+    correct: 2,
+    explanation: "Le document mentionne de se méfier du 'coup de pompe' au petit matin."
+  },
+  {
+    id: "fo1_17",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 1",
+    text: "Que faut-il vérifier concernant la batterie avant le départ ?",
+    options: ["Sa couleur", "Sa charge", "Son poids", "Sa marque"],
+    correct: 1,
+    explanation: "Il faut contrôler la charge de la batterie avant le départ."
+  },
+  {
+    id: "fo1_18",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 1",
+    text: "Pendant le trajet, quelle est la recommandation sur les pauses ?",
+    options: ["Ne pas en faire", "En faire plus fréquemment", "En faire une seule", "Attendre d'être fatigué"],
+    correct: 1,
+    explanation: "Il est conseillé de faire des pauses plus fréquentes."
+  },
+  {
+    id: "fo1_19",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 1",
+    text: "L'éblouissement diminue l'acuité visuelle de façon :",
+    options: ["Minime", "Importante", "Nulle", "Aléatoire"],
+    correct: 1,
+    explanation: "L'éblouissement diminue l'acuité de façon importante."
+  },
+  {
+    id: "fo1_20",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 1",
+    text: "Quelles informations routières peut-on consulter ?",
+    options: ["Internet, CRIR, CNIR, Radios", "Les journaux uniquement", "La météo à la télé", "Rien"],
+    correct: 0,
+    explanation: "On peut s'informer via Internet, CRIR, CNIR, Police, Gendarmerie, Autoroute info, Radios, etc."
+  },
+
+  // FICHE 2: Comportement en cas d'accident.
+  {
+    id: "fo2_1",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 2",
+    text: "Quels sont les trois gestes d'urgence à effectuer dans l'ordre ?",
+    options: ["Alerter, Secourir, Protéger", "Protéger, Alerter, Secourir", "Secourir, Protéger, Alerter", "Alerter, Protéger, Secourir"],
+    correct: 1,
+    explanation: "L'ordre est : PROTÉGER, ALERTER, SECOURIR."
+  },
+  {
+    id: "fo2_2",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 2",
+    text: "Comment doit-on protéger les lieux d'un accident ?",
+    options: ["En criant", "En utilisant des triangles de présignalisation", "En déplaçant les blessés", "En appelant sa famille"],
+    correct: 1,
+    explanation: "Il faut signaler l'accident par l'utilisation de triangles de présignalisation ou de feux de détresse."
+  },
+  {
+    id: "fo2_3",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 2",
+    text: "Que faut-il faire la nuit pour protéger un accident ?",
+    options: ["Éteindre toutes les lumières", "Essayer d'éclairer l'accident", "Rester dans le noir", "Utiliser un miroir"],
+    correct: 1,
+    explanation: "De nuit, il faut essayer d'éclairer l'accident."
+  },
+  {
+    id: "fo2_4",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 2",
+    text: "Quelles informations donner lors de l'alerte ?",
+    options: ["Son nom uniquement", "Lieu, gravité, nombre de blessés", "La météo", "Le prix du camion"],
+    correct: 1,
+    explanation: "Il faut préciser le lieu, la gravité apparente et le nombre de blessés."
+  },
+  {
+    id: "fo2_5",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 2",
+    text: "Quel est le numéro d'appel unique européen ?",
+    options: ["15", "17", "18", "112"],
+    correct: 3,
+    explanation: "Le 112 est le numéro d'appel unique européen."
+  },
+  {
+    id: "fo2_6",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 2",
+    text: "Comment secourir les blessés ?",
+    options: ["Les déplacer", "Les couvrir et leur parler", "Les laisser seuls", "Leur donner à manger"],
+    correct: 1,
+    explanation: "Il faut couvrir les blessés, leur parler mais ne pas intervenir sans compétences."
+  },
+  {
+    id: "fo2_7",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 2",
+    text: "Est-il autorisé de donner à boire à un blessé ?",
+    options: ["Oui", "Non", "Seulement de l'eau", "Seulement du café"],
+    correct: 1,
+    explanation: "Donner à boire à un blessé est un geste dangereux."
+  },
+  {
+    id: "fo2_8",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 2",
+    text: "Peut-on enlever le casque d'un motard blessé ?",
+    options: ["Oui, toujours", "Non, sauf nécessité immédiate", "Seulement s'il le demande", "Seulement s'il saigne"],
+    correct: 1,
+    explanation: "Il ne faut pas enlever le casque d'un motard sauf nécessité immédiate (incendie, noyade)."
+  },
+  {
+    id: "fo2_9",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 2",
+    text: "En cas d'accident matériel, quelle attitude adopter ?",
+    options: ["S'énerver", "Garder son calme et sa courtoisie", "Partir vite", "Appeler la police pour tout"],
+    correct: 1,
+    explanation: "Il faut garder son calme et sa courtoisie."
+  },
+  {
+    id: "fo2_10",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 2",
+    text: "Que faire si un véhicule lourd encombre la chaussée après un accident ?",
+    options: ["Le laisser tel quel", "Dégager les lieux dès que possible", "Attendre 24h", "Le couvrir d'une bâche"],
+    correct: 1,
+    explanation: "Il faut dégager les lieux dès que possible ou protéger les lieux en cas d'impossibilité."
+  },
+  {
+    id: "fo2_11",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 2",
+    text: "Quel est le format du constat amiable ?",
+    options: ["Format libre", "Format européen", "Format mondial", "Format A3"],
+    correct: 1,
+    explanation: "Le constat amiable est de format européen."
+  },
+  {
+    id: "fo2_12",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 2",
+    text: "Quelles parties du constat sont identiques dans tous les pays de l'Union ?",
+    options: ["Le verso", "Les rubriques", "La couleur", "Le prix"],
+    correct: 1,
+    explanation: "Les rubriques sont identiques, seules les langues des pays changent."
+  },
+  {
+    id: "fo2_13",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 2",
+    text: "Quand doit-on rédiger le recto du constat ?",
+    options: ["Le lendemain", "Sur les lieux de l'accident", "À l'entreprise", "Chez soi"],
+    correct: 1,
+    explanation: "La rédaction du recto se fait en présence de la partie adverse sur les lieux du sinistre."
+  },
+  {
+    id: "fo2_14",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 2",
+    text: "Dans quel délai le constat doit-il être envoyé à l'assureur ?",
+    options: ["24 heures", "2 jours", "5 jours", "10 jours"],
+    correct: 2,
+    explanation: "Le constat doit être envoyé à l'assureur sous 5 jours."
+  },
+  {
+    id: "fo2_15",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 2",
+    text: "En cas d'évacuation d'un car, quelle est la première consigne ?",
+    options: ["Crier fort", "Garder son sang-froid", "Sortir par les fenêtres", "Prendre ses bagages"],
+    correct: 1,
+    explanation: "La première consigne est de garder son sang-froid."
+  },
+  {
+    id: "fo2_16",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 2",
+    text: "Que faire avec le moteur lors d'une évacuation ?",
+    options: ["Le laisser tourner", "L'arrêter", "L'accélérer", "Le démonter"],
+    correct: 1,
+    explanation: "Il faut arrêter le moteur et allumer les feux de détresse."
+  },
+  {
+    id: "fo2_17",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 2",
+    text: "Où faut-il regrouper les passagers après l'évacuation ?",
+    options: ["Sur la route", "À l'abri du danger", "Dans le véhicule", "Sur le toit"],
+    correct: 1,
+    explanation: "Il faut grouper les passagers à l'abri du danger."
+  },
+  {
+    id: "fo2_18",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 2",
+    text: "Quels accessoires de sécurité doit-on connaître dans un car ?",
+    options: ["Radio, TV", "Extincteur, boîte secours, marteaux pics", "Roue de secours", "Climatisation"],
+    correct: 1,
+    explanation: "Il faut connaître l'emplacement de l'extincteur, boîte de secours, marteaux pics, lampe électrique."
+  },
+  {
+    id: "fo2_19",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 2",
+    text: "Faut-il couper les circuits électriques lors d'un accident ?",
+    options: ["Oui", "Non", "Seulement la radio", "Seulement les phares"],
+    correct: 0,
+    explanation: "Oui, il faut couper les circuits électriques."
+  },
+  {
+    id: "fo2_20",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 2",
+    text: "Que faire en cas d'agglomération lors d'un incendie de car ?",
+    options: ["Rester dedans", "Évacuer sans panique les passagers", "Attendre la police", "Ouvrir toutes les vitres"],
+    correct: 1,
+    explanation: "Il faut faire évacuer sans panique les passagers en utilisant au besoin les issues de secours."
+  }
+];
