@@ -510,7 +510,6 @@ export default function RouteMaster() {
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => setView(user ? 'home' : 'identification')}>
               <Truck className="text-emerald-500 w-6 h-6 md:w-8 md:h-8" />
               <h1 className="text-lg md:text-xl font-bold tracking-tighter text-white uppercase italic">RouteMaster <span className="text-emerald-500">CRM</span></h1>
-              <span className="text-[10px] md:text-xs text-zinc-400 italic ml-1 self-end mb-0.5">by M.Damart</span>
             </div>
           </div>
           <div className="flex items-center gap-2">
