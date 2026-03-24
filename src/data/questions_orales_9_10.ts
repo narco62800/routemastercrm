@@ -1,0 +1,447 @@
+import { Question } from '../types';
+
+export const ORAL_QUESTIONS_9_10: Question[] = [
+  // FICHE 9: Éco-conduite et dispositifs de dépollution.
+  {
+    id: "fo9_1",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 9",
+    text: "Qu'est-ce que l'éco-conduite ?",
+    options: ["Conduire très vite", "Conduite économique et écologique", "Conduire sans moteur", "Conduire uniquement le jour"],
+    correct: 1,
+    explanation: "L'éco-conduite est une conduite citoyenne, économique et écologique."
+  },
+  {
+    id: "fo9_2",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 9",
+    text: "Quel est un principe de base de l'éco-conduite ?",
+    options: ["Accélérer fort", "Anticiper et conduire avec souplesse", "Freiner au dernier moment", "Rester en 1ère"],
+    correct: 1,
+    explanation: "L'anticipation et la souplesse sont des principes fondamentaux."
+  },
+  {
+    id: "fo9_3",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 9",
+    text: "Où doit se situer l'aiguille du compte-tours pour une conduite économique ?",
+    options: ["En zone rouge", "En zone verte", "Au maximum", "À zéro"],
+    correct: 1,
+    explanation: "Il faut utiliser la zone verte du compte-tours, là où le couple est maximum."
+  },
+  {
+    id: "fo9_4",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 9",
+    text: "Quel est l'avantage financier de l'éco-conduite ?",
+    options: ["Aucun", "Économie de carburant (10 à 15%)", "On paye moins d'impôts", "Le camion devient gratuit"],
+    correct: 1,
+    explanation: "L'éco-conduite permet de réduire la consommation de carburant de 10 à 15%."
+  },
+  {
+    id: "fo9_5",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 9",
+    text: "L'éco-conduite réduit-elle la pollution ?",
+    options: ["Non", "Oui (CO2, particules)", "Seulement le bruit", "Seulement l'odeur"],
+    correct: 1,
+    explanation: "Oui, elle réduit les émissions de CO2 et de particules fines."
+  },
+  {
+    id: "fo9_6",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 9",
+    text: "Quel est l'impact de l'éco-conduite sur l'usure mécanique ?",
+    options: ["Elle l'augmente", "Elle la réduit (freins, pneus)", "Elle ne change rien", "Elle casse le moteur"],
+    correct: 1,
+    explanation: "Elle permet de réduire l'usure des freins, des pneus et de la mécanique en général."
+  },
+  {
+    id: "fo9_7",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 9",
+    text: "Que faut-il faire lors d'un arrêt prolongé ?",
+    options: ["Laisser le moteur tourner", "Couper le moteur", "Accélérer à vide", "Mettre la radio plus fort"],
+    correct: 1,
+    explanation: "Il est conseillé de couper le moteur lors d'un arrêt prolongé."
+  },
+  {
+    id: "fo9_8",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 9",
+    text: "À quoi servent les normes Euro ?",
+    options: ["À fixer le prix du camion", "À limiter les émissions polluantes", "À choisir la couleur", "À définir la taille des pneus"],
+    correct: 1,
+    explanation: "Les normes Euro (de 1 à 6) fixent les limites d'émissions polluantes pour les véhicules neufs."
+  },
+  {
+    id: "fo9_9",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 9",
+    text: "Qu'est-ce que le système SCR ?",
+    options: ["Un système de freinage", "Réduction catalytique sélective avec AdBlue", "Un système de navigation", "Un système de climatisation"],
+    correct: 1,
+    explanation: "Le SCR est un système de dépollution utilisant l'AdBlue."
+  },
+  {
+    id: "fo9_10",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 9",
+    text: "Qu'est-ce que l'AdBlue ?",
+    options: ["Un carburant bleu", "Une solution d'urée", "Un liquide de refroidissement", "Un additif pour les pneus"],
+    correct: 1,
+    explanation: "L'AdBlue est une solution d'urée qui permet de réduire les oxydes d'azote (NOx)."
+  },
+  {
+    id: "fo9_11",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 9",
+    text: "À quoi sert le FAP ?",
+    options: ["À faire du bruit", "À filtrer les particules fines", "À augmenter la puissance", "À refroidir le moteur"],
+    correct: 1,
+    explanation: "Le FAP (Filtre À Particules) sert à piéger et brûler les particules fines."
+  },
+  {
+    id: "fo9_12",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 9",
+    text: "L'entretien régulier est-il important pour l'éco-conduite ?",
+    options: ["Non", "Oui (pneus, filtres)", "Seulement pour l'esthétique", "Seulement si le camion est vieux"],
+    correct: 1,
+    explanation: "Oui, un véhicule bien entretenu consomme et pollue moins."
+  },
+  {
+    id: "fo9_13",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 9",
+    text: "Comment utiliser l'inertie du véhicule ?",
+    options: ["En accélérant toujours", "En lâchant l'accélérateur à l'approche d'un arrêt", "En freinant fort", "En passant au point mort"],
+    correct: 1,
+    explanation: "Il faut utiliser l'élan du véhicule pour avancer sans consommer de carburant."
+  },
+  {
+    id: "fo9_14",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 9",
+    text: "L'éco-conduite a-t-elle un impact sur la sécurité ?",
+    options: ["Non", "Oui, elle l'augmente par l'anticipation", "Elle la diminue", "Rien"],
+    correct: 1,
+    explanation: "L'anticipation propre à l'éco-conduite améliore la sécurité routière."
+  },
+  {
+    id: "fo9_15",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 9",
+    text: "Le système EGR sert à :",
+    options: ["Augmenter la vitesse", "Recirculer les gaz d'échappement", "Changer les vitesses", "Éclairer la route"],
+    correct: 1,
+    explanation: "L'EGR (Exhaust Gas Recirculation) réintroduit une partie des gaz d'échappement dans l'admission."
+  },
+  {
+    id: "fo9_16",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 9",
+    text: "L'éco-conduite réduit-elle le stress du conducteur ?",
+    options: ["Non", "Oui", "Seulement si on écoute de la musique", "Seulement en vacances"],
+    correct: 1,
+    explanation: "Une conduite plus souple et anticipée réduit le stress au volant."
+  },
+  {
+    id: "fo9_17",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 9",
+    text: "Faut-il passer les rapports rapidement en éco-conduite ?",
+    options: ["Non, il faut monter en régime", "Oui, pour rester à bas régime", "Seulement en descente", "Seulement en montée"],
+    correct: 1,
+    explanation: "Il faut passer les rapports supérieurs le plus tôt possible."
+  },
+  {
+    id: "fo9_18",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 9",
+    text: "La pression des pneus influence-t-elle la consommation ?",
+    options: ["Non", "Oui", "Seulement s'ils sont neufs", "Seulement s'ils sont vieux"],
+    correct: 1,
+    explanation: "Des pneus sous-gonflés augmentent la résistance au roulement et donc la consommation."
+  },
+  {
+    id: "fo9_19",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 9",
+    text: "L'éco-conduite réduit-elle les nuisances sonores ?",
+    options: ["Non", "Oui", "Seulement à l'intérieur du camion", "Seulement à l'arrêt"],
+    correct: 1,
+    explanation: "Une conduite à bas régime est moins bruyante pour l'environnement."
+  },
+  {
+    id: "fo9_20",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 9",
+    text: "L'AdBlue est utilisé pour réduire :",
+    options: ["Le CO2", "Les NOx (oxydes d'azote)", "Le bruit", "La poussière"],
+    correct: 1,
+    explanation: "L'AdBlue agit spécifiquement sur les oxydes d'azote."
+  },
+
+  // FICHE 10: Conduite en situation difficile.
+  {
+    id: "fo10_1",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 10",
+    text: "Quel est l'impact de la pluie sur la distance de freinage ?",
+    options: ["Elle ne change pas", "Elle est multipliée par 2", "Elle est divisée par 2", "Elle est multipliée par 10"],
+    correct: 1,
+    explanation: "Sur route mouillée, la distance de freinage est doublée."
+  },
+  {
+    id: "fo10_2",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 10",
+    text: "Qu'est-ce que l'aquaplanage ?",
+    options: ["Un sport nautique", "Perte d'adhérence due à une pellicule d'eau", "Laver son camion", "Rouler dans un tunnel"],
+    correct: 1,
+    explanation: "C'est quand les pneus ne peuvent plus évacuer l'eau et glissent sur la surface."
+  },
+  {
+    id: "fo10_3",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 10",
+    text: "Quel est l'impact de la neige/verglas sur la distance de freinage ?",
+    options: ["Multipliée par 2", "Multipliée par 5", "Multipliée par 10", "Inchangée"],
+    correct: 2,
+    explanation: "Sur neige ou verglas, la distance de freinage peut être multipliée par 10."
+  },
+  {
+    id: "fo10_4",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 10",
+    text: "Quel équipement est essentiel sur neige ?",
+    options: ["Des lunettes", "Des chaînes ou pneus hiver", "Un parapluie", "De la crème solaire"],
+    correct: 1,
+    explanation: "Les équipements spéciaux (chaînes, pneus hiver) sont indispensables."
+  },
+  {
+    id: "fo10_5",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 10",
+    text: "Quels feux de brouillard sont obligatoires par temps de brouillard ?",
+    options: ["Avant uniquement", "Arrière uniquement", "Avant et arrière", "Aucun"],
+    correct: 1,
+    explanation: "Le feu de brouillard arrière est obligatoire (sauf si visibilité > 50m selon code route, mais ici situation difficile)."
+  },
+  {
+    id: "fo10_6",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 10",
+    text: "Quel est le risque principal du vent pour un PL ?",
+    options: ["Il va plus vite", "Risque de déport ou renversement", "Il consomme moins", "La radio capte mieux"],
+    correct: 1,
+    explanation: "Le vent peut déporter le véhicule, surtout s'il est haut ou à vide."
+  },
+  {
+    id: "fo10_7",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 10",
+    text: "Où faut-il être particulièrement vigilant au vent ?",
+    options: ["Dans les forêts", "Sur les ponts et sorties de tunnels", "En ville", "Dans les parkings"],
+    correct: 1,
+    explanation: "Les zones exposées comme les ponts sont dangereuses en cas de vent latéral."
+  },
+  {
+    id: "fo10_8",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 10",
+    text: "Quel est un danger de la conduite de nuit ?",
+    options: ["On voit mieux", "Éblouissement et fatigue", "Il y a trop de monde", "On a faim"],
+    correct: 1,
+    explanation: "La nuit fatigue davantage et l'éblouissement est un risque majeur."
+  },
+  {
+    id: "fo10_9",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 10",
+    text: "Quelle précaution générale prendre en situation difficile ?",
+    options: ["Accélérer pour finir vite", "Réduire sa vitesse et augmenter les distances", "S'arrêter au milieu de la route", "Éteindre les feux"],
+    correct: 1,
+    explanation: "Il faut adapter sa vitesse et augmenter les distances de sécurité."
+  },
+  {
+    id: "fo10_10",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 10",
+    text: "Faut-il s'informer de la météo avant de partir ?",
+    options: ["Non", "Oui", "Seulement en hiver", "Seulement si on a peur"],
+    correct: 1,
+    explanation: "Il est nécessaire de s'informer des conditions météo prévues."
+  },
+  {
+    id: "fo10_11",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 10",
+    text: "La pluie réduit-elle la visibilité ?",
+    options: ["Non", "Oui", "Seulement la nuit", "Seulement le jour"],
+    correct: 1,
+    explanation: "Oui, la pluie diminue la visibilité."
+  },
+  {
+    id: "fo10_12",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 10",
+    text: "Le risque de collision arrière est-il accru par brouillard ?",
+    options: ["Non", "Oui", "Seulement en ville", "Seulement sur autoroute"],
+    correct: 1,
+    explanation: "Oui, à cause du manque de visibilité et des différences de vitesse."
+  },
+  {
+    id: "fo10_13",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 10",
+    text: "Les feux de brouillard avant sont-ils obligatoires ?",
+    options: ["Oui", "Non, ils sont autorisés", "Seulement en montagne", "Seulement en forêt"],
+    correct: 1,
+    explanation: "Les feux de brouillard avant sont facultatifs mais autorisés."
+  },
+  {
+    id: "fo10_14",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 10",
+    text: "L'adhérence sur verglas est :",
+    options: ["Excellente", "Quasi nulle", "La même que sur sec", "Meilleure"],
+    correct: 1,
+    explanation: "L'adhérence est extrêmement faible sur le verglas."
+  },
+  {
+    id: "fo10_15",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 10",
+    text: "Faut-il anticiper ses manoeuvres en situation difficile ?",
+    options: ["Non", "Oui", "Seulement si on est chargé", "Seulement si on est à vide"],
+    correct: 1,
+    explanation: "L'anticipation est clé pour éviter les réactions brusques sur sol glissant."
+  },
+  {
+    id: "fo10_16",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 10",
+    text: "Le vent influence-t-il la trajectoire ?",
+    options: ["Non", "Oui", "Seulement en marche arrière", "Seulement à l'arrêt"],
+    correct: 1,
+    explanation: "Le vent latéral peut modifier la trajectoire du véhicule."
+  },
+  {
+    id: "fo10_17",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 10",
+    text: "La nuit, la vigilance doit être :",
+    options: ["Réduite", "Accrue", "La même", "Nulle"],
+    correct: 1,
+    explanation: "La conduite de nuit demande une attention plus soutenue."
+  },
+  {
+    id: "fo10_18",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 10",
+    text: "L'utilisation d'un éclairage adapté est-elle nécessaire ?",
+    options: ["Non", "Oui", "Seulement s'il fait tout noir", "Seulement en ville"],
+    correct: 1,
+    explanation: "Il faut utiliser les feux appropriés à la situation (croisement, route, brouillard)."
+  },
+  {
+    id: "fo10_19",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 10",
+    text: "Le brouillard givrant est-il dangereux ?",
+    options: ["Non", "Oui, il crée du verglas", "Seulement pour les vitres", "Seulement pour les pneus"],
+    correct: 1,
+    explanation: "Il réduit la visibilité et rend la chaussée glissante."
+  },
+  {
+    id: "fo10_20",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 10",
+    text: "En cas de vent violent, il est préférable de :",
+    options: ["Accélérer", "Réduire sa vitesse", "S'arrêter sur la voie", "Ouvrir les fenêtres"],
+    correct: 1,
+    explanation: "Réduire sa vitesse permet de mieux contrôler le véhicule face aux rafales."
+  }
+];

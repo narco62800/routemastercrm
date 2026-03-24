@@ -1,0 +1,447 @@
+import { Question } from '../types';
+
+export const ORAL_QUESTIONS_5_6: Question[] = [
+  // FICHE 5: Chargement – Surcharge.
+  {
+    id: "fo5_1",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 5",
+    text: "Qui est responsable du chargement des marchandises ?",
+    options: ["Le client", "Le patron", "Le conducteur", "Le dispatcher"],
+    correct: 2,
+    explanation: "Le chargement est de la responsabilité du conducteur."
+  },
+  {
+    id: "fo5_2",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 5",
+    text: "Quelle précaution prendre concernant la répartition du chargement ?",
+    options: ["Tout mettre à l'arrière", "Équilibrer, répartir et arrimer", "Tout mettre à gauche", "Ne pas attacher"],
+    correct: 1,
+    explanation: "Il faut équilibrer, répartir et éventuellement arrimer le chargement."
+  },
+  {
+    id: "fo5_3",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 5",
+    text: "Comment organiser le chargement en cas de livraisons multiples ?",
+    options: ["Au hasard", "En fonction de l'itinéraire", "Par ordre alphabétique", "Par poids"],
+    correct: 1,
+    explanation: "Il faut organiser le chargement en fonction de l'itinéraire et des déchargements successifs."
+  },
+  {
+    id: "fo5_4",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 5",
+    text: "Sur quoi doit-on choisir son itinéraire ?",
+    options: ["Le prix des péages", "Gabarit et masses du véhicule", "La présence de restaurants", "La couleur de la route"],
+    correct: 1,
+    explanation: "Le choix de l'itinéraire se fait en fonction du gabarit et des masses (limitations de tonnage)."
+  },
+  {
+    id: "fo5_5",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 5",
+    text: "Quel est un risque lié à un chargement défectueux ?",
+    options: ["Une baisse de consommation", "Déséquilibre du véhicule", "Une meilleure visibilité", "Rien"],
+    correct: 1,
+    explanation: "Un chargement défectueux peut causer un déséquilibre du véhicule."
+  },
+  {
+    id: "fo5_6",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 5",
+    text: "Un chargement défectueux peut-il entraîner un renversement ?",
+    options: ["Non", "Oui", "Seulement en ville", "Seulement sur autoroute"],
+    correct: 1,
+    explanation: "Oui, le risque de renversement est l'un des dangers cités."
+  },
+  {
+    id: "fo5_7",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 5",
+    text: "Quel est le risque pour la voirie en cas de surcharge ?",
+    options: ["Elle devient plus propre", "Détérioration de la voirie et ouvrages d'art", "Elle s'élargit", "Rien"],
+    correct: 1,
+    explanation: "La surcharge risque d'endommager la voirie et les ouvrages d'art."
+  },
+  {
+    id: "fo5_8",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 5",
+    text: "La surcharge peut-elle impacter la garantie de l'assureur ?",
+    options: ["Non", "Oui, risque de limitation ou refus", "Seulement si on a un accident", "Seulement si on est seul"],
+    correct: 1,
+    explanation: "Oui, il y a un risque de limitation ou de refus de garantie de la part des assureurs."
+  },
+  {
+    id: "fo5_9",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 5",
+    text: "La masse réelle peut-elle dépasser le PTAC ?",
+    options: ["Oui, de 10%", "Jamais", "Seulement sur de courtes distances", "Si le patron est d'accord"],
+    correct: 1,
+    explanation: "La masse réelle ne doit JAMAIS dépasser la masse en charge maximale admissible (PTAC ou PTRA)."
+  },
+  {
+    id: "fo5_10",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 5",
+    text: "Où trouve-t-on l'information du PTAC sur la carte grise ?",
+    options: ["Case F1", "Case F2", "Case F3", "Case G"],
+    correct: 1,
+    explanation: "Le PTAC est indiqué à la case F2 du certificat d'immatriculation."
+  },
+  {
+    id: "fo5_11",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 5",
+    text: "Où trouve-t-on l'information du PTRA sur la carte grise ?",
+    options: ["Case F1", "Case F2", "Case F3", "Case G"],
+    correct: 2,
+    explanation: "Le PTRA est indiqué à la case F3 du certificat d'immatriculation."
+  },
+  {
+    id: "fo5_12",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 5",
+    text: "Où d'autre les masses sont-elles inscrites sur le véhicule ?",
+    options: ["Sur le volant", "Plaque de tare, plaque constructeur", "Sur les pneus", "Sur la radio"],
+    correct: 1,
+    explanation: "Les masses sont sur la plaque de tare, la plaque constructeur et le dispositif d'attelage."
+  },
+  {
+    id: "fo5_13",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 5",
+    text: "La surcharge constitue-t-elle une infraction ?",
+    options: ["Non", "Oui", "Seulement si on dépasse 1 tonne", "Seulement en cas d'accident"],
+    correct: 1,
+    explanation: "Oui, elle constitue une infraction à la réglementation des transports ou au code de la route."
+  },
+  {
+    id: "fo5_14",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 5",
+    text: "Quelle amende encourt-on pour une surcharge ?",
+    options: ["1ère classe", "2ème classe", "4ème classe", "Aucune"],
+    correct: 2,
+    explanation: "C'est une amende de 4ème classe."
+  },
+  {
+    id: "fo5_15",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 5",
+    text: "À partir de quel taux de surcharge le véhicule peut-il être immobilisé ?",
+    options: ["1%", "3%", "Au-delà de 5%", "10%"],
+    correct: 2,
+    explanation: "Le véhicule peut être immobilisé au-delà de 5% de surcharge."
+  },
+  {
+    id: "fo5_16",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 5",
+    text: "Peut-on aller en prison pour une surcharge ?",
+    options: ["Non", "Oui", "Seulement si on est récidiviste", "Seulement si on tue quelqu'un"],
+    correct: 1,
+    explanation: "La prison fait partie des sanctions encourues citées dans le document."
+  },
+  {
+    id: "fo5_17",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 5",
+    text: "Un chargement défectueux peut-il obstruer la visibilité ?",
+    options: ["Non", "Oui", "Seulement vers l'arrière", "Seulement vers l'avant"],
+    correct: 1,
+    explanation: "Oui, c'est l'un des risques cités."
+  },
+  {
+    id: "fo5_18",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 5",
+    text: "Quel est le risque pour la marchandise en cas de chargement défectueux ?",
+    options: ["Elle devient plus chère", "Risque de chute sur la chaussée", "Elle change de couleur", "Rien"],
+    correct: 1,
+    explanation: "Il y a un risque de chute de la marchandise sur la chaussée."
+  },
+  {
+    id: "fo5_19",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 5",
+    text: "Faut-il adapter sa vitesse au chargement ?",
+    options: ["Non", "Oui", "Seulement si on est en retard", "Seulement si on est en avance"],
+    correct: 1,
+    explanation: "Oui, il faut adapter sa vitesse au chargement."
+  },
+  {
+    id: "fo5_20",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 5",
+    text: "Le conducteur doit-il respecter la réglementation des masses maximales ?",
+    options: ["Non", "Oui", "Seulement s'il y a des contrôles", "Seulement sur autoroute"],
+    correct: 1,
+    explanation: "Oui, il doit respecter la réglementation pour éviter la surcharge."
+  },
+
+  // FICHE 6: Le dépassement.
+  {
+    id: "fo6_1",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 6",
+    text: "Pourquoi le dépassement nécessite-t-il une grande attention en PL ?",
+    options: ["À cause de la radio", "Poids et dimensions du véhicule", "La couleur du camion", "Le prix du gazole"],
+    correct: 1,
+    explanation: "Le dépassement est une manoeuvre délicate à cause du poids et des dimensions."
+  },
+  {
+    id: "fo6_2",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 6",
+    text: "Quelle signalisation faut-il respecter avant de dépasser ?",
+    options: ["Uniquement les panneaux", "Horizontale et verticale", "Uniquement le marquage au sol", "Aucune"],
+    correct: 1,
+    explanation: "Il faut respecter la signalisation horizontale et verticale."
+  },
+  {
+    id: "fo6_3",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 6",
+    text: "Pour quels véhicules le dépassement est-il interdit si la chaussée est enneigée ?",
+    options: ["Tous les véhicules", "PTAC > 3,5t ou ensemble > 7m", "Uniquement les voitures", "Uniquement les bus"],
+    correct: 1,
+    explanation: "L'interdiction concerne les véhicules de plus de 3,5t ou ensembles de plus de 7m."
+  },
+  {
+    id: "fo6_4",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 6",
+    text: "Pourquoi l'accélération est-elle difficile en PL ?",
+    options: ["Moteur trop puissant", "À cause de l'inertie", "Le vent de face", "Les pneus"],
+    correct: 1,
+    explanation: "Les accélérations sont difficiles par l'inertie du véhicule."
+  },
+  {
+    id: "fo6_5",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 6",
+    text: "Quels avertisseurs peut-on utiliser avant de dépasser ?",
+    options: ["Clignotants uniquement", "Sonores et lumineux", "Bras par la fenêtre", "Rien"],
+    correct: 1,
+    explanation: "On peut utiliser les avertisseurs sonores et lumineux."
+  },
+  {
+    id: "fo6_6",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 6",
+    text: "Que faut-il respecter pendant le dépassement ?",
+    options: ["La musique", "Distances latérales et longitudinales", "La météo", "Le paysage"],
+    correct: 1,
+    explanation: "Il faut respecter les distances de sécurité latérales et longitudinales."
+  },
+  {
+    id: "fo6_7",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 6",
+    text: "Quelle surveillance est indispensable pendant la manoeuvre ?",
+    options: ["Le tableau de bord", "Aide des rétroviseurs", "Le passager", "Le ciel"],
+    correct: 1,
+    explanation: "La surveillance à l'aide des dispositifs de rétrovision est essentielle."
+  },
+  {
+    id: "fo6_8",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 6",
+    text: "Quelle distance minimale de sécurité laisser après le dépassement (retour à droite) ?",
+    options: ["10 m", "25 m", "50 m", "100 m"],
+    correct: 2,
+    explanation: "L'article R.412-12 impose une distance minimale de 50 m pour les véhicules > 3,5t ou > 7m."
+  },
+  {
+    id: "fo6_9",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 6",
+    text: "Quel est un danger lors du dépassement ?",
+    options: ["S'endormir", "Accrochage de l'usager dépassé", "Perdre ses clés", "Changer de radio"],
+    correct: 1,
+    explanation: "L'accrochage est un risque dû à une mauvaise appréciation des distances."
+  },
+  {
+    id: "fo6_10",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 6",
+    text: "Quel phénomène peut déporter le véhicule lors d'un dépassement ?",
+    options: ["La pluie", "Le vent", "Le soleil", "La neige"],
+    correct: 1,
+    explanation: "Le déport dû au vent (passage zone abritée à non abritée) est un danger."
+  },
+  {
+    id: "fo6_11",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 6",
+    text: "Quel est l'objectif des dispositifs latéraux de protection ?",
+    options: ["Faire joli", "Protéger contre le risque de chute des 2-roues", "Réduire le bruit", "Porter des bagages"],
+    correct: 1,
+    explanation: "Ils visent à éviter que les usagers vulnérables ne tombent sous les roues."
+  },
+  {
+    id: "fo6_12",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 6",
+    text: "Quel est l'objectif des dispositifs arrière de protection ?",
+    options: ["Faire joli", "Protéger contre le risque d'encastrement", "Réduire la pollution", "Porter la plaque"],
+    correct: 1,
+    explanation: "Ils visent à éviter que les usagers venant de l'arrière ne s'encastrent sous le châssis."
+  },
+  {
+    id: "fo6_13",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 6",
+    text: "Faut-il se rabattre à droite après un dépassement ?",
+    options: ["Non", "Oui", "Seulement si on nous klaxonne", "Seulement en ville"],
+    correct: 1,
+    explanation: "Oui, il faut se rabattre à droite une fois la manoeuvre terminée."
+  },
+  {
+    id: "fo6_14",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 6",
+    text: "L'espace libre nécessaire est-il important en PL ?",
+    options: ["Non", "Oui", "Seulement de nuit", "Seulement sous la pluie"],
+    correct: 1,
+    explanation: "Oui, l'espace nécessaire est important à cause de la longueur du véhicule."
+  },
+  {
+    id: "fo6_15",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 6",
+    text: "La différence d'allure doit-elle être prise en compte ?",
+    options: ["Non", "Oui", "Seulement si on est pressé", "Seulement si on est en retard"],
+    correct: 1,
+    explanation: "Oui, il faut une différence d'allure suffisante pour dépasser en sécurité."
+  },
+  {
+    id: "fo6_16",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 6",
+    text: "Le limiteur de vitesse influence-t-il le dépassement ?",
+    options: ["Non", "Oui", "Seulement en descente", "Seulement en montée"],
+    correct: 1,
+    explanation: "Oui, il faut connaître les capacités de son véhicule bridé."
+  },
+  {
+    id: "fo6_17",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 6",
+    text: "Existe-t-il des règles spécifiques pour les piétons lors du dépassement ?",
+    options: ["Non", "Oui", "Seulement s'ils courent", "Seulement s'ils sont sur le trottoir"],
+    correct: 1,
+    explanation: "Oui, le code de la route prévoit des distances de sécurité pour les piétons."
+  },
+  {
+    id: "fo6_18",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 6",
+    text: "Une mauvaise appréciation des vitesses est-elle un danger ?",
+    options: ["Non", "Oui", "Seulement pour les voitures", "Seulement pour les vélos"],
+    correct: 1,
+    explanation: "Oui, c'est l'un des dangers cités."
+  },
+  {
+    id: "fo6_19",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 6",
+    text: "Les dispositifs de protection concernent-ils les véhicules de catégorie BE ?",
+    options: ["Non", "Oui", "Seulement s'ils sont longs", "Seulement s'ils sont lourds"],
+    correct: 1,
+    explanation: "Oui, ils concernent les catégories BE, C, CE, D1E et DE."
+  },
+  {
+    id: "fo6_20",
+    type: "qcm",
+    level: "1ères CRM",
+    subject: "fiches orales C",
+    chapter: "fiche orale 6",
+    text: "Le dépassement est-il interdit sur route enneigée pour un ensemble de 8m ?",
+    options: ["Non", "Oui", "Seulement de nuit", "Seulement en montagne"],
+    correct: 1,
+    explanation: "Oui, car il dépasse les 7 mètres de longueur."
+  }
+];

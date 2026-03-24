@@ -1,6 +1,8 @@
+export type QuestionType = 'qcm' | 'vf' | 'calc' | 'situ';
+
 export interface Question {
   id: string;
-  type: 'qcm';
+  type: QuestionType;
   level: string;
   subject: string;
   chapter: string;
@@ -8,12 +10,29 @@ export interface Question {
   options: string[];
   correct: number;
   explanation: string;
+  context?: string;
 }
 
 export interface Chapter {
   level: string;
   subject: string;
   title: string;
+}
+
+export interface User {
+  id: string;
+  pseudo: string;
+  password?: string;
+  level: string;
+  points: number;
+  fuel: number;
+  vehicleOwned: boolean;
+  vehicleType: 'none' | 'car' | 'truck' | 'articulated';
+  vehicleModel: string;
+  answeredQuestions: Record<string, number>;
+  ownedItems: string[];
+  customize: VehicleCustomize;
+  completedChapters: string[];
 }
 
 export interface VehicleCustomize {
@@ -31,20 +50,4 @@ export interface VehicleCustomize {
   cabinSticker: string | null;
   trailerColor: string;
   trailerLogo: string | null;
-}
-
-export interface User {
-  id: string;
-  pseudo: string;
-  password: string;
-  level: string;
-  points: number;
-  fuel: number;
-  vehicleOwned: boolean;
-  vehicleType: string;
-  vehicleModel: string;
-  answeredQuestions: Record<string, number>;
-  ownedItems: string[];
-  customize: VehicleCustomize;
-  completedChapters: string[];
 }
