@@ -181,7 +181,7 @@ export default function RouteMaster() {
     };
   });
 
-  const [shareUrl, setShareUrl] = useState(window.location.origin);
+  const [shareUrl, setShareUrl] = useState('https://routemastercrm.lovable.app');
   const [shortUrl, setShortUrl] = useState('');
   const [isGeneratingShortUrl, setIsGeneratingShortUrl] = useState(false);
 
