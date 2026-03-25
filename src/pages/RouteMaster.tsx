@@ -994,40 +994,46 @@ export default function RouteMaster() {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {availableItems.map((item) => (
-            <div key={item.id} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex flex-col gap-4">
-              <div className="w-full aspect-video bg-zinc-800 rounded-xl flex items-center justify-center">
-                <ShoppingBag className="w-12 h-12 text-zinc-700" />
-              </div>
-              <div>
-                <div className="flex justify-between items-start mb-1">
-                  <h3 className="text-lg font-bold text-white">{item.name}</h3>
-                  <span className="text-emerald-500 font-bold">{item.price}L</span>
+          {availableItems.map((item) => {
+            const owned = user?.ownedItems.includes(item.id);
+            const canAfford = user && user.points >= item.price;
+            return (
+              <div key={item.id} className={`bg-zinc-900 border rounded-2xl p-5 flex flex-col gap-4 ${owned ? 'border-emerald-500/50' : 'border-zinc-800'}`}>
+                <div className="w-full aspect-video bg-zinc-800 rounded-xl flex items-center justify-center">
+                  {item.type === 'vehicle' ? (
+                    <Truck className="w-12 h-12 text-zinc-600" />
+                  ) : item.type === 'paint' ? (
+                    <div className="w-16 h-16 rounded-full border-4 border-zinc-700" style={{ backgroundColor: (item as any).color }} />
+                  ) : (
+                    <ShoppingBag className="w-12 h-12 text-zinc-700" />
+                  )}
                 </div>
+                <div>
+                  <div className="flex justify-between items-start mb-1">
+                    <h3 className="text-lg font-bold text-white">{item.name}</h3>
+                    <span className="text-emerald-500 font-bold">{item.price} pts</span>
+                  </div>
+                </div>
+                {owned ? (
+                  <div className="w-full py-3 rounded-xl font-bold text-center bg-zinc-800 text-emerald-500 flex items-center justify-center gap-2">
+                    <CheckCircle2 className="w-4 h-4" /> POSSÉDÉ
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => handleBuyItem(item)}
+                    disabled={!canAfford || isGeneratingVehicle}
+                    className={`w-full py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${
+                      canAfford && !isGeneratingVehicle
+                        ? 'bg-emerald-500 text-black hover:bg-emerald-400'
+                        : 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
+                    }`}
+                  >
+                    {isGeneratingVehicle ? <><Loader2 className="w-4 h-4 animate-spin" /> GÉNÉRATION...</> : 'ACHETER'}
+                  </button>
+                )}
               </div>
-              <button
-                onClick={() => {
-                  if (user && user.fuel >= item.price) {
-                    const updatedUser = {
-                      ...user,
-                      fuel: user.fuel - item.price,
-                      vehicleOwned: item.type === 'vehicle' ? true : user.vehicleOwned
-                    };
-                    setUser(updatedUser);
-                    localStorage.setItem('routeMaster_user', JSON.stringify(updatedUser));
-                  }
-                }}
-                disabled={!user || user.fuel < item.price}
-                className={`w-full py-3 rounded-xl font-bold transition-all ${
-                  user && user.fuel >= item.price
-                    ? 'bg-emerald-500 text-black hover:bg-emerald-400'
-                    : 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
-                }`}
-              >
-                ACHETER
-              </button>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     );
