@@ -33,6 +33,7 @@ export interface User {
   ownedItems: string[];
   customize: VehicleCustomize;
   completedChapters: string[];
+  vehicleImageUrl?: string;
 }
 
 export interface VehicleCustomize {
