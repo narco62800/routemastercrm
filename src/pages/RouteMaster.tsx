@@ -383,26 +383,83 @@ export default function RouteMaster() {
     }
   };
 
-  const handleBuyItem = (item: any) => {
+  const [isGeneratingVehicle, setIsGeneratingVehicle] = useState(false);
+
+  const generateVehicleImage = useCallback(async (vehicleType: string, customize: User['customize']) => {
+    setIsGeneratingVehicle(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-vehicle', {
+        body: {
+          vehicleType,
+          paintColor: customize.paintColor,
+          hasBullbar: customize.hasBullbar,
+          hasBeacons: customize.hasBeacons,
+          hasLightBar: customize.hasLightBar,
+          hasXenon: customize.hasXenon,
+          hasSpoiler: customize.hasSpoiler,
+        }
+      });
+      if (error) throw error;
+      return data?.imageUrl || null;
+    } catch (err) {
+      console.error('Vehicle generation error:', err);
+      return null;
+    } finally {
+      setIsGeneratingVehicle(false);
+    }
+  }, []);
+
+  const handleBuyItem = async (item: any) => {
     if (!user || user.points < item.price) return;
     if (user.ownedItems.includes(item.id)) return;
 
-    setUser(prev => {
-      if (!prev) return null;
+    const updates: Partial<User> = {
+      points: user.points - item.price,
+      ownedItems: [...user.ownedItems, item.id]
+    };
+
+    if (item.type === 'vehicle') {
+      updates.vehicleOwned = true;
+      updates.vehicleType = item.vehicleType;
+      updates.vehicleModel = item.name;
       
-      const updates: Partial<User> = {
-        points: prev.points - item.price,
-        ownedItems: [...prev.ownedItems, item.id]
-      };
-
-      if (item.type === 'vehicle') {
-        updates.vehicleOwned = true;
-        updates.vehicleType = item.vehicleType;
-        updates.vehicleModel = item.name;
+      // Generate vehicle image
+      const imageUrl = await generateVehicleImage(item.vehicleType, user.customize);
+      if (imageUrl) {
+        updates.vehicleImageUrl = imageUrl;
       }
+    }
 
-      return { ...prev, ...updates };
-    });
+    if (item.type === 'paint' && item.color) {
+      const newCustomize = { ...user.customize, paintColor: item.color };
+      updates.customize = newCustomize;
+      
+      // Regenerate vehicle image with new color
+      if (user.vehicleOwned) {
+        const imageUrl = await generateVehicleImage(user.vehicleType, newCustomize);
+        if (imageUrl) {
+          updates.vehicleImageUrl = imageUrl;
+        }
+      }
+    }
+
+    if (item.type === 'accessory') {
+      const newCustomize = { ...user.customize };
+      if (item.id === 'beacons') newCustomize.hasBeacons = true;
+      if (item.id === 'bullbar') newCustomize.hasBullbar = true;
+      if (item.id === 'lightbar') newCustomize.hasLightBar = true;
+      updates.customize = newCustomize;
+
+      // Regenerate vehicle image with new accessory
+      if (user.vehicleOwned) {
+        const imageUrl = await generateVehicleImage(user.vehicleType, newCustomize);
+        if (imageUrl) {
+          updates.vehicleImageUrl = imageUrl;
+        }
+      }
+    }
+
+    setUser(prev => prev ? { ...prev, ...updates } : null);
   };
 
   const handleProfAccess = () => {
