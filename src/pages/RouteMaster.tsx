@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Truck, 
   BookOpen, 
@@ -23,13 +23,16 @@ import {
   Share2,
   QrCode,
   LogOut,
-  Download
+  Download,
+  Loader2,
+  Paintbrush
 } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Question, Chapter, User } from '../types';
 import { ALL_QUESTIONS, INITIAL_CHAPTERS, INITIAL_SUBJECT_NAMES } from '../data/index';
 import { FUEL_PER_CORRECT_ANSWER, INITIAL_FUEL, MAX_FUEL } from '../constants';
+import { supabase } from '@/integrations/supabase/client';
 
 const LEVELS = ['2ndes CRM', '1ères CRM', 'Terminales CRM'];
 
@@ -380,26 +383,83 @@ export default function RouteMaster() {
     }
   };
 
-  const handleBuyItem = (item: any) => {
+  const [isGeneratingVehicle, setIsGeneratingVehicle] = useState(false);
+
+  const generateVehicleImage = useCallback(async (vehicleType: string, customize: User['customize']) => {
+    setIsGeneratingVehicle(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-vehicle', {
+        body: {
+          vehicleType,
+          paintColor: customize.paintColor,
+          hasBullbar: customize.hasBullbar,
+          hasBeacons: customize.hasBeacons,
+          hasLightBar: customize.hasLightBar,
+          hasXenon: customize.hasXenon,
+          hasSpoiler: customize.hasSpoiler,
+        }
+      });
+      if (error) throw error;
+      return data?.imageUrl || null;
+    } catch (err) {
+      console.error('Vehicle generation error:', err);
+      return null;
+    } finally {
+      setIsGeneratingVehicle(false);
+    }
+  }, []);
+
+  const handleBuyItem = async (item: any) => {
     if (!user || user.points < item.price) return;
     if (user.ownedItems.includes(item.id)) return;
 
-    setUser(prev => {
-      if (!prev) return null;
+    const updates: Partial<User> = {
+      points: user.points - item.price,
+      ownedItems: [...user.ownedItems, item.id]
+    };
+
+    if (item.type === 'vehicle') {
+      updates.vehicleOwned = true;
+      updates.vehicleType = item.vehicleType;
+      updates.vehicleModel = item.name;
       
-      const updates: Partial<User> = {
-        points: prev.points - item.price,
-        ownedItems: [...prev.ownedItems, item.id]
-      };
-
-      if (item.type === 'vehicle') {
-        updates.vehicleOwned = true;
-        updates.vehicleType = item.vehicleType;
-        updates.vehicleModel = item.name;
+      // Generate vehicle image
+      const imageUrl = await generateVehicleImage(item.vehicleType, user.customize);
+      if (imageUrl) {
+        updates.vehicleImageUrl = imageUrl;
       }
+    }
 
-      return { ...prev, ...updates };
-    });
+    if (item.type === 'paint' && item.color) {
+      const newCustomize = { ...user.customize, paintColor: item.color };
+      updates.customize = newCustomize;
+      
+      // Regenerate vehicle image with new color
+      if (user.vehicleOwned) {
+        const imageUrl = await generateVehicleImage(user.vehicleType, newCustomize);
+        if (imageUrl) {
+          updates.vehicleImageUrl = imageUrl;
+        }
+      }
+    }
+
+    if (item.type === 'accessory') {
+      const newCustomize = { ...user.customize };
+      if (item.id === 'beacons') newCustomize.hasBeacons = true;
+      if (item.id === 'bullbar') newCustomize.hasBullbar = true;
+      if (item.id === 'lightbar') newCustomize.hasLightBar = true;
+      updates.customize = newCustomize;
+
+      // Regenerate vehicle image with new accessory
+      if (user.vehicleOwned) {
+        const imageUrl = await generateVehicleImage(user.vehicleType, newCustomize);
+        if (imageUrl) {
+          updates.vehicleImageUrl = imageUrl;
+        }
+      }
+    }
+
+    setUser(prev => prev ? { ...prev, ...updates } : null);
   };
 
   const handleProfAccess = () => {
@@ -880,7 +940,7 @@ export default function RouteMaster() {
       if (!user?.vehicleOwned) {
         return item.type === 'vehicle';
       }
-      return true; // Once a vehicle is owned, all items are available
+      return true;
     });
 
     return (
@@ -892,6 +952,41 @@ export default function RouteMaster() {
           <h2 className="text-xl md:text-2xl font-bold text-white">Boutique</h2>
         </div>
 
+        {/* Vehicle Display */}
+        {user?.vehicleOwned && (
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 md:p-6">
+            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+              <Truck className="text-emerald-500 w-5 h-5" />
+              Mon Véhicule — {user.vehicleModel}
+            </h3>
+            <div className="w-full aspect-video bg-zinc-800 rounded-xl overflow-hidden flex items-center justify-center relative">
+              {isGeneratingVehicle ? (
+                <div className="flex flex-col items-center gap-3 text-zinc-400">
+                  <Loader2 className="w-10 h-10 animate-spin text-emerald-500" />
+                  <span className="text-sm font-medium">Génération de votre véhicule...</span>
+                </div>
+              ) : user.vehicleImageUrl ? (
+                <img 
+                  src={user.vehicleImageUrl} 
+                  alt={user.vehicleModel}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <Truck className="w-16 h-16 text-zinc-700" />
+              )}
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <span className="text-[10px] bg-zinc-800 text-zinc-400 px-2 py-1 rounded-full border border-zinc-700">
+                <Paintbrush className="w-3 h-3 inline mr-1" />
+                {user.customize.paintColor}
+              </span>
+              {user.customize.hasBullbar && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Pare-buffle</span>}
+              {user.customize.hasBeacons && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Gyrophares</span>}
+              {user.customize.hasLightBar && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Rampe phares</span>}
+            </div>
+          </div>
+        )}
+
         {!user?.vehicleOwned && (
           <div className="bg-orange-500/10 border border-orange-500/50 p-3 md:p-4 rounded-xl text-orange-500 text-xs md:text-sm font-medium">
             Vous devez d'abord acheter un véhicule pour accéder aux accessoires et peintures.
@@ -899,40 +994,46 @@ export default function RouteMaster() {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {availableItems.map((item) => (
-            <div key={item.id} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex flex-col gap-4">
-              <div className="w-full aspect-video bg-zinc-800 rounded-xl flex items-center justify-center">
-                <ShoppingBag className="w-12 h-12 text-zinc-700" />
-              </div>
-              <div>
-                <div className="flex justify-between items-start mb-1">
-                  <h3 className="text-lg font-bold text-white">{item.name}</h3>
-                  <span className="text-emerald-500 font-bold">{item.price}L</span>
+          {availableItems.map((item) => {
+            const owned = user?.ownedItems.includes(item.id);
+            const canAfford = user && user.points >= item.price;
+            return (
+              <div key={item.id} className={`bg-zinc-900 border rounded-2xl p-5 flex flex-col gap-4 ${owned ? 'border-emerald-500/50' : 'border-zinc-800'}`}>
+                <div className="w-full aspect-video bg-zinc-800 rounded-xl flex items-center justify-center">
+                  {item.type === 'vehicle' ? (
+                    <Truck className="w-12 h-12 text-zinc-600" />
+                  ) : item.type === 'paint' ? (
+                    <div className="w-16 h-16 rounded-full border-4 border-zinc-700" style={{ backgroundColor: (item as any).color }} />
+                  ) : (
+                    <ShoppingBag className="w-12 h-12 text-zinc-700" />
+                  )}
                 </div>
+                <div>
+                  <div className="flex justify-between items-start mb-1">
+                    <h3 className="text-lg font-bold text-white">{item.name}</h3>
+                    <span className="text-emerald-500 font-bold">{item.price} pts</span>
+                  </div>
+                </div>
+                {owned ? (
+                  <div className="w-full py-3 rounded-xl font-bold text-center bg-zinc-800 text-emerald-500 flex items-center justify-center gap-2">
+                    <CheckCircle2 className="w-4 h-4" /> POSSÉDÉ
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => handleBuyItem(item)}
+                    disabled={!canAfford || isGeneratingVehicle}
+                    className={`w-full py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${
+                      canAfford && !isGeneratingVehicle
+                        ? 'bg-emerald-500 text-black hover:bg-emerald-400'
+                        : 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
+                    }`}
+                  >
+                    {isGeneratingVehicle ? <><Loader2 className="w-4 h-4 animate-spin" /> GÉNÉRATION...</> : 'ACHETER'}
+                  </button>
+                )}
               </div>
-              <button
-                onClick={() => {
-                  if (user && user.fuel >= item.price) {
-                    const updatedUser = {
-                      ...user,
-                      fuel: user.fuel - item.price,
-                      vehicleOwned: item.type === 'vehicle' ? true : user.vehicleOwned
-                    };
-                    setUser(updatedUser);
-                    localStorage.setItem('routeMaster_user', JSON.stringify(updatedUser));
-                  }
-                }}
-                disabled={!user || user.fuel < item.price}
-                className={`w-full py-3 rounded-xl font-bold transition-all ${
-                  user && user.fuel >= item.price
-                    ? 'bg-emerald-500 text-black hover:bg-emerald-400'
-                    : 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
-                }`}
-              >
-                ACHETER
-              </button>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     );
