@@ -940,7 +940,7 @@ export default function RouteMaster() {
       if (!user?.vehicleOwned) {
         return item.type === 'vehicle';
       }
-      return true; // Once a vehicle is owned, all items are available
+      return true;
     });
 
     return (
@@ -951,6 +951,41 @@ export default function RouteMaster() {
           </button>
           <h2 className="text-xl md:text-2xl font-bold text-white">Boutique</h2>
         </div>
+
+        {/* Vehicle Display */}
+        {user?.vehicleOwned && (
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 md:p-6">
+            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+              <Truck className="text-emerald-500 w-5 h-5" />
+              Mon Véhicule — {user.vehicleModel}
+            </h3>
+            <div className="w-full aspect-video bg-zinc-800 rounded-xl overflow-hidden flex items-center justify-center relative">
+              {isGeneratingVehicle ? (
+                <div className="flex flex-col items-center gap-3 text-zinc-400">
+                  <Loader2 className="w-10 h-10 animate-spin text-emerald-500" />
+                  <span className="text-sm font-medium">Génération de votre véhicule...</span>
+                </div>
+              ) : user.vehicleImageUrl ? (
+                <img 
+                  src={user.vehicleImageUrl} 
+                  alt={user.vehicleModel}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <Truck className="w-16 h-16 text-zinc-700" />
+              )}
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <span className="text-[10px] bg-zinc-800 text-zinc-400 px-2 py-1 rounded-full border border-zinc-700">
+                <Paintbrush className="w-3 h-3 inline mr-1" />
+                {user.customize.paintColor}
+              </span>
+              {user.customize.hasBullbar && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Pare-buffle</span>}
+              {user.customize.hasBeacons && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Gyrophares</span>}
+              {user.customize.hasLightBar && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Rampe phares</span>}
+            </div>
+          </div>
+        )}
 
         {!user?.vehicleOwned && (
           <div className="bg-orange-500/10 border border-orange-500/50 p-3 md:p-4 rounded-xl text-orange-500 text-xs md:text-sm font-medium">
