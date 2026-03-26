@@ -58,7 +58,7 @@ const DUMMY_RANKING = [
 ];
 
 export default function RouteMaster() {
-  // State
+  const { fetchAllUsers, fetchUserByPseudo, upsertUser, deleteUser: deleteProfile } = useProfiles();
   const [view, setView] = useState<'identification' | 'home' | 'levels' | 'subjects' | 'chapters' | 'quiz' | 'prof' | 'ranking' | 'shop'>(() => {
     return (sessionStorage.getItem('routemaster_view') as any) || 'identification';
   });
