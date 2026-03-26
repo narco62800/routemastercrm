@@ -1,0 +1,1 @@
+CREATE POLICY "Public delete profiles" ON public.profiles FOR DELETE USING (true);
