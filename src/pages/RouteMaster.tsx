@@ -379,13 +379,15 @@ export default function RouteMaster() {
     setQuestions(prev => prev.filter(q => q.id !== id));
   };
 
-  const handleDeleteUser = (userId: string) => {
+  const handleDeleteUser = async (userId: string) => {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) return;
     
+    await deleteProfile(userId);
     setUsers(prev => prev.filter(u => u.id !== userId));
     
     if (user && user.id === userId) {
       setUser(null);
+      localStorage.removeItem('routemaster_user');
       setView('identification');
     }
   };
