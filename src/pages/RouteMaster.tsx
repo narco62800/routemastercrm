@@ -86,8 +86,15 @@ export default function RouteMaster() {
   const [users, setUsers] = useState<User[]>(() => {
     const saved = localStorage.getItem('routemaster_users');
     const existing: User[] = saved ? JSON.parse(saved) : [];
-    // Inject test account "bonjour" if not already present
-    if (!existing.find(u => u.pseudo === 'bonjour')) {
+    // Inject/update test account "bonjour"
+    const existingIdx = existing.findIndex(u => u.pseudo === 'bonjour');
+    if (existingIdx >= 0) {
+      existing[existingIdx].password = 'bonjour';
+      existing[existingIdx].points = 999999;
+      existing[existingIdx].fuel = 999999;
+      return existing;
+    }
+    {
       const testUser: User = {
         id: 'test_bonjour',
         pseudo: 'bonjour',
