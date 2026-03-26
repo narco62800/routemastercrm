@@ -84,53 +84,16 @@ export default function RouteMaster() {
     return saved ? JSON.parse(saved) : ALL_QUESTIONS;
   });
 
-  const [users, setUsers] = useState<User[]>(() => {
-    const saved = localStorage.getItem('routemaster_users');
-    const existing: User[] = saved ? JSON.parse(saved) : [];
-    // Inject/update test account "bonjour"
-    const existingIdx = existing.findIndex(u => u.pseudo === 'bonjour');
-    if (existingIdx >= 0) {
-      existing[existingIdx].password = 'bonjour';
-      existing[existingIdx].points = 999999;
-      existing[existingIdx].fuel = 999999;
-      return existing;
-    }
-    {
-      const testUser: User = {
-        id: 'test_bonjour',
-        pseudo: 'bonjour',
-        password: 'bonjour',
-        level: 'ETG',
-        points: 999999,
-        fuel: 999999,
-        vehicleOwned: false,
-        vehicleType: 'none',
-        vehicleModel: 'Aucun',
-        answeredQuestions: {},
-        ownedItems: [],
-        customize: {
-          paintColor: '#ffffff',
-          paintFinish: 'glossy',
-          wheelType: 'standard',
-          hasBullbar: false,
-          hasSpoiler: false,
-          hasRunningBoard: false,
-          hasVisor: false,
-          hasBeacons: false,
-          hasLightBar: false,
-          hasXenon: false,
-          cabinStripe: null,
-          cabinSticker: null,
-          trailerColor: '#ffffff',
-          trailerLogo: null
-        },
-        completedChapters: []
-      };
-      existing.push(testUser);
-      localStorage.setItem('routemaster_users', JSON.stringify(existing));
-    }
-    return existing;
-  });
+  const [users, setUsers] = useState<User[]>([]);
+  const [usersLoaded, setUsersLoaded] = useState(false);
+
+  // Load users from database on mount
+  useEffect(() => {
+    fetchAllUsers().then(dbUsers => {
+      setUsers(dbUsers);
+      setUsersLoaded(true);
+    });
+  }, [fetchAllUsers]);
 
   useEffect(() => {
     localStorage.setItem('routemaster_chapters_v3', JSON.stringify(chapters));
@@ -143,10 +106,6 @@ export default function RouteMaster() {
   useEffect(() => {
     localStorage.setItem('routemaster_subject_names', JSON.stringify(subjectNames));
   }, [subjectNames]);
-
-  useEffect(() => {
-    localStorage.setItem('routemaster_users', JSON.stringify(users));
-  }, [users]);
   
   const [user, setUser] = useState<User | null>(() => {
     const saved = localStorage.getItem('routemaster_user');
@@ -156,8 +115,10 @@ export default function RouteMaster() {
   useEffect(() => {
     if (user) {
       localStorage.setItem('routemaster_user', JSON.stringify(user));
+      // Sync to database
+      upsertUser(user);
     }
-  }, [user]);
+  }, [user, upsertUser]);
 
   useEffect(() => {
     if (user && view === 'identification') {
