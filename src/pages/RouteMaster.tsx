@@ -33,6 +33,7 @@ import { Question, Chapter, User } from '../types';
 import { ALL_QUESTIONS, INITIAL_CHAPTERS, INITIAL_SUBJECT_NAMES } from '../data/index';
 import { FUEL_PER_CORRECT_ANSWER, INITIAL_FUEL, MAX_FUEL } from '../constants';
 import { supabase } from '@/integrations/supabase/client';
+import { useProfiles } from '@/hooks/useProfiles';
 
 const LEVELS = ['2ndes CRM', '1ères CRM', 'Terminales CRM'];
 
