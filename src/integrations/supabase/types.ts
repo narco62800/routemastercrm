@@ -14,7 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          answered_questions: Json
+          completed_chapters: string[]
+          created_at: string
+          customize: Json
+          fuel: number
+          id: string
+          level: string
+          owned_items: string[]
+          password: string
+          points: number
+          pseudo: string
+          updated_at: string
+          vehicle_image_url: string | null
+          vehicle_model: string
+          vehicle_owned: boolean
+          vehicle_type: string
+        }
+        Insert: {
+          answered_questions?: Json
+          completed_chapters?: string[]
+          created_at?: string
+          customize?: Json
+          fuel?: number
+          id: string
+          level?: string
+          owned_items?: string[]
+          password: string
+          points?: number
+          pseudo: string
+          updated_at?: string
+          vehicle_image_url?: string | null
+          vehicle_model?: string
+          vehicle_owned?: boolean
+          vehicle_type?: string
+        }
+        Update: {
+          answered_questions?: Json
+          completed_chapters?: string[]
+          created_at?: string
+          customize?: Json
+          fuel?: number
+          id?: string
+          level?: string
+          owned_items?: string[]
+          password?: string
+          points?: number
+          pseudo?: string
+          updated_at?: string
+          vehicle_image_url?: string | null
+          vehicle_model?: string
+          vehicle_owned?: boolean
+          vehicle_type?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
