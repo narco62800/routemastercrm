@@ -237,10 +237,11 @@ export default function RouteMaster() {
   }, [newQuestion]);
 
   // Handlers
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!pseudoInput.trim() || !passwordInput.trim()) return;
     
-    const existingUser = users.find(u => u.pseudo === pseudoInput);
+    // Check database first
+    const existingUser = await fetchUserByPseudo(pseudoInput);
     
     if (existingUser) {
       if (existingUser.password === passwordInput) {
@@ -284,6 +285,7 @@ export default function RouteMaster() {
       completedChapters: []
     };
     
+    await upsertUser(newUser);
     setUser(newUser);
     setView('home');
   };
