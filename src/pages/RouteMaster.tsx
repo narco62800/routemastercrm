@@ -85,7 +85,43 @@ export default function RouteMaster() {
 
   const [users, setUsers] = useState<User[]>(() => {
     const saved = localStorage.getItem('routemaster_users');
-    return saved ? JSON.parse(saved) : [];
+    const existing: User[] = saved ? JSON.parse(saved) : [];
+    // Inject test account "bonjour" if not already present
+    if (!existing.find(u => u.pseudo === 'bonjour')) {
+      const testUser: User = {
+        id: 'test_bonjour',
+        pseudo: 'bonjour',
+        password: 'bonjour',
+        level: 'ETG',
+        points: 999999,
+        fuel: 999999,
+        vehicleOwned: false,
+        vehicleType: 'none',
+        vehicleModel: 'Aucun',
+        answeredQuestions: {},
+        ownedItems: [],
+        customize: {
+          paintColor: '#ffffff',
+          paintFinish: 'glossy',
+          wheelType: 'standard',
+          hasBullbar: false,
+          hasSpoiler: false,
+          hasRunningBoard: false,
+          hasVisor: false,
+          hasBeacons: false,
+          hasLightBar: false,
+          hasXenon: false,
+          cabinStripe: null,
+          cabinSticker: null,
+          trailerColor: '#ffffff',
+          trailerLogo: null
+        },
+        completedChapters: []
+      };
+      existing.push(testUser);
+      localStorage.setItem('routemaster_users', JSON.stringify(existing));
+    }
+    return existing;
   });
 
   useEffect(() => {
