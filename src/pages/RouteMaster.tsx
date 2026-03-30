@@ -25,7 +25,10 @@ import {
   LogOut,
   Download,
   Loader2,
-  Paintbrush
+  Paintbrush,
+  Eye,
+  X,
+  Clock
 } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -37,25 +40,55 @@ import { useProfiles } from '@/hooks/useProfiles';
 
 const LEVELS = ['2ndes CRM', '1ères CRM', 'Terminales CRM'];
 
+const COOLDOWN_MS = 48 * 60 * 60 * 1000; // 48 hours in ms
+
+// Shop items with vehicleType restriction for paint/accessories
 const SHOP_ITEMS = [
+  // Vehicles
   { id: 'veh_car', name: 'Voiture de Tourisme', price: 1000, type: 'vehicle', vehicleType: 'car' },
   { id: 'veh_truck', name: 'Porteur (Camion)', price: 5000, type: 'vehicle', vehicleType: 'truck' },
   { id: 'veh_articulated', name: 'Ensemble Articulé', price: 15000, type: 'vehicle', vehicleType: 'articulated' },
+  // Paints
   { id: 'paint_red', name: 'Peinture Rouge', price: 500, type: 'paint', color: '#ff0000' },
   { id: 'paint_blue', name: 'Peinture Bleue', price: 500, type: 'paint', color: '#0000ff' },
   { id: 'paint_gold', name: 'Peinture Or', price: 2000, type: 'paint', color: '#ffd700' },
+  { id: 'paint_black', name: 'Peinture Noir Brillant', price: 300, type: 'paint', color: '#000000' },
+  { id: 'paint_green', name: 'Peinture Vert Racing', price: 800, type: 'paint', color: '#00ff00' },
+  { id: 'paint_orange', name: 'Peinture Orange Flamme', price: 700, type: 'paint', color: '#ff8800' },
+  { id: 'paint_silver', name: 'Peinture Argent Métallisé', price: 1000, type: 'paint', color: '#c0c0c0' },
+  { id: 'paint_purple', name: 'Peinture Violet Cosmique', price: 1500, type: 'paint', color: '#9900ff' },
+  { id: 'paint_matte_black', name: 'Peinture Noir Mat', price: 1200, type: 'paint', color: '#1a1a1a' },
+  { id: 'paint_candy_red', name: 'Peinture Rouge Candy', price: 2500, type: 'paint', color: '#cc0033' },
+  // Accessories
   { id: 'beacons', name: 'Gyrophares', price: 1500, type: 'accessory' },
   { id: 'bullbar', name: 'Pare-buffle', price: 1200, type: 'accessory' },
   { id: 'lightbar', name: 'Rampe de phares', price: 1800, type: 'accessory' },
+  { id: 'xenon', name: 'Phares Xénon', price: 800, type: 'accessory' },
+  { id: 'spoiler', name: 'Aileron / Spoiler', price: 1000, type: 'accessory' },
+  { id: 'chrome_wheels', name: 'Jantes Chrome', price: 2000, type: 'accessory' },
+  { id: 'running_board', name: 'Marchepieds Latéraux', price: 900, type: 'accessory' },
+  { id: 'visor', name: 'Visière Pare-soleil', price: 600, type: 'accessory' },
 ];
 
-const DUMMY_RANKING = [
-  { pseudo: 'TruckMaster', points: 15400, level: 'Terminales CRM' },
-  { pseudo: 'RouteKing', points: 12200, level: '1ères CRM' },
-  { pseudo: 'DieselPower', points: 10500, level: 'Terminales CRM' },
-  { pseudo: 'EcoDriver', points: 9800, level: '2ndes CRM' },
-  { pseudo: 'CargoPro', points: 8700, level: '1ères CRM' },
-];
+// Helper: get owned item key for a vehicle type
+function ownedKey(vehicleType: string, itemId: string) {
+  return `${vehicleType}:${itemId}`;
+}
+
+// Helper: check if user owns an item for their current vehicle type
+function ownsForVehicle(user: User, itemId: string): boolean {
+  return user.ownedItems.includes(ownedKey(user.vehicleType, itemId));
+}
+
+// Shuffle array (Fisher-Yates)
+function shuffleArray<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 
 export default function RouteMaster() {
   const { fetchAllUsers, fetchUserByPseudo, upsertUser, deleteUser: deleteProfile } = useProfiles();
@@ -87,6 +120,9 @@ export default function RouteMaster() {
   const [users, setUsers] = useState<User[]>([]);
   const [usersLoaded, setUsersLoaded] = useState(false);
 
+  // Modal to view another user's vehicle
+  const [viewingUser, setViewingUser] = useState<User | null>(null);
+
   // Load users from database on mount
   useEffect(() => {
     fetchAllUsers().then(dbUsers => {
@@ -115,7 +151,6 @@ export default function RouteMaster() {
   useEffect(() => {
     if (user) {
       localStorage.setItem('routemaster_user', JSON.stringify(user));
-      // Sync to database
       upsertUser(user);
     }
   }, [user, upsertUser]);
@@ -240,7 +275,6 @@ export default function RouteMaster() {
   const handleLogin = async () => {
     if (!pseudoInput.trim() || !passwordInput.trim()) return;
     
-    // Check database first
     const existingUser = await fetchUserByPseudo(pseudoInput);
     
     if (existingUser) {
@@ -302,12 +336,24 @@ export default function RouteMaster() {
 
   const handleChapterSelect = (chapterTitle: string) => {
     setSelectedChapter(chapterTitle);
+    const now = Date.now();
     const chapterQuestions = questions.filter(q => 
       q.level === selectedLevel && 
       q.subject === selectedSubject && 
       q.chapter === chapterTitle
     );
-    setCurrentQuestions(chapterQuestions);
+    
+    // Filter out questions on 48h cooldown
+    const availableQuestions = chapterQuestions.filter(q => {
+      const answeredAt = user?.answeredQuestions[q.id];
+      if (!answeredAt || typeof answeredAt !== 'number') return true;
+      return (now - answeredAt) >= COOLDOWN_MS;
+    });
+
+    // Shuffle randomly
+    const shuffled = shuffleArray(availableQuestions);
+    
+    setCurrentQuestions(shuffled);
     setCurrentQuestionIndex(0);
     setQuizScore(0);
     setQuizFinished(false);
@@ -322,12 +368,21 @@ export default function RouteMaster() {
     setIsCorrect(correct);
     setShowResult(true);
 
+    // Record timestamp for 48h cooldown
+    const updatedAnswered = { ...user.answeredQuestions, [question.id]: Date.now() };
+
     if (correct) {
       setQuizScore(prev => prev + 1);
       setUser(prev => prev ? ({
         ...prev,
         fuel: Math.min(prev.fuel + FUEL_PER_CORRECT_ANSWER, MAX_FUEL),
-        points: prev.points + 10
+        points: prev.points + 10,
+        answeredQuestions: updatedAnswered
+      }) : null);
+    } else {
+      setUser(prev => prev ? ({
+        ...prev,
+        answeredQuestions: updatedAnswered
       }) : null);
     }
   };
@@ -418,57 +473,105 @@ export default function RouteMaster() {
     }
   }, []);
 
-  const handleBuyItem = async (item: any) => {
-    if (!user || user.points < item.price) return;
-    if (user.ownedItems.includes(item.id)) return;
-
-    const updates: Partial<User> = {
-      points: user.points - item.price,
-      ownedItems: [...user.ownedItems, item.id]
+  // Build customize state from owned items for current vehicle type
+  const getCustomizeFromOwnedItems = (ownedItems: string[], vehicleType: string, baseCustomize: User['customize']) => {
+    const newCustomize = {
+      ...baseCustomize,
+      paintColor: '#ffffff',
+      paintFinish: 'glossy',
+      wheelType: 'standard',
+      hasBullbar: false,
+      hasSpoiler: false,
+      hasRunningBoard: false,
+      hasVisor: false,
+      hasBeacons: false,
+      hasLightBar: false,
+      hasXenon: false,
     };
 
+    for (const key of ownedItems) {
+      if (!key.startsWith(`${vehicleType}:`)) continue;
+      const itemId = key.split(':')[1];
+      const shopItem = SHOP_ITEMS.find(s => s.id === itemId);
+      if (!shopItem) continue;
+
+      if (shopItem.type === 'paint' && shopItem.color) {
+        newCustomize.paintColor = shopItem.color;
+      }
+      if (shopItem.id === 'beacons') newCustomize.hasBeacons = true;
+      if (shopItem.id === 'bullbar') newCustomize.hasBullbar = true;
+      if (shopItem.id === 'lightbar') newCustomize.hasLightBar = true;
+      if (shopItem.id === 'xenon') newCustomize.hasXenon = true;
+      if (shopItem.id === 'spoiler') newCustomize.hasSpoiler = true;
+      if (shopItem.id === 'chrome_wheels') newCustomize.wheelType = 'chrome';
+      if (shopItem.id === 'running_board') newCustomize.hasRunningBoard = true;
+      if (shopItem.id === 'visor') newCustomize.hasVisor = true;
+    }
+
+    return newCustomize;
+  };
+
+  const handleBuyItem = async (item: any) => {
+    if (!user || user.points < item.price) return;
+
     if (item.type === 'vehicle') {
-      updates.vehicleOwned = true;
-      updates.vehicleType = item.vehicleType;
-      updates.vehicleModel = item.name;
-      
-      // Generate vehicle image
-      const imageUrl = await generateVehicleImage(item.vehicleType, user.customize);
-      if (imageUrl) {
-        updates.vehicleImageUrl = imageUrl;
-      }
+      // Vehicle items use raw id (no prefix)
+      if (user.ownedItems.includes(item.id)) return;
+
+      // Reset customize for new vehicle type
+      const defaultCustomize: User['customize'] = {
+        paintColor: '#ffffff',
+        paintFinish: 'glossy',
+        wheelType: 'standard',
+        hasBullbar: false,
+        hasSpoiler: false,
+        hasRunningBoard: false,
+        hasVisor: false,
+        hasBeacons: false,
+        hasLightBar: false,
+        hasXenon: false,
+        cabinStripe: null,
+        cabinSticker: null,
+        trailerColor: '#ffffff',
+        trailerLogo: null
+      };
+
+      // Generate image for the new vehicle
+      const imageUrl = await generateVehicleImage(item.vehicleType, defaultCustomize);
+
+      setUser(prev => prev ? {
+        ...prev,
+        points: prev.points - item.price,
+        ownedItems: [...prev.ownedItems, item.id],
+        vehicleOwned: true,
+        vehicleType: item.vehicleType,
+        vehicleModel: item.name,
+        customize: defaultCustomize,
+        vehicleImageUrl: imageUrl || undefined,
+      } : null);
+      return;
     }
 
-    if (item.type === 'paint' && item.color) {
-      const newCustomize = { ...user.customize, paintColor: item.color };
-      updates.customize = newCustomize;
-      
-      // Regenerate vehicle image with new color
-      if (user.vehicleOwned) {
-        const imageUrl = await generateVehicleImage(user.vehicleType, newCustomize);
-        if (imageUrl) {
-          updates.vehicleImageUrl = imageUrl;
-        }
-      }
+    // For paint/accessory: use vehicleType prefix
+    const key = ownedKey(user.vehicleType, item.id);
+    if (user.ownedItems.includes(key)) return;
+
+    const newOwnedItems = [...user.ownedItems, key];
+    const newCustomize = getCustomizeFromOwnedItems(newOwnedItems, user.vehicleType, user.customize);
+
+    // Regenerate vehicle image
+    let imageUrl: string | null = null;
+    if (user.vehicleOwned) {
+      imageUrl = await generateVehicleImage(user.vehicleType, newCustomize);
     }
 
-    if (item.type === 'accessory') {
-      const newCustomize = { ...user.customize };
-      if (item.id === 'beacons') newCustomize.hasBeacons = true;
-      if (item.id === 'bullbar') newCustomize.hasBullbar = true;
-      if (item.id === 'lightbar') newCustomize.hasLightBar = true;
-      updates.customize = newCustomize;
-
-      // Regenerate vehicle image with new accessory
-      if (user.vehicleOwned) {
-        const imageUrl = await generateVehicleImage(user.vehicleType, newCustomize);
-        if (imageUrl) {
-          updates.vehicleImageUrl = imageUrl;
-        }
-      }
-    }
-
-    setUser(prev => prev ? { ...prev, ...updates } : null);
+    setUser(prev => prev ? {
+      ...prev,
+      points: prev.points - item.price,
+      ownedItems: newOwnedItems,
+      customize: newCustomize,
+      vehicleImageUrl: imageUrl || prev.vehicleImageUrl,
+    } : null);
   };
 
   const handleProfAccess = () => {
@@ -579,7 +682,7 @@ export default function RouteMaster() {
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => setView(user ? 'home' : 'identification')}>
               <Truck className="text-emerald-500 w-6 h-6 md:w-8 md:h-8" />
               <h1 className="text-lg md:text-xl font-bold tracking-tighter text-white uppercase italic">RouteMaster <span className="text-emerald-500">CRM</span></h1>
-              <span className="text-[10px] md:text-xs text-zinc-400 italic ml-1 self-end mb-0.5"><span className="text-[10px] md:text-xs text-zinc-400 italic ml-1 self-end mb-0.5">by Y.Damart</span></span>
+              <span className="text-[10px] md:text-xs text-zinc-400 italic ml-1 self-end mb-0.5">by Y.Damart</span>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -762,6 +865,7 @@ export default function RouteMaster() {
 
   const ChaptersView = () => {
     const currentChapters = chapters.filter(c => c.level === selectedLevel && c.subject === selectedSubject);
+    const now = Date.now();
     
     return (
       <div className="space-y-6 md:space-y-8 py-4 md:py-8">
@@ -776,16 +880,40 @@ export default function RouteMaster() {
         </div>
 
         <div className="grid grid-cols-1 gap-2 md:gap-3">
-          {currentChapters.map((chapter) => (
-            <button
-              key={chapter.title}
-              onClick={() => handleChapterSelect(chapter.title)}
-              className="flex items-center justify-between p-3 md:p-4 bg-zinc-900/50 border border-zinc-800 rounded-xl hover:bg-zinc-800 transition-colors text-left"
-            >
-              <span className="text-white font-medium text-sm md:text-base">{chapter.title}</span>
-              <ChevronRight className="text-zinc-600 w-4 h-4" />
-            </button>
-          ))}
+          {currentChapters.map((chapter) => {
+            // Count available questions (not on cooldown)
+            const chapterQuestions = questions.filter(q => 
+              q.level === selectedLevel && 
+              q.subject === selectedSubject && 
+              q.chapter === chapter.title
+            );
+            const availableCount = chapterQuestions.filter(q => {
+              const answeredAt = user?.answeredQuestions[q.id];
+              if (!answeredAt || typeof answeredAt !== 'number') return true;
+              return (now - answeredAt) >= COOLDOWN_MS;
+            }).length;
+            
+            return (
+              <button
+                key={chapter.title}
+                onClick={() => handleChapterSelect(chapter.title)}
+                className="flex items-center justify-between p-3 md:p-4 bg-zinc-900/50 border border-zinc-800 rounded-xl hover:bg-zinc-800 transition-colors text-left"
+              >
+                <div>
+                  <span className="text-white font-medium text-sm md:text-base">{chapter.title}</span>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-zinc-500 text-[10px]">{availableCount}/{chapterQuestions.length} questions disponibles</span>
+                    {availableCount < chapterQuestions.length && (
+                      <span className="text-orange-400 text-[10px] flex items-center gap-0.5">
+                        <Clock className="w-3 h-3" /> cooldown 48h
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <ChevronRight className="text-zinc-600 w-4 h-4" />
+              </button>
+            );
+          })}
         </div>
       </div>
     );
@@ -795,9 +923,9 @@ export default function RouteMaster() {
     if (currentQuestions.length === 0) {
       return (
         <div className="py-20 text-center space-y-4">
-          <BookOpen className="w-16 h-16 text-zinc-700 mx-auto" />
-          <h3 className="text-xl font-bold text-white">Aucune question disponible</h3>
-          <p className="text-zinc-500">Ce chapitre n'a pas encore de questions.</p>
+          <Clock className="w-16 h-16 text-orange-400 mx-auto" />
+          <h3 className="text-xl font-bold text-white">Toutes les questions sont en cooldown</h3>
+          <p className="text-zinc-500">Revenez dans quelques heures pour de nouvelles questions !</p>
           <button onClick={() => setView('chapters')} className="text-emerald-500 font-bold">Retour</button>
         </div>
       );
@@ -908,6 +1036,66 @@ export default function RouteMaster() {
     );
   };
 
+  // Vehicle viewer modal
+  const VehicleModal = ({ targetUser, onClose }: { targetUser: User; onClose: () => void }) => (
+    <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
+      <motion.div 
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 max-w-lg w-full" 
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-bold text-white flex items-center gap-2">
+            <Truck className="text-emerald-500 w-5 h-5" />
+            Véhicule de {targetUser.pseudo}
+          </h3>
+          <button onClick={onClose} className="p-1 hover:bg-zinc-800 rounded-full text-zinc-400">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        
+        {targetUser.vehicleOwned ? (
+          <>
+            <div className="w-full aspect-video bg-zinc-800 rounded-xl overflow-hidden flex items-center justify-center mb-4">
+              {targetUser.vehicleImageUrl ? (
+                <img 
+                  src={targetUser.vehicleImageUrl} 
+                  alt={targetUser.vehicleModel}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <Truck className="w-16 h-16 text-zinc-700" />
+              )}
+            </div>
+            <div className="space-y-2">
+              <p className="text-white font-bold">{targetUser.vehicleModel}</p>
+              <div className="flex flex-wrap gap-2">
+                <span className="text-[10px] bg-zinc-800 text-zinc-400 px-2 py-1 rounded-full border border-zinc-700">
+                  <Paintbrush className="w-3 h-3 inline mr-1" />
+                  {targetUser.customize.paintColor}
+                </span>
+                {targetUser.customize.hasBullbar && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Pare-buffle</span>}
+                {targetUser.customize.hasBeacons && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Gyrophares</span>}
+                {targetUser.customize.hasLightBar && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Rampe phares</span>}
+                {targetUser.customize.hasXenon && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Xénon</span>}
+                {targetUser.customize.hasSpoiler && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Spoiler</span>}
+                {targetUser.customize.wheelType === 'chrome' && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Jantes Chrome</span>}
+                {targetUser.customize.hasRunningBoard && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Marchepieds</span>}
+                {targetUser.customize.hasVisor && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Visière</span>}
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="py-8 text-center text-zinc-500">
+            <Truck className="w-12 h-12 mx-auto mb-3 text-zinc-700" />
+            <p>Ce joueur n'a pas encore de véhicule.</p>
+          </div>
+        )}
+      </motion.div>
+    </div>
+  );
+
   const RankingView = () => {
     const sortedUsers = [...users].sort((a, b) => b.points - a.points);
     
@@ -920,19 +1108,30 @@ export default function RouteMaster() {
           <h2 className="text-xl md:text-2xl font-bold text-white">Classement Général</h2>
         </div>
 
+        <p className="text-zinc-500 text-xs px-2">Cliquez sur un pseudo pour voir son véhicule</p>
+
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl md:rounded-2xl overflow-hidden">
           {sortedUsers.length === 0 ? (
             <div className="p-8 text-center text-zinc-500 text-sm">Aucun utilisateur enregistré.</div>
           ) : (
             sortedUsers.map((r, i) => (
-              <div key={r.id} className={`flex items-center justify-between p-3 md:p-4 border-b border-zinc-800 last:border-0 ${r.pseudo === user?.pseudo ? 'bg-emerald-500/10' : ''}`}>
+              <div 
+                key={r.id} 
+                className={`flex items-center justify-between p-3 md:p-4 border-b border-zinc-800 last:border-0 cursor-pointer hover:bg-zinc-800/50 transition-colors ${r.pseudo === user?.pseudo ? 'bg-emerald-500/10' : ''}`}
+                onClick={() => setViewingUser(r)}
+              >
                 <div className="flex items-center gap-3 md:gap-4">
                   <span className={`w-6 md:w-8 text-center font-bold text-sm md:text-base ${i === 0 ? 'text-yellow-500' : i === 1 ? 'text-zinc-400' : i === 2 ? 'text-orange-500' : 'text-zinc-600'}`}>
                     #{i + 1}
                   </span>
-                  <div>
-                    <p className="text-white font-bold text-sm md:text-base">{r.pseudo}</p>
-                    <p className="text-zinc-500 text-[10px] md:text-xs">{r.level}</p>
+                  <div className="flex items-center gap-2">
+                    <div>
+                      <p className="text-white font-bold text-sm md:text-base flex items-center gap-1">
+                        {r.pseudo}
+                        {r.vehicleOwned && <Eye className="w-3 h-3 text-emerald-500" />}
+                      </p>
+                      <p className="text-zinc-500 text-[10px] md:text-xs">{r.level}</p>
+                    </div>
                   </div>
                 </div>
                 <span className="text-emerald-500 font-mono font-bold text-sm md:text-base">{r.points} pts</span>
@@ -945,12 +1144,18 @@ export default function RouteMaster() {
   };
 
   const ShopView = () => {
+    // Show vehicles always; show paint/accessories only for current vehicle type
     const availableItems = SHOP_ITEMS.filter(item => {
-      if (!user?.vehicleOwned) {
-        return item.type === 'vehicle';
-      }
+      if (item.type === 'vehicle') return true;
+      if (!user?.vehicleOwned) return false;
       return true;
     });
+
+    const vehicleTypeLabel: Record<string, string> = {
+      car: 'Tourisme',
+      truck: 'Porteur',
+      articulated: 'Articulé'
+    };
 
     return (
       <div className="space-y-6 md:space-y-8 py-4 md:py-8">
@@ -992,6 +1197,9 @@ export default function RouteMaster() {
               {user.customize.hasBullbar && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Pare-buffle</span>}
               {user.customize.hasBeacons && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Gyrophares</span>}
               {user.customize.hasLightBar && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Rampe phares</span>}
+              {user.customize.hasXenon && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Xénon</span>}
+              {user.customize.hasSpoiler && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Spoiler</span>}
+              {user.customize.wheelType === 'chrome' && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Jantes Chrome</span>}
             </div>
           </div>
         )}
@@ -1002,12 +1210,23 @@ export default function RouteMaster() {
           </div>
         )}
 
+        {user?.vehicleOwned && (
+          <div className="bg-blue-500/10 border border-blue-500/30 p-3 rounded-xl text-blue-400 text-xs font-medium">
+            🔧 Les peintures et accessoires achetés sont liés à votre véhicule actuel ({vehicleTypeLabel[user.vehicleType] || user.vehicleType}). Changer de véhicule nécessitera de débloquer à nouveau les éléments.
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {availableItems.map((item) => {
-            const owned = user?.ownedItems.includes(item.id);
+            const isVehicle = item.type === 'vehicle';
+            const owned = isVehicle 
+              ? user?.ownedItems.includes(item.id) 
+              : user ? ownsForVehicle(user, item.id) : false;
             const canAfford = user && user.points >= item.price;
+            const isCurrentVehicle = isVehicle && user?.vehicleType === item.vehicleType && user?.vehicleOwned;
+            
             return (
-              <div key={item.id} className={`bg-zinc-900 border rounded-2xl p-5 flex flex-col gap-4 ${owned ? 'border-emerald-500/50' : 'border-zinc-800'}`}>
+              <div key={item.id} className={`bg-zinc-900 border rounded-2xl p-5 flex flex-col gap-4 ${owned ? 'border-emerald-500/50' : isCurrentVehicle ? 'border-yellow-500/50' : 'border-zinc-800'}`}>
                 <div className="w-full aspect-video bg-zinc-800 rounded-xl flex items-center justify-center">
                   {item.type === 'vehicle' ? (
                     <Truck className="w-12 h-12 text-zinc-600" />
@@ -1022,6 +1241,9 @@ export default function RouteMaster() {
                     <h3 className="text-lg font-bold text-white">{item.name}</h3>
                     <span className="text-emerald-500 font-bold">{item.price} pts</span>
                   </div>
+                  {isCurrentVehicle && !owned && (
+                    <span className="text-[10px] text-yellow-500 font-medium">Véhicule actuel</span>
+                  )}
                 </div>
                 {owned ? (
                   <div className="w-full py-3 rounded-xl font-bold text-center bg-zinc-800 text-emerald-500 flex items-center justify-center gap-2">
@@ -1397,7 +1619,6 @@ export default function RouteMaster() {
                     if (isGeneratingShortUrl) return;
                     setIsGeneratingShortUrl(true);
                     try {
-                      // Utilisation d'un proxy CORS (allorigins) pour éviter l'erreur de blocage du navigateur
                       const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://is.gd/create.php?format=json&url=${encodeURIComponent(shareUrl)}`)}`);
                       const data = await response.json();
                       const parsed = JSON.parse(data.contents);
@@ -1484,6 +1705,11 @@ export default function RouteMaster() {
           </motion.div>
         </AnimatePresence>
       </main>
+
+      {/* Vehicle viewer modal */}
+      {viewingUser && (
+        <VehicleModal targetUser={viewingUser} onClose={() => setViewingUser(null)} />
+      )}
 
       {user && (
         <nav className="fixed bottom-0 left-0 right-0 bg-zinc-900/80 backdrop-blur-md border-t border-zinc-800 p-2 flex justify-around items-center z-50">
