@@ -199,6 +199,7 @@ export default function RouteMaster() {
     const saved = sessionStorage.getItem('routemaster_quiz_score');
     return saved ? parseInt(saved) : 0;
   });
+  const [correctStreak, setCorrectStreak] = useState(0);
 
   // Prof Space State
   const [editingSubject, setEditingSubject] = useState<string | null>(null);
