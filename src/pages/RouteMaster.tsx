@@ -28,7 +28,10 @@ import {
   Paintbrush,
   Eye,
   X,
-  Clock
+  Clock,
+  GripVertical,
+  Filter,
+  Search
 } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -228,6 +231,36 @@ export default function RouteMaster() {
   const [shareUrl, setShareUrl] = useState('https://routemastercrm.lovable.app');
   const [shortUrl, setShortUrl] = useState('');
   const [isGeneratingShortUrl, setIsGeneratingShortUrl] = useState(false);
+
+  // Question editor state
+  const [profFilterSubject, setProfFilterSubject] = useState<string>('');
+  const [profFilterChapter, setProfFilterChapter] = useState<string>('');
+  const [profSearchText, setProfSearchText] = useState('');
+  const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
+  const [draggedOptionIndex, setDraggedOptionIndex] = useState<number | null>(null);
+
+  const handleSaveEditQuestion = () => {
+    if (!editingQuestion) return;
+    setQuestions(prev => prev.map(q => q.id === editingQuestion.id ? editingQuestion : q));
+    setEditingQuestion(null);
+  };
+
+  const handleSwapOptions = (fromIdx: number, toIdx: number) => {
+    if (!editingQuestion) return;
+    const newOptions = [...editingQuestion.options];
+    const [moved] = newOptions.splice(fromIdx, 1);
+    newOptions.splice(toIdx, 0, moved);
+    // Adjust correct answer index
+    let newCorrect = editingQuestion.correct;
+    if (editingQuestion.correct === fromIdx) {
+      newCorrect = toIdx;
+    } else if (fromIdx < editingQuestion.correct && toIdx >= editingQuestion.correct) {
+      newCorrect = editingQuestion.correct - 1;
+    } else if (fromIdx > editingQuestion.correct && toIdx <= editingQuestion.correct) {
+      newCorrect = editingQuestion.correct + 1;
+    }
+    setEditingQuestion({ ...editingQuestion, options: newOptions, correct: newCorrect });
+  };
 
   useEffect(() => {
     sessionStorage.setItem('routemaster_view', view);
@@ -1448,6 +1481,7 @@ export default function RouteMaster() {
 
         {profTab === 'questions' && (
           <div className="space-y-4 md:space-y-6">
+            {/* Add question form */}
             <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 md:p-6">
               <h3 className="text-lg font-bold text-white mb-4">Ajouter une Question</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-4">
@@ -1516,22 +1550,186 @@ export default function RouteMaster() {
               </button>
             </div>
 
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
-              {questions.length === 0 ? (
-                <div className="p-8 text-center text-zinc-500 text-sm">Aucune question enregistrée.</div>
-              ) : (
-                questions.map((q) => (
-                  <div key={q.id} className="flex items-center justify-between p-4 border-b border-zinc-800 last:border-0 hover:bg-zinc-800/50 transition-colors">
-                    <div className="flex-1 pr-4">
-                      <p className="text-white font-medium line-clamp-1 text-sm md:text-base">{q.text}</p>
-                      <p className="text-zinc-500 text-[10px] md:text-xs uppercase tracking-wider">{q.level} • {q.subject} • {q.chapter}</p>
-                    </div>
-                    <button onClick={() => handleDeleteQuestion(q.id)} className="text-red-500 hover:bg-red-500/10 p-2 rounded-lg transition-colors">
-                      <Trash2 className="w-4 h-4" />
+            {/* Filter & search */}
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 md:p-6">
+              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <Filter className="text-emerald-500 w-5 h-5" />
+                Rechercher / Filtrer
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                <select 
+                  value={profFilterSubject}
+                  onChange={(e) => { setProfFilterSubject(e.target.value); setProfFilterChapter(''); }}
+                  className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm"
+                >
+                  <option value="">Toutes les matières</option>
+                  {subjects.map(s => <option key={s} value={s}>{subjectNames[s] || s}</option>)}
+                </select>
+                <select 
+                  value={profFilterChapter}
+                  onChange={(e) => setProfFilterChapter(e.target.value)}
+                  className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm"
+                >
+                  <option value="">Tous les chapitres</option>
+                  {chapters
+                    .filter(c => !profFilterSubject || c.subject === profFilterSubject)
+                    .map(c => <option key={c.title} value={c.title}>{c.title}</option>)}
+                </select>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                  <input 
+                    type="text"
+                    placeholder="Rechercher..."
+                    value={profSearchText}
+                    onChange={(e) => setProfSearchText(e.target.value)}
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl pl-10 pr-4 py-2.5 text-white text-sm"
+                  />
+                </div>
+              </div>
+              <p className="text-zinc-500 text-xs">
+                {(() => {
+                  const filtered = questions.filter(q => {
+                    if (profFilterSubject && q.subject !== profFilterSubject) return false;
+                    if (profFilterChapter && q.chapter !== profFilterChapter) return false;
+                    if (profSearchText && !q.text.toLowerCase().includes(profSearchText.toLowerCase())) return false;
+                    return true;
+                  });
+                  return `${filtered.length} question(s) trouvée(s)`;
+                })()}
+              </p>
+            </div>
+
+            {/* Edit modal */}
+            {editingQuestion && (
+              <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={() => setEditingQuestion(null)}>
+                <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-bold text-white">Modifier la question</h3>
+                    <button onClick={() => setEditingQuestion(null)} className="text-zinc-400 hover:text-white p-1">
+                      <X className="w-5 h-5" />
                     </button>
                   </div>
-                ))
-              )}
+                  
+                  <label className="text-xs text-zinc-400 mb-1 block">Question</label>
+                  <textarea 
+                    value={editingQuestion.text}
+                    onChange={(e) => setEditingQuestion({...editingQuestion, text: e.target.value})}
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white mb-4 h-24 text-sm resize-none"
+                  />
+
+                  <label className="text-xs text-zinc-400 mb-2 block">
+                    Réponses <span className="text-emerald-500">(glissez pour réordonner)</span>
+                  </label>
+                  <div className="space-y-2 mb-4">
+                    {editingQuestion.options.map((opt, idx) => (
+                      <div 
+                        key={idx}
+                        draggable
+                        onDragStart={() => setDraggedOptionIndex(idx)}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={() => {
+                          if (draggedOptionIndex !== null && draggedOptionIndex !== idx) {
+                            handleSwapOptions(draggedOptionIndex, idx);
+                          }
+                          setDraggedOptionIndex(null);
+                        }}
+                        className={`flex items-center gap-2 p-2 rounded-xl border transition-all ${
+                          editingQuestion.correct === idx 
+                            ? 'border-emerald-500 bg-emerald-500/10' 
+                            : 'border-zinc-700 bg-zinc-800'
+                        } ${draggedOptionIndex === idx ? 'opacity-50' : ''}`}
+                      >
+                        <div className="cursor-grab text-zinc-500 hover:text-white">
+                          <GripVertical className="w-4 h-4" />
+                        </div>
+                        <input 
+                          type="text"
+                          value={opt}
+                          onChange={(e) => {
+                            const newOpts = [...editingQuestion.options];
+                            newOpts[idx] = e.target.value;
+                            setEditingQuestion({...editingQuestion, options: newOpts});
+                          }}
+                          className="flex-1 bg-transparent text-white text-sm outline-none"
+                        />
+                        <button 
+                          onClick={() => setEditingQuestion({...editingQuestion, correct: idx})}
+                          className={`p-1.5 rounded-lg transition-all ${
+                            editingQuestion.correct === idx 
+                              ? 'bg-emerald-500 text-black' 
+                              : 'text-zinc-500 hover:text-emerald-500'
+                          }`}
+                          title="Marquer comme bonne réponse"
+                        >
+                          <CheckCircle2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <label className="text-xs text-zinc-400 mb-1 block">Explication</label>
+                  <textarea 
+                    value={editingQuestion.explanation}
+                    onChange={(e) => setEditingQuestion({...editingQuestion, explanation: e.target.value})}
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white mb-4 h-20 text-sm resize-none"
+                  />
+
+                  <button 
+                    onClick={handleSaveEditQuestion}
+                    className="w-full py-3 bg-emerald-500 text-black font-bold rounded-xl hover:bg-emerald-400 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Save className="w-5 h-5" />
+                    ENREGISTRER
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Questions list */}
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+              {(() => {
+                const filtered = questions.filter(q => {
+                  if (profFilterSubject && q.subject !== profFilterSubject) return false;
+                  if (profFilterChapter && q.chapter !== profFilterChapter) return false;
+                  if (profSearchText && !q.text.toLowerCase().includes(profSearchText.toLowerCase())) return false;
+                  return true;
+                });
+                if (filtered.length === 0) {
+                  return <div className="p-8 text-center text-zinc-500 text-sm">Aucune question trouvée.</div>;
+                }
+                return filtered.slice(0, 50).map((q) => (
+                  <div key={q.id} className="flex items-center justify-between p-4 border-b border-zinc-800 last:border-0 hover:bg-zinc-800/50 transition-colors">
+                    <div className="flex-1 pr-4 cursor-pointer" onClick={() => setEditingQuestion({...q})}>
+                      <p className="text-white font-medium line-clamp-1 text-sm md:text-base">{q.text}</p>
+                      <p className="text-zinc-500 text-[10px] md:text-xs uppercase tracking-wider">{q.level} • {q.subject} • {q.chapter}</p>
+                      <p className="text-emerald-500/60 text-[10px] mt-0.5">
+                        ✓ {q.options[q.correct]}
+                      </p>
+                    </div>
+                    <div className="flex gap-1">
+                      <button onClick={() => setEditingQuestion({...q})} className="text-zinc-400 hover:text-emerald-500 p-2 rounded-lg transition-colors" title="Modifier">
+                        <Edit3 className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => handleDeleteQuestion(q.id)} className="text-zinc-400 hover:text-red-500 p-2 rounded-lg transition-colors" title="Supprimer">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ));
+              })()}
+              {(() => {
+                const filtered = questions.filter(q => {
+                  if (profFilterSubject && q.subject !== profFilterSubject) return false;
+                  if (profFilterChapter && q.chapter !== profFilterChapter) return false;
+                  if (profSearchText && !q.text.toLowerCase().includes(profSearchText.toLowerCase())) return false;
+                  return true;
+                });
+                return filtered.length > 50 ? (
+                  <div className="p-3 text-center text-zinc-500 text-xs border-t border-zinc-800">
+                    Affichage limité aux 50 premières questions. Utilisez les filtres pour affiner.
+                  </div>
+                ) : null;
+              })()}
             </div>
           </div>
         )}
