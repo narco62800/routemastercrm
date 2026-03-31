@@ -1234,7 +1234,7 @@ export default function RouteMaster() {
             const owned = isVehicle 
               ? user?.ownedItems.includes(item.id) 
               : user ? ownsForVehicle(user, item.id) : false;
-            const canAfford = user && user.points >= item.price;
+            const canAfford = user && user.fuel >= item.price;
             const isCurrentVehicle = isVehicle && user?.vehicleType === item.vehicleType && user?.vehicleOwned;
             
             return (
