@@ -232,6 +232,36 @@ export default function RouteMaster() {
   const [shortUrl, setShortUrl] = useState('');
   const [isGeneratingShortUrl, setIsGeneratingShortUrl] = useState(false);
 
+  // Question editor state
+  const [profFilterSubject, setProfFilterSubject] = useState<string>('');
+  const [profFilterChapter, setProfFilterChapter] = useState<string>('');
+  const [profSearchText, setProfSearchText] = useState('');
+  const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
+  const [draggedOptionIndex, setDraggedOptionIndex] = useState<number | null>(null);
+
+  const handleSaveEditQuestion = () => {
+    if (!editingQuestion) return;
+    setQuestions(prev => prev.map(q => q.id === editingQuestion.id ? editingQuestion : q));
+    setEditingQuestion(null);
+  };
+
+  const handleSwapOptions = (fromIdx: number, toIdx: number) => {
+    if (!editingQuestion) return;
+    const newOptions = [...editingQuestion.options];
+    const [moved] = newOptions.splice(fromIdx, 1);
+    newOptions.splice(toIdx, 0, moved);
+    // Adjust correct answer index
+    let newCorrect = editingQuestion.correct;
+    if (editingQuestion.correct === fromIdx) {
+      newCorrect = toIdx;
+    } else if (fromIdx < editingQuestion.correct && toIdx >= editingQuestion.correct) {
+      newCorrect = editingQuestion.correct - 1;
+    } else if (fromIdx > editingQuestion.correct && toIdx <= editingQuestion.correct) {
+      newCorrect = editingQuestion.correct + 1;
+    }
+    setEditingQuestion({ ...editingQuestion, options: newOptions, correct: newCorrect });
+  };
+
   useEffect(() => {
     sessionStorage.setItem('routemaster_view', view);
   }, [view]);
