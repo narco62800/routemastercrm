@@ -357,6 +357,7 @@ export default function RouteMaster() {
     setCurrentQuestions(shuffled);
     setCurrentQuestionIndex(0);
     setQuizScore(0);
+    setCorrectStreak(0);
     setQuizFinished(false);
     setView('quiz');
   };
