@@ -28,7 +28,10 @@ import {
   Paintbrush,
   Eye,
   X,
-  Clock
+  Clock,
+  GripVertical,
+  Filter,
+  Search
 } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { motion, AnimatePresence } from 'motion/react';
