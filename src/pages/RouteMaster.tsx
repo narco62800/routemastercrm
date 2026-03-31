@@ -523,7 +523,7 @@ export default function RouteMaster() {
   };
 
   const handleBuyItem = async (item: any) => {
-    if (!user || user.points < item.price) return;
+    if (!user || user.fuel < item.price) return;
 
     if (item.type === 'vehicle') {
       // Vehicle items use raw id (no prefix)
