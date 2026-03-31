@@ -34,7 +34,7 @@ import { QRCodeCanvas } from 'qrcode.react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Question, Chapter, User } from '../types';
 import { ALL_QUESTIONS, INITIAL_CHAPTERS, INITIAL_SUBJECT_NAMES } from '../data/index';
-import { FUEL_PER_CORRECT_ANSWER, INITIAL_FUEL, MAX_FUEL } from '../constants';
+import { FUEL_PER_CORRECT_ANSWER, POINTS_PER_CORRECT_ANSWER, STREAK_BONUS_FUEL, STREAK_BONUS_POINTS, INITIAL_FUEL, MAX_FUEL, MAX_POINTS } from '../constants';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfiles } from '@/hooks/useProfiles';
 
@@ -199,6 +199,7 @@ export default function RouteMaster() {
     const saved = sessionStorage.getItem('routemaster_quiz_score');
     return saved ? parseInt(saved) : 0;
   });
+  const [correctStreak, setCorrectStreak] = useState(0);
 
   // Prof Space State
   const [editingSubject, setEditingSubject] = useState<string | null>(null);
@@ -356,6 +357,7 @@ export default function RouteMaster() {
     setCurrentQuestions(shuffled);
     setCurrentQuestionIndex(0);
     setQuizScore(0);
+    setCorrectStreak(0);
     setQuizFinished(false);
     setView('quiz');
   };
@@ -373,13 +375,24 @@ export default function RouteMaster() {
 
     if (correct) {
       setQuizScore(prev => prev + 1);
+      setCorrectStreak(prev => prev + 1);
+      const newStreak = correctStreak + 1;
+      // Base reward: 15L + 50pts per correct answer
+      let fuelGain = FUEL_PER_CORRECT_ANSWER;
+      let pointsGain = POINTS_PER_CORRECT_ANSWER;
+      // Streak bonus: every answer in a streak without error gives +20L +50pts
+      if (newStreak > 1) {
+        fuelGain += STREAK_BONUS_FUEL;
+        pointsGain += STREAK_BONUS_POINTS;
+      }
       setUser(prev => prev ? ({
         ...prev,
-        fuel: Math.min(prev.fuel + FUEL_PER_CORRECT_ANSWER, MAX_FUEL),
-        points: prev.points + 10,
+        fuel: Math.min(prev.fuel + fuelGain, MAX_FUEL),
+        points: Math.min(prev.points + pointsGain, MAX_POINTS),
         answeredQuestions: updatedAnswered
       }) : null);
     } else {
+      setCorrectStreak(0);
       setUser(prev => prev ? ({
         ...prev,
         answeredQuestions: updatedAnswered
@@ -512,7 +525,7 @@ export default function RouteMaster() {
   };
 
   const handleBuyItem = async (item: any) => {
-    if (!user || user.points < item.price) return;
+    if (!user || user.fuel < item.price) return;
 
     if (item.type === 'vehicle') {
       // Vehicle items use raw id (no prefix)
@@ -541,7 +554,7 @@ export default function RouteMaster() {
 
       setUser(prev => prev ? {
         ...prev,
-        points: prev.points - item.price,
+        fuel: prev.fuel - item.price,
         ownedItems: [...prev.ownedItems, item.id],
         vehicleOwned: true,
         vehicleType: item.vehicleType,
@@ -567,7 +580,7 @@ export default function RouteMaster() {
 
     setUser(prev => prev ? {
       ...prev,
-      points: prev.points - item.price,
+      fuel: prev.fuel - item.price,
       ownedItems: newOwnedItems,
       customize: newCustomize,
       vehicleImageUrl: imageUrl || prev.vehicleImageUrl,
@@ -952,10 +965,11 @@ export default function RouteMaster() {
               <span className="text-zinc-500">Gazole gagné</span>
               <span className="text-orange-500 font-bold">+{quizScore * FUEL_PER_CORRECT_ANSWER}L</span>
             </div>
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center mb-4">
               <span className="text-zinc-500">Points gagnés</span>
-              <span className="text-yellow-500 font-bold">+{quizScore * 10} pts</span>
+              <span className="text-yellow-500 font-bold">+{quizScore * POINTS_PER_CORRECT_ANSWER} pts</span>
             </div>
+            <p className="text-xs text-zinc-600 mt-2">Les points servent au classement • Les litres servent pour la boutique</p>
           </div>
 
           <button 
@@ -1222,7 +1236,7 @@ export default function RouteMaster() {
             const owned = isVehicle 
               ? user?.ownedItems.includes(item.id) 
               : user ? ownsForVehicle(user, item.id) : false;
-            const canAfford = user && user.points >= item.price;
+            const canAfford = user && user.fuel >= item.price;
             const isCurrentVehicle = isVehicle && user?.vehicleType === item.vehicleType && user?.vehicleOwned;
             
             return (
@@ -1239,7 +1253,7 @@ export default function RouteMaster() {
                 <div>
                   <div className="flex justify-between items-start mb-1">
                     <h3 className="text-lg font-bold text-white">{item.name}</h3>
-                    <span className="text-emerald-500 font-bold">{item.price} pts</span>
+                    <span className="text-orange-500 font-bold">{item.price} L</span>
                   </div>
                   {isCurrentVehicle && !owned && (
                     <span className="text-[10px] text-yellow-500 font-medium">Véhicule actuel</span>
