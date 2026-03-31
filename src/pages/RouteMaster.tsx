@@ -579,7 +579,7 @@ export default function RouteMaster() {
 
     setUser(prev => prev ? {
       ...prev,
-      points: prev.points - item.price,
+      fuel: prev.fuel - item.price,
       ownedItems: newOwnedItems,
       customize: newCustomize,
       vehicleImageUrl: imageUrl || prev.vehicleImageUrl,
