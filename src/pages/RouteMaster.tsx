@@ -1253,7 +1253,7 @@ export default function RouteMaster() {
                 <div>
                   <div className="flex justify-between items-start mb-1">
                     <h3 className="text-lg font-bold text-white">{item.name}</h3>
-                    <span className="text-emerald-500 font-bold">{item.price} pts</span>
+                    <span className="text-orange-500 font-bold">{item.price} L</span>
                   </div>
                   {isCurrentVehicle && !owned && (
                     <span className="text-[10px] text-yellow-500 font-medium">Véhicule actuel</span>
