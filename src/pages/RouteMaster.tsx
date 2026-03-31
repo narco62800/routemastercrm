@@ -553,7 +553,7 @@ export default function RouteMaster() {
 
       setUser(prev => prev ? {
         ...prev,
-        points: prev.points - item.price,
+        fuel: prev.fuel - item.price,
         ownedItems: [...prev.ownedItems, item.id],
         vehicleOwned: true,
         vehicleType: item.vehicleType,
