@@ -373,13 +373,24 @@ export default function RouteMaster() {
 
     if (correct) {
       setQuizScore(prev => prev + 1);
+      setCorrectStreak(prev => prev + 1);
+      const newStreak = correctStreak + 1;
+      // Base reward: 15L + 50pts per correct answer
+      let fuelGain = FUEL_PER_CORRECT_ANSWER;
+      let pointsGain = POINTS_PER_CORRECT_ANSWER;
+      // Streak bonus: every answer in a streak without error gives +20L +50pts
+      if (newStreak > 1) {
+        fuelGain += STREAK_BONUS_FUEL;
+        pointsGain += STREAK_BONUS_POINTS;
+      }
       setUser(prev => prev ? ({
         ...prev,
-        fuel: Math.min(prev.fuel + FUEL_PER_CORRECT_ANSWER, MAX_FUEL),
-        points: prev.points + 10,
+        fuel: Math.min(prev.fuel + fuelGain, MAX_FUEL),
+        points: Math.min(prev.points + pointsGain, MAX_POINTS),
         answeredQuestions: updatedAnswered
       }) : null);
     } else {
+      setCorrectStreak(0);
       setUser(prev => prev ? ({
         ...prev,
         answeredQuestions: updatedAnswered
