@@ -13,10 +13,9 @@ serve(async (req) => {
   try {
     const { vehicleType, paintColor, hasBullbar, hasBeacons, hasLightBar, hasXenon, hasSpoiler } = await req.json();
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");
 
-    // Build a detailed prompt based on customizations
     const vehicleNames: Record<string, string> = {
       car: "a modern European sedan car (like a Peugeot 308 or Renault Megane)",
       truck: "a heavy-duty European box truck (like a Renault D-Series or DAF LF)",
@@ -25,7 +24,6 @@ serve(async (req) => {
 
     const vehicleName = vehicleNames[vehicleType] || vehicleNames.car;
     
-    // Convert hex color to a descriptive color name
     const colorDescriptions: Record<string, string> = {
       '#ffffff': 'white',
       '#ff0000': 'bright red',
@@ -54,36 +52,33 @@ serve(async (req) => {
 
     console.log("Generating vehicle with prompt:", prompt);
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    // Use Google Gemini API directly with user's own API key
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3.1-flash-image-preview",
-        messages: [
-          { role: "user", content: prompt }
+        contents: [
+          {
+            parts: [{ text: prompt }]
+          }
         ],
-        modalities: ["image", "text"]
+        generationConfig: {
+          responseModalities: ["TEXT", "IMAGE"],
+        }
       }),
     });
 
     if (!response.ok) {
+      const t = await response.text();
+      console.error("Gemini API error:", response.status, t);
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limited, please try again later." }), {
           status: 429,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Credits exhausted." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      const t = await response.text();
-      console.error("AI gateway error:", response.status, t);
       return new Response(JSON.stringify({ error: "AI generation failed" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -91,15 +86,32 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    const imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    console.log("Gemini response keys:", JSON.stringify(Object.keys(data)));
+    
+    // Extract image from Gemini response
+    const parts = data.candidates?.[0]?.content?.parts;
+    let imageBase64 = "";
+    let mimeType = "image/png";
+    
+    if (parts) {
+      for (const part of parts) {
+        if (part.inlineData) {
+          imageBase64 = part.inlineData.data;
+          mimeType = part.inlineData.mimeType || "image/png";
+          break;
+        }
+      }
+    }
 
-    if (!imageUrl) {
-      console.error("No image in response:", JSON.stringify(data).substring(0, 500));
+    if (!imageBase64) {
+      console.error("No image in Gemini response:", JSON.stringify(data).substring(0, 500));
       return new Response(JSON.stringify({ error: "No image generated" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    const imageUrl = `data:${mimeType};base64,${imageBase64}`;
 
     return new Response(JSON.stringify({ imageUrl }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
