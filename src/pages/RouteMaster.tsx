@@ -964,10 +964,11 @@ export default function RouteMaster() {
               <span className="text-zinc-500">Gazole gagné</span>
               <span className="text-orange-500 font-bold">+{quizScore * FUEL_PER_CORRECT_ANSWER}L</span>
             </div>
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center mb-4">
               <span className="text-zinc-500">Points gagnés</span>
-              <span className="text-yellow-500 font-bold">+{quizScore * 10} pts</span>
+              <span className="text-yellow-500 font-bold">+{quizScore * POINTS_PER_CORRECT_ANSWER} pts</span>
             </div>
+            <p className="text-xs text-zinc-600 mt-2">Les points servent au classement • Les litres servent pour la boutique</p>
           </div>
 
           <button 
