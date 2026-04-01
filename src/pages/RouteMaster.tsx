@@ -238,6 +238,9 @@ export default function RouteMaster() {
   const [profSearchText, setProfSearchText] = useState('');
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   const [draggedOptionIndex, setDraggedOptionIndex] = useState<number | null>(null);
+  const [expandedChapter, setExpandedChapter] = useState<string | null>(null);
+  const [chapterEditingQuestion, setChapterEditingQuestion] = useState<Question | null>(null);
+  const [chapterDraggedIdx, setChapterDraggedIdx] = useState<number | null>(null);
 
   const handleSaveEditQuestion = () => {
     if (!editingQuestion) return;
@@ -1463,17 +1466,115 @@ export default function RouteMaster() {
               {chapters.length === 0 ? (
                 <div className="p-8 text-center text-zinc-500 text-sm">Aucun chapitre enregistré.</div>
               ) : (
-                chapters.map((c, i) => (
-                  <div key={i} className="flex items-center justify-between p-4 border-b border-zinc-800 last:border-0 hover:bg-zinc-800/50 transition-colors">
-                    <div className="flex-1 pr-4">
-                      <p className="text-white font-medium text-sm md:text-base">{c.title}</p>
-                      <p className="text-zinc-500 text-[10px] md:text-xs uppercase tracking-wider">{c.level} • {c.subject}</p>
+                chapters.map((c, i) => {
+                  const chapterKey = `${c.level}|${c.subject}|${c.title}`;
+                  const isExpanded = expandedChapter === chapterKey;
+                  const chapterQuestions = questions.filter(q => q.level === c.level && q.subject === c.subject && q.chapter === c.title);
+                  return (
+                    <div key={i} className="border-b border-zinc-800 last:border-0">
+                      <div 
+                        className="flex items-center justify-between p-4 hover:bg-zinc-800/50 transition-colors cursor-pointer select-none"
+                        onDoubleClick={() => setExpandedChapter(isExpanded ? null : chapterKey)}
+                      >
+                        <div className="flex-1 pr-4">
+                          <p className="text-white font-medium text-sm md:text-base flex items-center gap-2">
+                            <ChevronRight className={`w-4 h-4 text-zinc-500 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                            {c.title}
+                            <span className="text-zinc-500 text-xs font-normal">({chapterQuestions.length} questions)</span>
+                          </p>
+                          <p className="text-zinc-500 text-[10px] md:text-xs uppercase tracking-wider ml-6">{c.level} • {c.subject}</p>
+                        </div>
+                        <button onClick={(e) => { e.stopPropagation(); handleDeleteChapter(c.title); }} className="text-red-500 hover:bg-red-500/10 p-2 rounded-lg transition-colors">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                      {isExpanded && (
+                        <div className="bg-zinc-950/50 border-t border-zinc-800">
+                          {chapterQuestions.length === 0 ? (
+                            <div className="p-4 text-center text-zinc-500 text-xs">Aucune question dans ce chapitre.</div>
+                          ) : (
+                            chapterQuestions.map((q) => (
+                              <div key={q.id} className="px-6 py-3 border-b border-zinc-800/50 last:border-0 hover:bg-zinc-800/30 transition-colors">
+                                {chapterEditingQuestion?.id === q.id ? (
+                                  <div className="space-y-3">
+                                    <textarea 
+                                      value={chapterEditingQuestion.text}
+                                      onChange={(e) => setChapterEditingQuestion({...chapterEditingQuestion, text: e.target.value})}
+                                      className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm resize-none h-20"
+                                    />
+                                    <div className="space-y-2">
+                                      {chapterEditingQuestion.options.map((opt, idx) => (
+                                        <div 
+                                          key={idx}
+                                          draggable
+                                          onDragStart={() => setChapterDraggedIdx(idx)}
+                                          onDragOver={(e) => e.preventDefault()}
+                                          onDrop={() => {
+                                            if (chapterDraggedIdx !== null && chapterDraggedIdx !== idx) {
+                                              const newOpts = [...chapterEditingQuestion.options];
+                                              const [moved] = newOpts.splice(chapterDraggedIdx, 1);
+                                              newOpts.splice(idx, 0, moved);
+                                              let newCorrect = chapterEditingQuestion.correct;
+                                              if (chapterDraggedIdx === chapterEditingQuestion.correct) newCorrect = idx;
+                                              else if (chapterDraggedIdx < chapterEditingQuestion.correct && idx >= chapterEditingQuestion.correct) newCorrect--;
+                                              else if (chapterDraggedIdx > chapterEditingQuestion.correct && idx <= chapterEditingQuestion.correct) newCorrect++;
+                                              setChapterEditingQuestion({...chapterEditingQuestion, options: newOpts, correct: newCorrect});
+                                            }
+                                            setChapterDraggedIdx(null);
+                                          }}
+                                          className={`flex items-center gap-2 p-2 rounded-lg border ${chapterEditingQuestion.correct === idx ? 'border-emerald-500 bg-emerald-500/10' : 'border-zinc-700 bg-zinc-800'} ${chapterDraggedIdx === idx ? 'opacity-50' : ''}`}
+                                        >
+                                          <GripVertical className="w-3 h-3 text-zinc-500 cursor-grab" />
+                                          <input 
+                                            type="text" value={opt}
+                                            onChange={(e) => { const o = [...chapterEditingQuestion.options]; o[idx] = e.target.value; setChapterEditingQuestion({...chapterEditingQuestion, options: o}); }}
+                                            className="flex-1 bg-transparent text-white text-sm outline-none"
+                                          />
+                                          <button onClick={() => setChapterEditingQuestion({...chapterEditingQuestion, correct: idx})}
+                                            className={`p-1 rounded ${chapterEditingQuestion.correct === idx ? 'text-emerald-500' : 'text-zinc-500 hover:text-emerald-400'}`}>
+                                            <CheckCircle2 className="w-3.5 h-3.5" />
+                                          </button>
+                                        </div>
+                                      ))}
+                                    </div>
+                                    <textarea 
+                                      value={chapterEditingQuestion.explanation}
+                                      onChange={(e) => setChapterEditingQuestion({...chapterEditingQuestion, explanation: e.target.value})}
+                                      placeholder="Explication..."
+                                      className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm resize-none h-16"
+                                    />
+                                    <div className="flex gap-2">
+                                      <button onClick={() => {
+                                        setQuestions(prev => prev.map(qq => qq.id === chapterEditingQuestion.id ? chapterEditingQuestion : qq));
+                                        setChapterEditingQuestion(null);
+                                      }} className="px-4 py-2 bg-emerald-500 text-black text-sm font-bold rounded-lg hover:bg-emerald-400 flex items-center gap-1">
+                                        <Save className="w-3.5 h-3.5" /> Enregistrer
+                                      </button>
+                                      <button onClick={() => setChapterEditingQuestion(null)} className="px-4 py-2 bg-zinc-700 text-white text-sm rounded-lg hover:bg-zinc-600">
+                                        Annuler
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="flex items-start justify-between gap-2 cursor-pointer" onClick={() => setChapterEditingQuestion({...q})}>
+                                    <div className="flex-1">
+                                      <p className="text-white text-sm">{q.text}</p>
+                                      <p className="text-emerald-500/60 text-[10px] mt-1">✓ {q.options[q.correct]}</p>
+                                    </div>
+                                    <Edit3 className="w-3.5 h-3.5 text-zinc-500 hover:text-emerald-500 mt-1 flex-shrink-0" />
+                                  </div>
+                                )}
+                              </div>
+                            ))
+                          )}
+                          <div className="p-2 text-center">
+                            <p className="text-zinc-600 text-[10px]">Double-cliquez sur le chapitre pour fermer</p>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    <button onClick={() => handleDeleteChapter(c.title)} className="text-red-500 hover:bg-red-500/10 p-2 rounded-lg transition-colors">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           </div>
