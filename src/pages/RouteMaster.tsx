@@ -238,6 +238,9 @@ export default function RouteMaster() {
   const [profSearchText, setProfSearchText] = useState('');
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   const [draggedOptionIndex, setDraggedOptionIndex] = useState<number | null>(null);
+  const [expandedChapter, setExpandedChapter] = useState<string | null>(null);
+  const [chapterEditingQuestion, setChapterEditingQuestion] = useState<Question | null>(null);
+  const [chapterDraggedIdx, setChapterDraggedIdx] = useState<number | null>(null);
 
   const handleSaveEditQuestion = () => {
     if (!editingQuestion) return;
