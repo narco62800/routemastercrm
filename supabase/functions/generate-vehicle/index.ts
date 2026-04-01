@@ -1,4 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { decode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -33,6 +35,10 @@ serve(async (req) => {
       '#00ff00': 'lime green',
       '#ff8800': 'orange',
       '#888888': 'silver grey',
+      '#c0c0c0': 'silver metallic',
+      '#9900ff': 'cosmic purple',
+      '#1a1a1a': 'matte black',
+      '#cc0033': 'candy red',
     };
     
     const colorDesc = colorDescriptions[paintColor?.toLowerCase()] || `painted in the color ${paintColor}`;
@@ -52,21 +58,12 @@ serve(async (req) => {
 
     console.log("Generating vehicle with prompt:", prompt);
 
-    // Use Google Gemini API directly with user's own API key
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        contents: [
-          {
-            parts: [{ text: prompt }]
-          }
-        ],
-        generationConfig: {
-          responseModalities: ["TEXT", "IMAGE"],
-        }
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { responseModalities: ["TEXT", "IMAGE"] },
       }),
     });
 
@@ -75,20 +72,15 @@ serve(async (req) => {
       console.error("Gemini API error:", response.status, t);
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limited, please try again later." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       return new Response(JSON.stringify({ error: "AI generation failed" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const data = await response.json();
-    console.log("Gemini response keys:", JSON.stringify(Object.keys(data)));
-    
-    // Extract image from Gemini response
     const parts = data.candidates?.[0]?.content?.parts;
     let imageBase64 = "";
     let mimeType = "image/png";
@@ -106,12 +98,41 @@ serve(async (req) => {
     if (!imageBase64) {
       console.error("No image in Gemini response:", JSON.stringify(data).substring(0, 500));
       return new Response(JSON.stringify({ error: "No image generated" }), {
-        status: 500,
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Upload to Supabase Storage instead of returning base64
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    const ext = mimeType === "image/jpeg" ? "jpg" : "png";
+    const fileName = `vehicle_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${ext}`;
+    
+    const imageBytes = decode(imageBase64);
+    
+    const { error: uploadError } = await supabase.storage
+      .from('vehicle-images')
+      .upload(fileName, imageBytes, {
+        contentType: mimeType,
+        upsert: false,
+      });
+
+    if (uploadError) {
+      console.error("Storage upload error:", uploadError);
+      // Fallback to base64 if upload fails
+      const imageUrl = `data:${mimeType};base64,${imageBase64}`;
+      return new Response(JSON.stringify({ imageUrl }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const imageUrl = `data:${mimeType};base64,${imageBase64}`;
+    const { data: publicUrlData } = supabase.storage
+      .from('vehicle-images')
+      .getPublicUrl(fileName);
+
+    const imageUrl = publicUrlData.publicUrl;
 
     return new Response(JSON.stringify({ imageUrl }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -120,8 +141,7 @@ serve(async (req) => {
   } catch (e) {
     console.error("generate-vehicle error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
