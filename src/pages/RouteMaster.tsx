@@ -31,7 +31,11 @@ import {
   Clock,
   GripVertical,
   Filter,
-  Search
+  Search,
+  RefreshCw,
+  ToggleLeft,
+  ToggleRight,
+  AlertTriangle
 } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { motion, AnimatePresence } from 'motion/react';
