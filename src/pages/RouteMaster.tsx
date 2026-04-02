@@ -1230,7 +1230,32 @@ export default function RouteMaster() {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <Truck className="w-16 h-16 text-zinc-700" />
+                <div className="flex flex-col items-center gap-3">
+                  <Truck className="w-16 h-16 text-zinc-700" />
+                  {vehicleGenError && (
+                    <p className="text-red-400 text-xs text-center px-4">{vehicleGenError}</p>
+                  )}
+                </div>
+              )}
+            </div>
+            {/* Regenerate button */}
+            <div className="mt-3 flex items-center gap-2">
+              <button
+                onClick={handleRegenerateImage}
+                disabled={isGeneratingVehicle}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                  isGeneratingVehicle
+                    ? 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
+                    : 'bg-zinc-800 text-emerald-500 hover:bg-zinc-700 border border-zinc-700'
+                }`}
+              >
+                <RefreshCw className={`w-4 h-4 ${isGeneratingVehicle ? 'animate-spin' : ''}`} />
+                Régénérer l'image
+              </button>
+              {vehicleGenError && (
+                <span className="text-red-400 text-xs flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3" /> Erreur
+                </span>
               )}
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
@@ -1244,6 +1269,8 @@ export default function RouteMaster() {
               {user.customize.hasXenon && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Xénon</span>}
               {user.customize.hasSpoiler && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Spoiler</span>}
               {user.customize.wheelType === 'chrome' && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Jantes Chrome</span>}
+              {user.customize.hasRunningBoard && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Marchepieds</span>}
+              {user.customize.hasVisor && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Visière</span>}
             </div>
           </div>
         )}
@@ -1268,16 +1295,22 @@ export default function RouteMaster() {
               : user ? ownsForVehicle(user, item.id) : false;
             const canAfford = user && user.fuel >= item.price;
             const isCurrentVehicle = isVehicle && user?.vehicleType === item.vehicleType && user?.vehicleOwned;
+            const equipped = !isVehicle && owned ? isItemEquipped(item) : false;
             
             return (
-              <div key={item.id} className={`bg-zinc-900 border rounded-2xl p-5 flex flex-col gap-4 ${owned ? 'border-emerald-500/50' : isCurrentVehicle ? 'border-yellow-500/50' : 'border-zinc-800'}`}>
-                <div className="w-full aspect-video bg-zinc-800 rounded-xl flex items-center justify-center">
+              <div key={item.id} className={`bg-zinc-900 border rounded-2xl p-5 flex flex-col gap-4 ${owned ? (equipped ? 'border-emerald-500' : 'border-emerald-500/30') : isCurrentVehicle ? 'border-yellow-500/50' : 'border-zinc-800'}`}>
+                <div className="w-full aspect-video bg-zinc-800 rounded-xl flex items-center justify-center relative">
                   {item.type === 'vehicle' ? (
                     <Truck className="w-12 h-12 text-zinc-600" />
                   ) : item.type === 'paint' ? (
                     <div className="w-16 h-16 rounded-full border-4 border-zinc-700" style={{ backgroundColor: (item as any).color }} />
                   ) : (
                     <ShoppingBag className="w-12 h-12 text-zinc-700" />
+                  )}
+                  {equipped && (
+                    <div className="absolute top-2 right-2 bg-emerald-500 text-black text-[10px] font-bold px-2 py-0.5 rounded-full">
+                      ÉQUIPÉ
+                    </div>
                   )}
                 </div>
                 <div>
@@ -1289,7 +1322,25 @@ export default function RouteMaster() {
                     <span className="text-[10px] text-yellow-500 font-medium">Véhicule actuel</span>
                   )}
                 </div>
-                {owned ? (
+                {owned && !isVehicle ? (
+                  <button
+                    onClick={() => handleToggleItem(item)}
+                    disabled={isGeneratingVehicle}
+                    className={`w-full py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${
+                      equipped
+                        ? 'bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30'
+                        : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30'
+                    }`}
+                  >
+                    {isGeneratingVehicle ? (
+                      <><Loader2 className="w-4 h-4 animate-spin" /> MODIFICATION...</>
+                    ) : equipped ? (
+                      <><ToggleRight className="w-4 h-4" /> RETIRER</>
+                    ) : (
+                      <><ToggleLeft className="w-4 h-4" /> ÉQUIPER</>
+                    )}
+                  </button>
+                ) : owned && isVehicle ? (
                   <div className="w-full py-3 rounded-xl font-bold text-center bg-zinc-800 text-emerald-500 flex items-center justify-center gap-2">
                     <CheckCircle2 className="w-4 h-4" /> POSSÉDÉ
                   </div>
