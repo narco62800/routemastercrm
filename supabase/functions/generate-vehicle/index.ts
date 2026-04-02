@@ -7,13 +7,18 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
+const MODELS = [
+  "gemini-2.0-flash",
+  "gemini-2.0-flash-lite",
+];
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { vehicleType, paintColor, hasBullbar, hasBeacons, hasLightBar, hasXenon, hasSpoiler } = await req.json();
+    const { vehicleType, paintColor, hasBullbar, hasBeacons, hasLightBar, hasXenon, hasSpoiler, hasRunningBoard, hasVisor, wheelType } = await req.json();
 
     const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
     if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");
@@ -49,6 +54,9 @@ serve(async (req) => {
     if (hasLightBar) accessories.push("an LED light bar on top");
     if (hasXenon) accessories.push("bright xenon headlights");
     if (hasSpoiler) accessories.push("a rear spoiler");
+    if (hasRunningBoard) accessories.push("side running boards / step bars");
+    if (hasVisor) accessories.push("a sun visor above the windshield");
+    if (wheelType === 'chrome') accessories.push("shiny chrome alloy wheels");
 
     const accessoryText = accessories.length > 0 
       ? `The vehicle is equipped with: ${accessories.join(", ")}.` 
@@ -58,51 +66,77 @@ serve(async (req) => {
 
     console.log("Generating vehicle with prompt:", prompt);
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { responseModalities: ["TEXT", "IMAGE"] },
-      }),
-    });
-
-    if (!response.ok) {
-      const t = await response.text();
-      console.error("Gemini API error:", response.status, t);
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limited, please try again later." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      return new Response(JSON.stringify({ error: "AI generation failed" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const data = await response.json();
-    const parts = data.candidates?.[0]?.content?.parts;
     let imageBase64 = "";
     let mimeType = "image/png";
-    
-    if (parts) {
-      for (const part of parts) {
-        if (part.inlineData) {
-          imageBase64 = part.inlineData.data;
-          mimeType = part.inlineData.mimeType || "image/png";
-          break;
+    let lastError = "";
+
+    for (const model of MODELS) {
+      try {
+        console.log(`Trying model: ${model}`);
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { responseModalities: ["TEXT", "IMAGE"] },
+          }),
+        });
+
+        if (response.status === 404) {
+          const t = await response.text();
+          console.warn(`Model ${model} not found, trying next...`, t);
+          lastError = `Model ${model} not found`;
+          continue;
         }
+
+        if (response.status === 429) {
+          const t = await response.text();
+          console.warn(`Rate limited on ${model}`, t);
+          lastError = "Rate limited";
+          continue;
+        }
+
+        if (!response.ok) {
+          const t = await response.text();
+          console.error(`Error with model ${model}:`, response.status, t);
+          lastError = `${model}: ${response.status}`;
+          continue;
+        }
+
+        const data = await response.json();
+        const parts = data.candidates?.[0]?.content?.parts;
+        
+        if (parts) {
+          for (const part of parts) {
+            if (part.inlineData) {
+              imageBase64 = part.inlineData.data;
+              mimeType = part.inlineData.mimeType || "image/png";
+              break;
+            }
+          }
+        }
+
+        if (imageBase64) {
+          console.log(`Successfully generated image with model: ${model}`);
+          break;
+        } else {
+          console.warn(`No image in response from ${model}`);
+          lastError = `No image from ${model}`;
+        }
+      } catch (err) {
+        console.error(`Exception with model ${model}:`, err);
+        lastError = `${model}: ${err instanceof Error ? err.message : 'unknown'}`;
       }
     }
 
     if (!imageBase64) {
-      console.error("No image in Gemini response:", JSON.stringify(data).substring(0, 500));
-      return new Response(JSON.stringify({ error: "No image generated" }), {
+      console.error("All models failed. Last error:", lastError);
+      return new Response(JSON.stringify({ error: `Image generation failed: ${lastError}` }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Upload to Supabase Storage instead of returning base64
+    // Upload to Supabase Storage
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -121,7 +155,7 @@ serve(async (req) => {
 
     if (uploadError) {
       console.error("Storage upload error:", uploadError);
-      // Fallback to base64 if upload fails
+      // Fallback to base64
       const imageUrl = `data:${mimeType};base64,${imageBase64}`;
       return new Response(JSON.stringify({ imageUrl }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
