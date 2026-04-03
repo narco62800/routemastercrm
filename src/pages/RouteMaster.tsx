@@ -564,20 +564,34 @@ export default function RouteMaster() {
     setUser(prev => prev ? { ...prev, vehicleImageUrl: imageUrl || undefined } : null);
   };
 
+  const WHEEL_IDS = ['chrome_wheels', 'wheels_bbs', 'wheels_oz', 'wheels_vossen', 'wheels_rotiform', 'wheels_work'];
+  const WHEEL_TYPE_MAP: Record<string, string> = {
+    chrome_wheels: 'chrome', wheels_bbs: 'bbs', wheels_oz: 'oz_racing',
+    wheels_vossen: 'vossen', wheels_rotiform: 'rotiform', wheels_work: 'work_meister'
+  };
+
   const handleToggleItem = async (item: any) => {
     if (!user || !user.vehicleOwned) return;
     const newCustomize = { ...user.customize };
     if (item.type === 'paint' && item.color) {
       newCustomize.paintColor = newCustomize.paintColor === item.color ? '#ffffff' : item.color;
     } else if (item.type === 'accessory') {
-      if (item.id === 'beacons') newCustomize.hasBeacons = !newCustomize.hasBeacons;
-      if (item.id === 'bullbar') newCustomize.hasBullbar = !newCustomize.hasBullbar;
-      if (item.id === 'lightbar') newCustomize.hasLightBar = !newCustomize.hasLightBar;
-      if (item.id === 'xenon') newCustomize.hasXenon = !newCustomize.hasXenon;
-      if (item.id === 'spoiler') newCustomize.hasSpoiler = !newCustomize.hasSpoiler;
-      if (item.id === 'chrome_wheels') newCustomize.wheelType = newCustomize.wheelType === 'chrome' ? 'standard' : 'chrome';
-      if (item.id === 'running_board') newCustomize.hasRunningBoard = !newCustomize.hasRunningBoard;
-      if (item.id === 'visor') newCustomize.hasVisor = !newCustomize.hasVisor;
+      if (WHEEL_IDS.includes(item.id)) {
+        const wt = WHEEL_TYPE_MAP[item.id] || 'standard';
+        newCustomize.wheelType = newCustomize.wheelType === wt ? 'standard' : wt;
+      }
+      else if (item.id === 'beacons') newCustomize.hasBeacons = !newCustomize.hasBeacons;
+      else if (item.id === 'bullbar') newCustomize.hasBullbar = !newCustomize.hasBullbar;
+      else if (item.id === 'lightbar') newCustomize.hasLightBar = !newCustomize.hasLightBar;
+      else if (item.id === 'xenon') newCustomize.hasXenon = !newCustomize.hasXenon;
+      else if (item.id === 'spoiler') newCustomize.hasSpoiler = !newCustomize.hasSpoiler;
+      else if (item.id === 'running_board') newCustomize.hasRunningBoard = !newCustomize.hasRunningBoard;
+      else if (item.id === 'visor') newCustomize.hasVisor = !newCustomize.hasVisor;
+      else if (item.id === 'tuning_bumper') newCustomize.hasTuningBumper = !newCustomize.hasTuningBumper;
+      else if (item.id === 'neon_kit') newCustomize.hasNeonKit = !newCustomize.hasNeonKit;
+      else if (item.id === 'widebody_kit') newCustomize.hasWideBodyKit = !newCustomize.hasWideBodyKit;
+      else if (item.id === 'hood_scoop') newCustomize.hasHood = !newCustomize.hasHood;
+      else if (item.id === 'exhaust') newCustomize.hasExhaust = !newCustomize.hasExhaust;
     }
     const imageUrl = await generateVehicleImage(user.vehicleType, newCustomize);
     setUser(prev => prev ? { ...prev, customize: newCustomize, vehicleImageUrl: imageUrl || prev.vehicleImageUrl } : null);
@@ -586,14 +600,19 @@ export default function RouteMaster() {
   const isItemEquipped = (item: any): boolean => {
     if (!user) return false;
     if (item.type === 'paint' && item.color) return user.customize.paintColor === item.color;
+    if (WHEEL_IDS.includes(item.id)) return user.customize.wheelType === (WHEEL_TYPE_MAP[item.id] || 'standard');
     if (item.id === 'beacons') return user.customize.hasBeacons;
     if (item.id === 'bullbar') return user.customize.hasBullbar;
     if (item.id === 'lightbar') return user.customize.hasLightBar;
     if (item.id === 'xenon') return user.customize.hasXenon;
     if (item.id === 'spoiler') return user.customize.hasSpoiler;
-    if (item.id === 'chrome_wheels') return user.customize.wheelType === 'chrome';
     if (item.id === 'running_board') return user.customize.hasRunningBoard;
     if (item.id === 'visor') return user.customize.hasVisor;
+    if (item.id === 'tuning_bumper') return !!user.customize.hasTuningBumper;
+    if (item.id === 'neon_kit') return !!user.customize.hasNeonKit;
+    if (item.id === 'widebody_kit') return !!user.customize.hasWideBodyKit;
+    if (item.id === 'hood_scoop') return !!user.customize.hasHood;
+    if (item.id === 'exhaust') return !!user.customize.hasExhaust;
     return false;
   };
 
