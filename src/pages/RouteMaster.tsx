@@ -1328,9 +1328,14 @@ export default function RouteMaster() {
               {user.customize.hasLightBar && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Rampe phares</span>}
               {user.customize.hasXenon && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Xénon</span>}
               {user.customize.hasSpoiler && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Spoiler</span>}
-              {user.customize.wheelType === 'chrome' && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Jantes Chrome</span>}
+               {user.customize.wheelType && user.customize.wheelType !== 'standard' && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Jantes {user.customize.wheelType}</span>}
               {user.customize.hasRunningBoard && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Marchepieds</span>}
               {user.customize.hasVisor && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Visière</span>}
+              {user.customize.hasTuningBumper && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Pare-choc Tuning</span>}
+              {user.customize.hasNeonKit && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Néon</span>}
+              {user.customize.hasWideBodyKit && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Widebody</span>}
+              {user.customize.hasHood && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Capot Racing</span>}
+              {user.customize.hasExhaust && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Échappement Sport</span>}
             </div>
           </div>
         )}
