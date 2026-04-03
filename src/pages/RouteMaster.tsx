@@ -1179,9 +1179,14 @@ export default function RouteMaster() {
                 {targetUser.customize.hasLightBar && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Rampe phares</span>}
                 {targetUser.customize.hasXenon && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Xénon</span>}
                 {targetUser.customize.hasSpoiler && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Spoiler</span>}
-                {targetUser.customize.wheelType === 'chrome' && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Jantes Chrome</span>}
+                {targetUser.customize.wheelType && targetUser.customize.wheelType !== 'standard' && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Jantes {targetUser.customize.wheelType}</span>}
                 {targetUser.customize.hasRunningBoard && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Marchepieds</span>}
                 {targetUser.customize.hasVisor && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Visière</span>}
+                {targetUser.customize.hasTuningBumper && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Pare-choc Tuning</span>}
+                {targetUser.customize.hasNeonKit && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Néon</span>}
+                {targetUser.customize.hasWideBodyKit && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Widebody</span>}
+                {targetUser.customize.hasHood && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Capot Racing</span>}
+                {targetUser.customize.hasExhaust && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Échappement Sport</span>}
               </div>
             </div>
           </>
