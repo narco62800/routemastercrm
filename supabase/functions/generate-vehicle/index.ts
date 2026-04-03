@@ -7,11 +7,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-const MODELS = [
-  "gemini-2.0-flash",
-  "gemini-2.0-flash-lite",
-];
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -20,8 +15,8 @@ serve(async (req) => {
   try {
     const { vehicleType, paintColor, hasBullbar, hasBeacons, hasLightBar, hasXenon, hasSpoiler, hasRunningBoard, hasVisor, wheelType } = await req.json();
 
-    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
-    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     const vehicleNames: Record<string, string> = {
       car: "a modern European sedan car (like a Peugeot 308 or Renault Megane)",
@@ -62,79 +57,54 @@ serve(async (req) => {
       ? `The vehicle is equipped with: ${accessories.join(", ")}.` 
       : "";
 
-    const prompt = `Create a photorealistic studio photograph of ${vehicleName}, ${colorDesc} paint finish, shot from a 3/4 front angle. The vehicle is on a clean dark studio background with dramatic lighting. ${accessoryText} Ultra-detailed, professional automotive photography style, high resolution, sharp focus. No text, no watermarks, no logos.`;
+    const prompt = `Generate a photorealistic studio photograph of ${vehicleName}, ${colorDesc} paint finish, shot from a 3/4 front angle. The vehicle is on a clean dark studio background with dramatic lighting. ${accessoryText} Ultra-detailed, professional automotive photography style, high resolution, sharp focus. No text, no watermarks, no logos.`;
 
-    console.log("Generating vehicle with prompt:", prompt);
+    console.log("Generating vehicle with Lovable AI Gateway, prompt:", prompt.substring(0, 100) + "...");
 
-    let imageBase64 = "";
-    let mimeType = "image/png";
-    let lastError = "";
+    // Call Lovable AI Gateway with image generation model
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash-image",
+        messages: [
+          { role: "user", content: prompt }
+        ],
+        modalities: ["image", "text"],
+      }),
+    });
 
-    for (const model of MODELS) {
-      try {
-        console.log(`Trying model: ${model}`);
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { responseModalities: ["TEXT", "IMAGE"] },
-          }),
-        });
-
-        if (response.status === 404) {
-          const t = await response.text();
-          console.warn(`Model ${model} not found, trying next...`, t);
-          lastError = `Model ${model} not found`;
-          continue;
-        }
-
-        if (response.status === 429) {
-          const t = await response.text();
-          console.warn(`Rate limited on ${model}`, t);
-          lastError = "Rate limited";
-          continue;
-        }
-
-        if (!response.ok) {
-          const t = await response.text();
-          console.error(`Error with model ${model}:`, response.status, t);
-          lastError = `${model}: ${response.status}`;
-          continue;
-        }
-
-        const data = await response.json();
-        const parts = data.candidates?.[0]?.content?.parts;
-        
-        if (parts) {
-          for (const part of parts) {
-            if (part.inlineData) {
-              imageBase64 = part.inlineData.data;
-              mimeType = part.inlineData.mimeType || "image/png";
-              break;
-            }
-          }
-        }
-
-        if (imageBase64) {
-          console.log(`Successfully generated image with model: ${model}`);
-          break;
-        } else {
-          console.warn(`No image in response from ${model}`);
-          lastError = `No image from ${model}`;
-        }
-      } catch (err) {
-        console.error(`Exception with model ${model}:`, err);
-        lastError = `${model}: ${err instanceof Error ? err.message : 'unknown'}`;
-      }
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Lovable AI Gateway error:", response.status, errorText);
+      throw new Error(`AI Gateway error: ${response.status} - ${errorText}`);
     }
 
-    if (!imageBase64) {
-      console.error("All models failed. Last error:", lastError);
-      return new Response(JSON.stringify({ error: `Image generation failed: ${lastError}` }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    const data = await response.json();
+    console.log("AI Gateway response received, checking for images...");
+
+    const imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+
+    if (!imageUrl) {
+      console.error("No image in AI response:", JSON.stringify(data).substring(0, 500));
+      throw new Error("No image generated by AI model");
+    }
+
+    // Extract base64 data from data URL
+    const base64Match = imageUrl.match(/^data:([^;]+);base64,(.+)$/);
+    if (!base64Match) {
+      // If it's already a URL, return it directly
+      console.log("Image is a direct URL, returning as-is");
+      return new Response(JSON.stringify({ imageUrl }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    const mimeType = base64Match[1];
+    const imageBase64 = base64Match[2];
 
     // Upload to Supabase Storage
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -155,8 +125,7 @@ serve(async (req) => {
 
     if (uploadError) {
       console.error("Storage upload error:", uploadError);
-      // Fallback to base64
-      const imageUrl = `data:${mimeType};base64,${imageBase64}`;
+      // Fallback: return base64 data URL directly
       return new Response(JSON.stringify({ imageUrl }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -166,9 +135,10 @@ serve(async (req) => {
       .from('vehicle-images')
       .getPublicUrl(fileName);
 
-    const imageUrl = publicUrlData.publicUrl;
+    const publicUrl = publicUrlData.publicUrl;
+    console.log("Vehicle image uploaded successfully:", fileName);
 
-    return new Response(JSON.stringify({ imageUrl }), {
+    return new Response(JSON.stringify({ imageUrl: publicUrl }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
 
