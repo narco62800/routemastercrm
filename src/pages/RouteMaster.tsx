@@ -1391,9 +1391,34 @@ export default function RouteMaster() {
                     )}
                   </button>
                 ) : owned && isVehicle ? (
-                  <div className="w-full py-3 rounded-xl font-bold text-center bg-zinc-800 text-emerald-500 flex items-center justify-center gap-2">
-                    <CheckCircle2 className="w-4 h-4" /> POSSÉDÉ
-                  </div>
+                  isCurrentVehicle ? (
+                    <div className="w-full py-3 rounded-xl font-bold text-center bg-zinc-800 text-emerald-500 flex items-center justify-center gap-2">
+                      <CheckCircle2 className="w-4 h-4" /> VÉHICULE ACTIF
+                    </div>
+                  ) : (
+                    <button
+                      onClick={async () => {
+                        if (!user) return;
+                        const defaultCustomize: User['customize'] = {
+                          paintColor: '#ffffff', paintFinish: 'glossy', wheelType: 'standard',
+                          hasBullbar: false, hasSpoiler: false, hasRunningBoard: false, hasVisor: false,
+                          hasBeacons: false, hasLightBar: false, hasXenon: false,
+                          hasTuningBumper: false, hasNeonKit: false, hasWideBodyKit: false, hasHood: false, hasExhaust: false,
+                          cabinStripe: null, cabinSticker: null, trailerColor: '#ffffff', trailerLogo: null
+                        };
+                        setUser(prev => prev ? { ...prev, vehicleImageUrl: undefined, vehicleType: (item as any).vehicleType, vehicleModel: item.name } : null);
+                        const imageUrl = await generateVehicleImage((item as any).vehicleType, defaultCustomize);
+                        setUser(prev => prev ? {
+                          ...prev, vehicleType: (item as any).vehicleType, vehicleModel: item.name,
+                          customize: defaultCustomize, vehicleImageUrl: imageUrl || undefined,
+                        } : null);
+                      }}
+                      disabled={isGeneratingVehicle}
+                      className="w-full py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30"
+                    >
+                      {isGeneratingVehicle ? <><Loader2 className="w-4 h-4 animate-spin" /> CHANGEMENT...</> : <><RefreshCw className="w-4 h-4" /> UTILISER CE VÉHICULE</>}
+                    </button>
+                  )
                 ) : (
                   <button
                     onClick={() => handleBuyItem(item)}
