@@ -649,9 +649,14 @@ export default function RouteMaster() {
     if (item.id === 'lightbar') newCustomize.hasLightBar = true;
     if (item.id === 'xenon') newCustomize.hasXenon = true;
     if (item.id === 'spoiler') newCustomize.hasSpoiler = true;
-    if (item.id === 'chrome_wheels') newCustomize.wheelType = 'chrome';
+    if (WHEEL_IDS.includes(item.id)) newCustomize.wheelType = WHEEL_TYPE_MAP[item.id] || 'standard';
     if (item.id === 'running_board') newCustomize.hasRunningBoard = true;
     if (item.id === 'visor') newCustomize.hasVisor = true;
+    if (item.id === 'tuning_bumper') newCustomize.hasTuningBumper = true;
+    if (item.id === 'neon_kit') newCustomize.hasNeonKit = true;
+    if (item.id === 'widebody_kit') newCustomize.hasWideBodyKit = true;
+    if (item.id === 'hood_scoop') newCustomize.hasHood = true;
+    if (item.id === 'exhaust') newCustomize.hasExhaust = true;
 
     let imageUrl: string | null = null;
     if (user.vehicleOwned) imageUrl = await generateVehicleImage(user.vehicleType, newCustomize);
