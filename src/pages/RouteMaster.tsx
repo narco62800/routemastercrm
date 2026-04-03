@@ -55,7 +55,7 @@ const SHOP_ITEMS = [
   { id: 'veh_car', name: 'Voiture de Tourisme', price: 1000, type: 'vehicle', vehicleType: 'car' },
   { id: 'veh_truck', name: 'Porteur (Camion)', price: 5000, type: 'vehicle', vehicleType: 'truck' },
   { id: 'veh_articulated', name: 'Ensemble Articulé', price: 15000, type: 'vehicle', vehicleType: 'articulated' },
-  // Paints
+  // Paints — Standard
   { id: 'paint_red', name: 'Peinture Rouge', price: 500, type: 'paint', color: '#ff0000' },
   { id: 'paint_blue', name: 'Peinture Bleue', price: 500, type: 'paint', color: '#0000ff' },
   { id: 'paint_gold', name: 'Peinture Or', price: 2000, type: 'paint', color: '#ffd700' },
@@ -66,15 +66,35 @@ const SHOP_ITEMS = [
   { id: 'paint_purple', name: 'Peinture Violet Cosmique', price: 1500, type: 'paint', color: '#9900ff' },
   { id: 'paint_matte_black', name: 'Peinture Noir Mat', price: 1200, type: 'paint', color: '#1a1a1a' },
   { id: 'paint_candy_red', name: 'Peinture Rouge Candy', price: 2500, type: 'paint', color: '#cc0033' },
-  // Accessories
+  // Paints — Fast & Furious style
+  { id: 'paint_ff_blue_flames', name: '🔥 Bleu Flammes (F&F)', price: 4000, type: 'paint', color: '#0044cc' },
+  { id: 'paint_ff_green_neon', name: '🔥 Vert Néon (F&F)', price: 4000, type: 'paint', color: '#39ff14' },
+  { id: 'paint_ff_orange_pearl', name: '🔥 Orange Pearl (Supra)', price: 5000, type: 'paint', color: '#ff6600' },
+  { id: 'paint_ff_chrome_mirror', name: '🔥 Chrome Miroir', price: 8000, type: 'paint', color: '#e8e8e8' },
+  { id: 'paint_ff_midnight_purple', name: '🔥 Midnight Purple (Skyline)', price: 6000, type: 'paint', color: '#4b0082' },
+  { id: 'paint_ff_candy_lime', name: '🔥 Candy Lime Green', price: 5500, type: 'paint', color: '#32cd32' },
+  { id: 'paint_ff_galaxy_blue', name: '🔥 Bleu Galaxy Métal', price: 7000, type: 'paint', color: '#1a237e' },
+  // Wheels — Premium brands
+  { id: 'chrome_wheels', name: 'Jantes Chrome Standard', price: 2000, type: 'accessory' },
+  { id: 'wheels_bbs', name: 'Jantes BBS RS', price: 6000, type: 'accessory' },
+  { id: 'wheels_oz', name: 'Jantes OZ Racing', price: 5000, type: 'accessory' },
+  { id: 'wheels_vossen', name: 'Jantes Vossen CVT', price: 7000, type: 'accessory' },
+  { id: 'wheels_rotiform', name: 'Jantes Rotiform', price: 5500, type: 'accessory' },
+  { id: 'wheels_work', name: 'Jantes Work Meister', price: 8000, type: 'accessory' },
+  // Accessories — Classic
   { id: 'beacons', name: 'Gyrophares', price: 1500, type: 'accessory' },
   { id: 'bullbar', name: 'Pare-buffle', price: 1200, type: 'accessory' },
   { id: 'lightbar', name: 'Rampe de phares', price: 1800, type: 'accessory' },
   { id: 'xenon', name: 'Phares Xénon', price: 800, type: 'accessory' },
   { id: 'spoiler', name: 'Aileron / Spoiler', price: 1000, type: 'accessory' },
-  { id: 'chrome_wheels', name: 'Jantes Chrome', price: 2000, type: 'accessory' },
   { id: 'running_board', name: 'Marchepieds Latéraux', price: 900, type: 'accessory' },
   { id: 'visor', name: 'Visière Pare-soleil', price: 600, type: 'accessory' },
+  // Accessories — Tuning
+  { id: 'tuning_bumper', name: '🏎️ Pare-choc Tuning Sport', price: 3500, type: 'accessory' },
+  { id: 'neon_kit', name: '💡 Kit Néon Underglow', price: 4500, type: 'accessory' },
+  { id: 'widebody_kit', name: '🔧 Kit Widebody', price: 9000, type: 'accessory' },
+  { id: 'hood_scoop', name: '💨 Capot Racing / Prise d\'air', price: 3000, type: 'accessory' },
+  { id: 'exhaust', name: '🔊 Échappement Sport Double', price: 2500, type: 'accessory' },
 ];
 
 // Helper: get owned item key for a vehicle type
