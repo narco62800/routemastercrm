@@ -606,6 +606,7 @@ export default function RouteMaster() {
         paintColor: '#ffffff', paintFinish: 'glossy', wheelType: 'standard',
         hasBullbar: false, hasSpoiler: false, hasRunningBoard: false, hasVisor: false,
         hasBeacons: false, hasLightBar: false, hasXenon: false,
+        hasTuningBumper: false, hasNeonKit: false, hasWideBodyKit: false, hasHood: false, hasExhaust: false,
         cabinStripe: null, cabinSticker: null, trailerColor: '#ffffff', trailerLogo: null
       };
       setUser(prev => prev ? { ...prev, vehicleImageUrl: undefined, vehicleType: item.vehicleType, vehicleModel: item.name } : null);
