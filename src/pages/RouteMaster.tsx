@@ -544,6 +544,11 @@ export default function RouteMaster() {
           hasRunningBoard: customize.hasRunningBoard,
           hasVisor: customize.hasVisor,
           wheelType: customize.wheelType,
+          hasTuningBumper: customize.hasTuningBumper,
+          hasNeonKit: customize.hasNeonKit,
+          hasWideBodyKit: customize.hasWideBodyKit,
+          hasHood: customize.hasHood,
+          hasExhaust: customize.hasExhaust,
         }
       });
       if (error) throw error;
