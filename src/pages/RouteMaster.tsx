@@ -55,7 +55,7 @@ const SHOP_ITEMS = [
   { id: 'veh_car', name: 'Voiture de Tourisme', price: 1000, type: 'vehicle', vehicleType: 'car' },
   { id: 'veh_truck', name: 'Porteur (Camion)', price: 5000, type: 'vehicle', vehicleType: 'truck' },
   { id: 'veh_articulated', name: 'Ensemble Articulé', price: 15000, type: 'vehicle', vehicleType: 'articulated' },
-  // Paints
+  // Paints — Standard
   { id: 'paint_red', name: 'Peinture Rouge', price: 500, type: 'paint', color: '#ff0000' },
   { id: 'paint_blue', name: 'Peinture Bleue', price: 500, type: 'paint', color: '#0000ff' },
   { id: 'paint_gold', name: 'Peinture Or', price: 2000, type: 'paint', color: '#ffd700' },
@@ -66,15 +66,35 @@ const SHOP_ITEMS = [
   { id: 'paint_purple', name: 'Peinture Violet Cosmique', price: 1500, type: 'paint', color: '#9900ff' },
   { id: 'paint_matte_black', name: 'Peinture Noir Mat', price: 1200, type: 'paint', color: '#1a1a1a' },
   { id: 'paint_candy_red', name: 'Peinture Rouge Candy', price: 2500, type: 'paint', color: '#cc0033' },
-  // Accessories
+  // Paints — Fast & Furious style
+  { id: 'paint_ff_blue_flames', name: '🔥 Bleu Flammes (F&F)', price: 4000, type: 'paint', color: '#0044cc' },
+  { id: 'paint_ff_green_neon', name: '🔥 Vert Néon (F&F)', price: 4000, type: 'paint', color: '#39ff14' },
+  { id: 'paint_ff_orange_pearl', name: '🔥 Orange Pearl (Supra)', price: 5000, type: 'paint', color: '#ff6600' },
+  { id: 'paint_ff_chrome_mirror', name: '🔥 Chrome Miroir', price: 8000, type: 'paint', color: '#e8e8e8' },
+  { id: 'paint_ff_midnight_purple', name: '🔥 Midnight Purple (Skyline)', price: 6000, type: 'paint', color: '#4b0082' },
+  { id: 'paint_ff_candy_lime', name: '🔥 Candy Lime Green', price: 5500, type: 'paint', color: '#32cd32' },
+  { id: 'paint_ff_galaxy_blue', name: '🔥 Bleu Galaxy Métal', price: 7000, type: 'paint', color: '#1a237e' },
+  // Wheels — Premium brands
+  { id: 'chrome_wheels', name: 'Jantes Chrome Standard', price: 2000, type: 'accessory' },
+  { id: 'wheels_bbs', name: 'Jantes BBS RS', price: 6000, type: 'accessory' },
+  { id: 'wheels_oz', name: 'Jantes OZ Racing', price: 5000, type: 'accessory' },
+  { id: 'wheels_vossen', name: 'Jantes Vossen CVT', price: 7000, type: 'accessory' },
+  { id: 'wheels_rotiform', name: 'Jantes Rotiform', price: 5500, type: 'accessory' },
+  { id: 'wheels_work', name: 'Jantes Work Meister', price: 8000, type: 'accessory' },
+  // Accessories — Classic
   { id: 'beacons', name: 'Gyrophares', price: 1500, type: 'accessory' },
   { id: 'bullbar', name: 'Pare-buffle', price: 1200, type: 'accessory' },
   { id: 'lightbar', name: 'Rampe de phares', price: 1800, type: 'accessory' },
   { id: 'xenon', name: 'Phares Xénon', price: 800, type: 'accessory' },
   { id: 'spoiler', name: 'Aileron / Spoiler', price: 1000, type: 'accessory' },
-  { id: 'chrome_wheels', name: 'Jantes Chrome', price: 2000, type: 'accessory' },
   { id: 'running_board', name: 'Marchepieds Latéraux', price: 900, type: 'accessory' },
   { id: 'visor', name: 'Visière Pare-soleil', price: 600, type: 'accessory' },
+  // Accessories — Tuning
+  { id: 'tuning_bumper', name: '🏎️ Pare-choc Tuning Sport', price: 3500, type: 'accessory' },
+  { id: 'neon_kit', name: '💡 Kit Néon Underglow', price: 4500, type: 'accessory' },
+  { id: 'widebody_kit', name: '🔧 Kit Widebody', price: 9000, type: 'accessory' },
+  { id: 'hood_scoop', name: '💨 Capot Racing / Prise d\'air', price: 3000, type: 'accessory' },
+  { id: 'exhaust', name: '🔊 Échappement Sport Double', price: 2500, type: 'accessory' },
 ];
 
 // Helper: get owned item key for a vehicle type
@@ -352,6 +372,11 @@ export default function RouteMaster() {
         hasBeacons: false,
         hasLightBar: false,
         hasXenon: false,
+        hasTuningBumper: false,
+        hasNeonKit: false,
+        hasWideBodyKit: false,
+        hasHood: false,
+        hasExhaust: false,
         cabinStripe: null,
         cabinSticker: null,
         trailerColor: '#ffffff',
@@ -519,6 +544,11 @@ export default function RouteMaster() {
           hasRunningBoard: customize.hasRunningBoard,
           hasVisor: customize.hasVisor,
           wheelType: customize.wheelType,
+          hasTuningBumper: customize.hasTuningBumper,
+          hasNeonKit: customize.hasNeonKit,
+          hasWideBodyKit: customize.hasWideBodyKit,
+          hasHood: customize.hasHood,
+          hasExhaust: customize.hasExhaust,
         }
       });
       if (error) throw error;
@@ -539,20 +569,34 @@ export default function RouteMaster() {
     setUser(prev => prev ? { ...prev, vehicleImageUrl: imageUrl || undefined } : null);
   };
 
+  const WHEEL_IDS = ['chrome_wheels', 'wheels_bbs', 'wheels_oz', 'wheels_vossen', 'wheels_rotiform', 'wheels_work'];
+  const WHEEL_TYPE_MAP: Record<string, string> = {
+    chrome_wheels: 'chrome', wheels_bbs: 'bbs', wheels_oz: 'oz_racing',
+    wheels_vossen: 'vossen', wheels_rotiform: 'rotiform', wheels_work: 'work_meister'
+  };
+
   const handleToggleItem = async (item: any) => {
     if (!user || !user.vehicleOwned) return;
     const newCustomize = { ...user.customize };
     if (item.type === 'paint' && item.color) {
       newCustomize.paintColor = newCustomize.paintColor === item.color ? '#ffffff' : item.color;
     } else if (item.type === 'accessory') {
-      if (item.id === 'beacons') newCustomize.hasBeacons = !newCustomize.hasBeacons;
-      if (item.id === 'bullbar') newCustomize.hasBullbar = !newCustomize.hasBullbar;
-      if (item.id === 'lightbar') newCustomize.hasLightBar = !newCustomize.hasLightBar;
-      if (item.id === 'xenon') newCustomize.hasXenon = !newCustomize.hasXenon;
-      if (item.id === 'spoiler') newCustomize.hasSpoiler = !newCustomize.hasSpoiler;
-      if (item.id === 'chrome_wheels') newCustomize.wheelType = newCustomize.wheelType === 'chrome' ? 'standard' : 'chrome';
-      if (item.id === 'running_board') newCustomize.hasRunningBoard = !newCustomize.hasRunningBoard;
-      if (item.id === 'visor') newCustomize.hasVisor = !newCustomize.hasVisor;
+      if (WHEEL_IDS.includes(item.id)) {
+        const wt = WHEEL_TYPE_MAP[item.id] || 'standard';
+        newCustomize.wheelType = newCustomize.wheelType === wt ? 'standard' : wt;
+      }
+      else if (item.id === 'beacons') newCustomize.hasBeacons = !newCustomize.hasBeacons;
+      else if (item.id === 'bullbar') newCustomize.hasBullbar = !newCustomize.hasBullbar;
+      else if (item.id === 'lightbar') newCustomize.hasLightBar = !newCustomize.hasLightBar;
+      else if (item.id === 'xenon') newCustomize.hasXenon = !newCustomize.hasXenon;
+      else if (item.id === 'spoiler') newCustomize.hasSpoiler = !newCustomize.hasSpoiler;
+      else if (item.id === 'running_board') newCustomize.hasRunningBoard = !newCustomize.hasRunningBoard;
+      else if (item.id === 'visor') newCustomize.hasVisor = !newCustomize.hasVisor;
+      else if (item.id === 'tuning_bumper') newCustomize.hasTuningBumper = !newCustomize.hasTuningBumper;
+      else if (item.id === 'neon_kit') newCustomize.hasNeonKit = !newCustomize.hasNeonKit;
+      else if (item.id === 'widebody_kit') newCustomize.hasWideBodyKit = !newCustomize.hasWideBodyKit;
+      else if (item.id === 'hood_scoop') newCustomize.hasHood = !newCustomize.hasHood;
+      else if (item.id === 'exhaust') newCustomize.hasExhaust = !newCustomize.hasExhaust;
     }
     const imageUrl = await generateVehicleImage(user.vehicleType, newCustomize);
     setUser(prev => prev ? { ...prev, customize: newCustomize, vehicleImageUrl: imageUrl || prev.vehicleImageUrl } : null);
@@ -561,14 +605,19 @@ export default function RouteMaster() {
   const isItemEquipped = (item: any): boolean => {
     if (!user) return false;
     if (item.type === 'paint' && item.color) return user.customize.paintColor === item.color;
+    if (WHEEL_IDS.includes(item.id)) return user.customize.wheelType === (WHEEL_TYPE_MAP[item.id] || 'standard');
     if (item.id === 'beacons') return user.customize.hasBeacons;
     if (item.id === 'bullbar') return user.customize.hasBullbar;
     if (item.id === 'lightbar') return user.customize.hasLightBar;
     if (item.id === 'xenon') return user.customize.hasXenon;
     if (item.id === 'spoiler') return user.customize.hasSpoiler;
-    if (item.id === 'chrome_wheels') return user.customize.wheelType === 'chrome';
     if (item.id === 'running_board') return user.customize.hasRunningBoard;
     if (item.id === 'visor') return user.customize.hasVisor;
+    if (item.id === 'tuning_bumper') return !!user.customize.hasTuningBumper;
+    if (item.id === 'neon_kit') return !!user.customize.hasNeonKit;
+    if (item.id === 'widebody_kit') return !!user.customize.hasWideBodyKit;
+    if (item.id === 'hood_scoop') return !!user.customize.hasHood;
+    if (item.id === 'exhaust') return !!user.customize.hasExhaust;
     return false;
   };
 
@@ -581,6 +630,7 @@ export default function RouteMaster() {
         paintColor: '#ffffff', paintFinish: 'glossy', wheelType: 'standard',
         hasBullbar: false, hasSpoiler: false, hasRunningBoard: false, hasVisor: false,
         hasBeacons: false, hasLightBar: false, hasXenon: false,
+        hasTuningBumper: false, hasNeonKit: false, hasWideBodyKit: false, hasHood: false, hasExhaust: false,
         cabinStripe: null, cabinSticker: null, trailerColor: '#ffffff', trailerLogo: null
       };
       setUser(prev => prev ? { ...prev, vehicleImageUrl: undefined, vehicleType: item.vehicleType, vehicleModel: item.name } : null);
@@ -604,9 +654,14 @@ export default function RouteMaster() {
     if (item.id === 'lightbar') newCustomize.hasLightBar = true;
     if (item.id === 'xenon') newCustomize.hasXenon = true;
     if (item.id === 'spoiler') newCustomize.hasSpoiler = true;
-    if (item.id === 'chrome_wheels') newCustomize.wheelType = 'chrome';
+    if (WHEEL_IDS.includes(item.id)) newCustomize.wheelType = WHEEL_TYPE_MAP[item.id] || 'standard';
     if (item.id === 'running_board') newCustomize.hasRunningBoard = true;
     if (item.id === 'visor') newCustomize.hasVisor = true;
+    if (item.id === 'tuning_bumper') newCustomize.hasTuningBumper = true;
+    if (item.id === 'neon_kit') newCustomize.hasNeonKit = true;
+    if (item.id === 'widebody_kit') newCustomize.hasWideBodyKit = true;
+    if (item.id === 'hood_scoop') newCustomize.hasHood = true;
+    if (item.id === 'exhaust') newCustomize.hasExhaust = true;
 
     let imageUrl: string | null = null;
     if (user.vehicleOwned) imageUrl = await generateVehicleImage(user.vehicleType, newCustomize);
@@ -1124,9 +1179,14 @@ export default function RouteMaster() {
                 {targetUser.customize.hasLightBar && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Rampe phares</span>}
                 {targetUser.customize.hasXenon && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Xénon</span>}
                 {targetUser.customize.hasSpoiler && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Spoiler</span>}
-                {targetUser.customize.wheelType === 'chrome' && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Jantes Chrome</span>}
+                {targetUser.customize.wheelType && targetUser.customize.wheelType !== 'standard' && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Jantes {targetUser.customize.wheelType}</span>}
                 {targetUser.customize.hasRunningBoard && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Marchepieds</span>}
                 {targetUser.customize.hasVisor && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Visière</span>}
+                {targetUser.customize.hasTuningBumper && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Pare-choc Tuning</span>}
+                {targetUser.customize.hasNeonKit && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Néon</span>}
+                {targetUser.customize.hasWideBodyKit && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Widebody</span>}
+                {targetUser.customize.hasHood && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Capot Racing</span>}
+                {targetUser.customize.hasExhaust && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Échappement Sport</span>}
               </div>
             </div>
           </>
@@ -1268,9 +1328,14 @@ export default function RouteMaster() {
               {user.customize.hasLightBar && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Rampe phares</span>}
               {user.customize.hasXenon && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Xénon</span>}
               {user.customize.hasSpoiler && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Spoiler</span>}
-              {user.customize.wheelType === 'chrome' && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Jantes Chrome</span>}
+               {user.customize.wheelType && user.customize.wheelType !== 'standard' && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Jantes {user.customize.wheelType}</span>}
               {user.customize.hasRunningBoard && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Marchepieds</span>}
               {user.customize.hasVisor && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Visière</span>}
+              {user.customize.hasTuningBumper && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Pare-choc Tuning</span>}
+              {user.customize.hasNeonKit && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Néon</span>}
+              {user.customize.hasWideBodyKit && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Widebody</span>}
+              {user.customize.hasHood && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Capot Racing</span>}
+              {user.customize.hasExhaust && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Échappement Sport</span>}
             </div>
           </div>
         )}
@@ -1341,9 +1406,34 @@ export default function RouteMaster() {
                     )}
                   </button>
                 ) : owned && isVehicle ? (
-                  <div className="w-full py-3 rounded-xl font-bold text-center bg-zinc-800 text-emerald-500 flex items-center justify-center gap-2">
-                    <CheckCircle2 className="w-4 h-4" /> POSSÉDÉ
-                  </div>
+                  isCurrentVehicle ? (
+                    <div className="w-full py-3 rounded-xl font-bold text-center bg-zinc-800 text-emerald-500 flex items-center justify-center gap-2">
+                      <CheckCircle2 className="w-4 h-4" /> VÉHICULE ACTIF
+                    </div>
+                  ) : (
+                    <button
+                      onClick={async () => {
+                        if (!user) return;
+                        const defaultCustomize: User['customize'] = {
+                          paintColor: '#ffffff', paintFinish: 'glossy', wheelType: 'standard',
+                          hasBullbar: false, hasSpoiler: false, hasRunningBoard: false, hasVisor: false,
+                          hasBeacons: false, hasLightBar: false, hasXenon: false,
+                          hasTuningBumper: false, hasNeonKit: false, hasWideBodyKit: false, hasHood: false, hasExhaust: false,
+                          cabinStripe: null, cabinSticker: null, trailerColor: '#ffffff', trailerLogo: null
+                        };
+                        setUser(prev => prev ? { ...prev, vehicleImageUrl: undefined, vehicleType: (item as any).vehicleType, vehicleModel: item.name } : null);
+                        const imageUrl = await generateVehicleImage((item as any).vehicleType, defaultCustomize);
+                        setUser(prev => prev ? {
+                          ...prev, vehicleType: (item as any).vehicleType, vehicleModel: item.name,
+                          customize: defaultCustomize, vehicleImageUrl: imageUrl || undefined,
+                        } : null);
+                      }}
+                      disabled={isGeneratingVehicle}
+                      className="w-full py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30"
+                    >
+                      {isGeneratingVehicle ? <><Loader2 className="w-4 h-4 animate-spin" /> CHANGEMENT...</> : <><RefreshCw className="w-4 h-4" /> UTILISER CE VÉHICULE</>}
+                    </button>
+                  )
                 ) : (
                   <button
                     onClick={() => handleBuyItem(item)}

@@ -47,6 +47,11 @@ export interface VehicleCustomize {
   hasBeacons: boolean;
   hasLightBar: boolean;
   hasXenon: boolean;
+  hasTuningBumper: boolean;
+  hasNeonKit: boolean;
+  hasWideBodyKit: boolean;
+  hasHood: boolean;
+  hasExhaust: boolean;
   cabinStripe: string | null;
   cabinSticker: string | null;
   trailerColor: string;

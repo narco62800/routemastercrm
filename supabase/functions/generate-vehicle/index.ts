@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { vehicleType, paintColor, hasBullbar, hasBeacons, hasLightBar, hasXenon, hasSpoiler, hasRunningBoard, hasVisor, wheelType } = await req.json();
+    const { vehicleType, paintColor, hasBullbar, hasBeacons, hasLightBar, hasXenon, hasSpoiler, hasRunningBoard, hasVisor, wheelType, hasTuningBumper, hasNeonKit, hasWideBodyKit, hasHood, hasExhaust } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
@@ -39,9 +39,25 @@ serve(async (req) => {
       '#9900ff': 'cosmic purple',
       '#1a1a1a': 'matte black',
       '#cc0033': 'candy red',
+      '#0044cc': 'deep blue with painted flame decals on the sides',
+      '#39ff14': 'neon green glow effect paint',
+      '#ff6600': 'pearl orange like the Toyota Supra from Fast and Furious',
+      '#e8e8e8': 'full chrome mirror wrap finish',
+      '#4b0082': 'midnight purple like the Nissan Skyline R34 from Fast and Furious',
+      '#32cd32': 'candy lime green with metallic flake',
+      '#1a237e': 'galaxy blue with metallic pearl finish',
     };
     
     const colorDesc = colorDescriptions[paintColor?.toLowerCase()] || `painted in the color ${paintColor}`;
+
+    const wheelDescriptions: Record<string, string> = {
+      chrome: 'shiny chrome alloy wheels',
+      bbs: 'iconic BBS RS mesh wheels with gold centers',
+      oz_racing: 'OZ Racing Ultraleggera lightweight wheels',
+      vossen: 'Vossen CVT forged concave wheels',
+      rotiform: 'Rotiform BLQ monoblock wheels',
+      work_meister: 'Work Meister S1R deep dish wheels',
+    };
 
     const accessories: string[] = [];
     if (hasBullbar) accessories.push("a front bull bar / brush guard");
@@ -51,7 +67,12 @@ serve(async (req) => {
     if (hasSpoiler) accessories.push("a rear spoiler");
     if (hasRunningBoard) accessories.push("side running boards / step bars");
     if (hasVisor) accessories.push("a sun visor above the windshield");
-    if (wheelType === 'chrome') accessories.push("shiny chrome alloy wheels");
+    if (wheelType && wheelDescriptions[wheelType]) accessories.push(wheelDescriptions[wheelType]);
+    if (hasTuningBumper) accessories.push("an aggressive aftermarket tuning front bumper with splitter");
+    if (hasNeonKit) accessories.push("underglow neon LED lights glowing under the vehicle");
+    if (hasWideBodyKit) accessories.push("a widebody kit with flared fenders");
+    if (hasHood) accessories.push("a racing hood with a large air intake scoop");
+    if (hasExhaust) accessories.push("a dual sport exhaust with large chrome tips");
 
     const accessoryText = accessories.length > 0 
       ? `The vehicle is equipped with: ${accessories.join(", ")}.` 
