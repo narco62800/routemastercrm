@@ -44,6 +44,12 @@ import { ALL_QUESTIONS, INITIAL_CHAPTERS, INITIAL_SUBJECT_NAMES } from '../data/
 import { FUEL_PER_CORRECT_ANSWER, POINTS_PER_CORRECT_ANSWER, STREAK_BONUS_FUEL, STREAK_BONUS_POINTS, INITIAL_FUEL, MAX_FUEL, MAX_POINTS } from '../constants';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfiles } from '@/hooks/useProfiles';
+import {
+  normalizeStoredChapters,
+  normalizeStoredQuestions,
+  normalizeStoredSelectedSubject,
+  normalizeStoredSubjectNames,
+} from '../lib/contentNormalization';
 
 const LEVELS = ['2ndes CRM', '1ères CRM', 'Terminales CRM'];
 
@@ -117,6 +123,16 @@ function shuffleArray<T>(arr: T[]): T[] {
   return a;
 }
 
+function parseStoredJson<T>(value: string | null): T | null {
+  if (!value) return null;
+
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return null;
+  }
+}
+
 export default function RouteMaster() {
   const { fetchAllUsers, fetchUserByPseudo, upsertUser, deleteUser: deleteProfile } = useProfiles();
   const [view, setView] = useState<'identification' | 'home' | 'levels' | 'subjects' | 'chapters' | 'quiz' | 'prof' | 'ranking' | 'shop'>(() => {
@@ -126,33 +142,28 @@ export default function RouteMaster() {
     return sessionStorage.getItem('routemaster_selected_level');
   });
   const [selectedSubject, setSelectedSubject] = useState<string | null>(() => {
-    return sessionStorage.getItem('routemaster_selected_subject');
+    return normalizeStoredSelectedSubject(
+      sessionStorage.getItem('routemaster_selected_level'),
+      sessionStorage.getItem('routemaster_selected_subject'),
+      sessionStorage.getItem('routemaster_selected_chapter')
+    );
   });
   const [selectedChapter, setSelectedChapter] = useState<string | null>(() => {
     return sessionStorage.getItem('routemaster_selected_chapter');
   });
   const [subjectNames, setSubjectNames] = useState<Record<string, string>>(() => {
-    const saved = localStorage.getItem('routemaster_subject_names');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      // Merge with initial names to ensure all subjects exist with correct defaults
-      const merged = { ...INITIAL_SUBJECT_NAMES };
-      for (const key of Object.keys(INITIAL_SUBJECT_NAMES)) {
-        if (parsed[key] && parsed[key] !== key) {
-          merged[key] = parsed[key]; // Keep user customizations
-        }
-      }
-      return merged;
-    }
-    return INITIAL_SUBJECT_NAMES;
+    return normalizeStoredSubjectNames(
+      parseStoredJson<Record<string, string>>(localStorage.getItem('routemaster_subject_names')),
+      INITIAL_SUBJECT_NAMES
+    );
   });
   const [chapters, setChapters] = useState<Chapter[]>(() => {
-    const saved = localStorage.getItem('routemaster_chapters_v3');
-    return saved ? JSON.parse(saved) : INITIAL_CHAPTERS;
+    const saved = parseStoredJson<Chapter[]>(localStorage.getItem('routemaster_chapters_v3'));
+    return saved ? normalizeStoredChapters(saved) : INITIAL_CHAPTERS;
   });
   const [questions, setQuestions] = useState<Question[]>(() => {
-    const saved = localStorage.getItem('routemaster_questions_v3');
-    return saved ? JSON.parse(saved) : ALL_QUESTIONS;
+    const saved = parseStoredJson<Question[]>(localStorage.getItem('routemaster_questions_v3'));
+    return saved ? normalizeStoredQuestions(saved) : ALL_QUESTIONS;
   });
 
   const [users, setUsers] = useState<User[]>([]);
@@ -246,12 +257,24 @@ export default function RouteMaster() {
     return (sessionStorage.getItem('routemaster_prof_tab') as any) || 'subjects';
   });
   const [newChapter, setNewChapter] = useState(() => {
-    const saved = sessionStorage.getItem('routemaster_new_chapter');
-    return saved ? JSON.parse(saved) : { level: '2ndes CRM', subject: 'ETG', title: '' };
+    const saved = parseStoredJson<{ level: string; subject: string; title: string }>(sessionStorage.getItem('routemaster_new_chapter'));
+    if (!saved) return { level: '2ndes CRM', subject: 'ETG', title: '' };
+
+    return {
+      ...saved,
+      subject: normalizeStoredSelectedSubject(saved.level, saved.subject, saved.title) ?? saved.subject,
+    };
   });
   const [newQuestion, setNewQuestion] = useState<Partial<Question>>(() => {
-    const saved = sessionStorage.getItem('routemaster_new_question');
-    return saved ? JSON.parse(saved) : {
+    const saved = parseStoredJson<Partial<Question>>(sessionStorage.getItem('routemaster_new_question'));
+    if (saved) {
+      return {
+        ...saved,
+        subject: normalizeStoredSelectedSubject(saved.level ?? null, saved.subject ?? null, saved.chapter ?? null) ?? saved.subject,
+      };
+    }
+
+    return {
       type: 'qcm',
       level: '2ndes CRM',
       subject: 'ETG',
@@ -496,7 +519,10 @@ export default function RouteMaster() {
 
   const handleAddChapter = () => {
     if (!newChapter.title.trim()) return;
-    setChapters(prev => [...prev, { ...newChapter }]);
+    setChapters(prev => [...prev, {
+      ...newChapter,
+      subject: normalizeStoredSelectedSubject(newChapter.level, newChapter.subject, newChapter.title) ?? newChapter.subject,
+    }]);
     setNewChapter({ ...newChapter, title: '' });
   };
 
@@ -508,6 +534,7 @@ export default function RouteMaster() {
     if (!newQuestion.text?.trim()) return;
     const q: Question = {
       ...newQuestion as Question,
+      subject: normalizeStoredSelectedSubject(newQuestion.level ?? null, newQuestion.subject ?? null, newQuestion.chapter ?? null) ?? (newQuestion.subject as string),
       id: Math.random().toString(36).substr(2, 9)
     };
     setQuestions(prev => [...prev, q]);
