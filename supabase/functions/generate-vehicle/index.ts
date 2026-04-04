@@ -18,17 +18,16 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    // Highly specific vehicle descriptions to avoid confusion between types
-    const vehiclePrompts: Record<string, string> = {
-      car: `a modern European 5-door hatchback passenger car, similar to a Peugeot 308 or Volkswagen Golf. It is a SMALL personal automobile with 4 wheels, a low roof, a short hood, a hatchback trunk, and standard car proportions. This is NOT a truck, NOT a van, NOT a commercial vehicle. It seats 5 passengers.`,
-      truck: `a European rigid box truck (porteur / straight truck) with a FIXED cargo box body permanently attached to the chassis. Similar to a Renault D-Series, DAF LF, or MAN TGL. It has a cab in front and a large rectangular cargo box behind it — all on ONE single rigid frame with 2 axles (6 wheels total). This is NOT an articulated truck, it does NOT have a detachable trailer, it does NOT have a fifth wheel coupling. The cargo box and the cab are part of the SAME vehicle.`,
-      articulated: `a European articulated semi-truck consisting of TWO separate parts connected together: (1) a tractor unit / cab (like a Renault T-Series, Scania R-Series, or Volvo FH) with a fifth wheel coupling, and (2) a LONG semi-trailer attached behind it. The semi-trailer is a large enclosed box trailer with its own set of wheels at the rear. The ENTIRE combination must be shown: the tractor cab pulling the long semi-trailer. The total length is approximately 16 meters. This is NOT just a cab — the trailer MUST be visible and attached.`
+    const vehicleNames: Record<string, string> = {
+      car: "a modern European sedan car (like a Peugeot 308 or Renault Megane)",
+      truck: "a heavy-duty European box truck (like a Renault D-Series or DAF LF)",
+      articulated: "a European articulated semi-truck with trailer (like a Renault T-Series or Scania R-Series)"
     };
 
-    const vehicleDesc = vehiclePrompts[vehicleType] || vehiclePrompts.car;
+    const vehicleName = vehicleNames[vehicleType] || vehicleNames.car;
     
     const colorDescriptions: Record<string, string> = {
-      '#ffffff': 'clean white',
+      '#ffffff': 'white',
       '#ff0000': 'bright red',
       '#0000ff': 'royal blue',
       '#ffd700': 'metallic gold',
@@ -61,45 +60,29 @@ serve(async (req) => {
     };
 
     const accessories: string[] = [];
-    if (hasBullbar) accessories.push("a front bull bar / brush guard mounted on the front bumper");
-    if (hasBeacons) accessories.push("amber rotating beacons on the roof of the cab");
-    if (hasLightBar) accessories.push("an LED light bar mounted on top of the cab");
-    if (hasXenon) accessories.push("bright xenon/LED headlights");
-    if (hasSpoiler) accessories.push("a rear spoiler on the roof");
-    if (hasRunningBoard) accessories.push("chrome side running boards / step bars");
+    if (hasBullbar) accessories.push("a front bull bar / brush guard");
+    if (hasBeacons) accessories.push("amber rotating beacons on the roof");
+    if (hasLightBar) accessories.push("an LED light bar on top");
+    if (hasXenon) accessories.push("bright xenon headlights");
+    if (hasSpoiler) accessories.push("a rear spoiler");
+    if (hasRunningBoard) accessories.push("side running boards / step bars");
     if (hasVisor) accessories.push("a sun visor above the windshield");
     if (wheelType && wheelDescriptions[wheelType]) accessories.push(wheelDescriptions[wheelType]);
-    if (hasTuningBumper) accessories.push("an aggressive aftermarket sport front bumper with splitter");
-    if (hasNeonKit) accessories.push("underglow neon LED lights glowing beneath the vehicle chassis");
-    if (hasWideBodyKit) accessories.push("a widebody kit with flared wheel arches");
-    if (hasHood) accessories.push("a racing hood/bonnet with a large air intake scoop");
-    if (hasExhaust) accessories.push("a dual sport exhaust system with large chrome tips visible at the rear");
+    if (hasTuningBumper) accessories.push("an aggressive aftermarket tuning front bumper with splitter");
+    if (hasNeonKit) accessories.push("underglow neon LED lights glowing under the vehicle");
+    if (hasWideBodyKit) accessories.push("a widebody kit with flared fenders");
+    if (hasHood) accessories.push("a racing hood with a large air intake scoop");
+    if (hasExhaust) accessories.push("a dual sport exhaust with large chrome tips");
 
     const accessoryText = accessories.length > 0 
-      ? `ACCESSORIES installed on the vehicle: ${accessories.join("; ")}.` 
-      : "The vehicle has no aftermarket accessories — it is in stock/factory condition.";
+      ? `The vehicle is equipped with: ${accessories.join(", ")}.` 
+      : "";
 
-    // Vehicle-type specific composition instructions
-    const compositionInstructions: Record<string, string> = {
-      car: "Frame the entire car in the shot, showing all 4 wheels touching the ground. The car should be centered.",
-      truck: "Frame the entire rigid truck in the shot from cab to rear of the cargo box. Show the complete vehicle with both axles visible. The cargo box must be clearly attached to the same chassis as the cab.",
-      articulated: "CRITICAL: Frame the COMPLETE articulated truck showing BOTH the tractor unit AND the full-length semi-trailer behind it. The trailer must extend to the right side of the image. Both the cab and the entire trailer must be fully visible — do NOT crop the trailer. Show the connection point between tractor and trailer.",
-    };
+    const prompt = `Generate a photorealistic studio photograph of ${vehicleName}, ${colorDesc} paint finish, shot from a 3/4 front angle. The vehicle is on a clean dark studio background with dramatic lighting. ${accessoryText} Ultra-detailed, professional automotive photography style, high resolution, sharp focus. No text, no watermarks, no logos.`;
 
-    const composition = compositionInstructions[vehicleType] || compositionInstructions.car;
+    console.log("Generating vehicle with Lovable AI Gateway, prompt:", prompt.substring(0, 100) + "...");
 
-    const prompt = `Generate a photorealistic studio photograph of ${vehicleDesc}
-
-The vehicle has a ${colorDesc} paint finish on the entire body.
-
-${accessoryText}
-
-COMPOSITION: Shot from a 3/4 front-left angle on a clean dark studio background with professional dramatic lighting. ${composition}
-
-STYLE: Ultra-detailed professional automotive photography, commercial advertising quality, sharp focus, high resolution. Absolutely no text, no watermarks, no logos, no license plates, no people.`;
-
-    console.log("Generating vehicle with prompt:", prompt.substring(0, 200) + "...");
-
+    // Call Lovable AI Gateway with image generation model
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -131,8 +114,10 @@ STYLE: Ultra-detailed professional automotive photography, commercial advertisin
       throw new Error("No image generated by AI model");
     }
 
+    // Extract base64 data from data URL
     const base64Match = imageUrl.match(/^data:([^;]+);base64,(.+)$/);
     if (!base64Match) {
+      // If it's already a URL, return it directly
       console.log("Image is a direct URL, returning as-is");
       return new Response(JSON.stringify({ imageUrl }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -142,6 +127,7 @@ STYLE: Ultra-detailed professional automotive photography, commercial advertisin
     const mimeType = base64Match[1];
     const imageBase64 = base64Match[2];
 
+    // Upload to Supabase Storage
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -160,6 +146,7 @@ STYLE: Ultra-detailed professional automotive photography, commercial advertisin
 
     if (uploadError) {
       console.error("Storage upload error:", uploadError);
+      // Fallback: return base64 data URL directly
       return new Response(JSON.stringify({ imageUrl }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
