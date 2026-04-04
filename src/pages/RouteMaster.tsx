@@ -133,7 +133,18 @@ export default function RouteMaster() {
   });
   const [subjectNames, setSubjectNames] = useState<Record<string, string>>(() => {
     const saved = localStorage.getItem('routemaster_subject_names');
-    return saved ? JSON.parse(saved) : INITIAL_SUBJECT_NAMES;
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Merge with initial names to ensure all subjects exist with correct defaults
+      const merged = { ...INITIAL_SUBJECT_NAMES };
+      for (const key of Object.keys(INITIAL_SUBJECT_NAMES)) {
+        if (parsed[key] && parsed[key] !== key) {
+          merged[key] = parsed[key]; // Keep user customizations
+        }
+      }
+      return merged;
+    }
+    return INITIAL_SUBJECT_NAMES;
   });
   const [chapters, setChapters] = useState<Chapter[]>(() => {
     const saved = localStorage.getItem('routemaster_chapters_v3');
