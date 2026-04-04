@@ -1467,7 +1467,10 @@ export default function RouteMaster() {
   };
 
   const ProfView = () => {
-    const subjects: string[] = Object.keys(subjectNames);
+    const subjects: string[] = Array.from(new Set([
+      ...Object.keys(subjectNames),
+      ...chapters.map(c => c.subject)
+    ]));
 
     if (!isProfAuthenticated) {
       return (
