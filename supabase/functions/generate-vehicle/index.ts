@@ -15,13 +15,10 @@ serve(async (req) => {
   try {
     const { vehicleType, paintColor, hasBullbar, hasBeacons, hasLightBar, hasXenon, hasSpoiler, hasRunningBoard, hasVisor, wheelType, hasTuningBumper, hasNeonKit, hasWideBodyKit, hasHood, hasExhaust } = await req.json();
 
-    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
-    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");
-
     const vehicleNames: Record<string, string> = {
       car: "a modern European sedan car (like a Peugeot 308 or Renault Megane)",
-      truck: "a heavy-duty European box truck (like a Renault D-Series or DAF LF)",
-      articulated: "a European articulated semi-truck with trailer (like a Renault T-Series or Scania R-Series)"
+      truck: "a heavy-duty European rigid box truck (like a Renault D-Series or DAF LF) with a single chassis and integrated cargo box, NOT an articulated truck",
+      articulated: "a European articulated semi-truck with a separate tractor unit pulling a long trailer (like a Renault T-Series or Scania R-Series)"
     };
 
     const vehicleName = vehicleNames[vehicleType] || vehicleNames.car;
@@ -78,79 +75,65 @@ serve(async (req) => {
       ? `The vehicle is equipped with: ${accessories.join(", ")}.` 
       : "";
 
-    const prompt = `Generate a photorealistic studio photograph of ${vehicleName}, ${colorDesc} paint finish, shot from a 3/4 front angle. The vehicle is on a clean dark studio background with dramatic lighting. ${accessoryText} Ultra-detailed, professional automotive photography style, high resolution, sharp focus. No text, no watermarks, no logos.`;
+    const prompt = `Photorealistic studio photograph of ${vehicleName}, ${colorDesc} paint finish, shot from a 3/4 front angle. Clean dark studio background with dramatic lighting. ${accessoryText} Ultra-detailed, professional automotive photography style, high resolution, sharp focus. No text, no watermarks, no logos.`;
 
-    console.log("Generating vehicle with Gemini API directly, prompt:", prompt.substring(0, 100) + "...");
+    console.log("Generating vehicle with Pollinations.ai, prompt:", prompt.substring(0, 100) + "...");
 
-    // Use Gemini API directly with the user's own API key
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${GEMINI_API_KEY}`;
-    const response = await fetch(geminiUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          responseModalities: ["TEXT", "IMAGE"],
-        },
-      }),
+    // Use Pollinations.ai — 100% free, no API key needed
+    const encodedPrompt = encodeURIComponent(prompt);
+    const seed = Math.floor(Math.random() * 999999);
+    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=576&seed=${seed}&nologo=true&model=flux`;
+
+    // Pollinations returns the image directly as binary
+    const response = await fetch(pollinationsUrl, {
+      method: "GET",
+      headers: { "Accept": "image/*" },
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Gemini API error:", response.status, errorText);
-      
-      // Fallback: try Imagen 3
-      console.log("Trying Imagen 4 Fast as fallback...");
-      const imagenUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-fast-generate-001:predict?key=${GEMINI_API_KEY}`;
-      const imagenResponse = await fetch(imagenUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          instances: [{ prompt }],
-          parameters: { sampleCount: 1 },
-        }),
+      console.error("Pollinations error:", response.status, errorText);
+      throw new Error(`Pollinations error: ${response.status}`);
+    }
+
+    const contentType = response.headers.get("content-type") || "image/jpeg";
+    const imageBuffer = new Uint8Array(await response.arrayBuffer());
+    
+    console.log("Image received from Pollinations, size:", imageBuffer.length, "bytes");
+
+    if (imageBuffer.length < 1000) {
+      throw new Error("Image too small, generation may have failed");
+    }
+
+    // Upload to Supabase Storage
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    const ext = contentType.includes("png") ? "png" : "jpg";
+    const fileName = `vehicle_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${ext}`;
+    
+    const { error: uploadError } = await supabase.storage
+      .from('vehicle-images')
+      .upload(fileName, imageBuffer, {
+        contentType,
+        upsert: false,
       });
 
-      if (!imagenResponse.ok) {
-        const imagenError = await imagenResponse.text();
-        console.error("Imagen API error:", imagenResponse.status, imagenError);
-        throw new Error(`Gemini: ${response.status}, Imagen: ${imagenResponse.status}`);
-      }
-
-      const imagenData = await imagenResponse.json();
-      const imagenB64 = imagenData.predictions?.[0]?.bytesBase64Encoded;
-      if (!imagenB64) throw new Error("No image from Imagen");
-
-      // Upload Imagen result
-      const imageBytes = decode(imagenB64);
-      return await uploadAndReturn(imageBytes, "image/png");
+    if (uploadError) {
+      console.error("Storage upload error:", uploadError);
+      throw new Error("Failed to upload image to storage");
     }
 
-    const data = await response.json();
-    console.log("Gemini response received");
+    const { data: publicUrlData } = supabase.storage
+      .from('vehicle-images')
+      .getPublicUrl(fileName);
 
-    // Extract image from Gemini response
-    const parts = data.candidates?.[0]?.content?.parts;
-    if (!parts) throw new Error("No parts in Gemini response");
+    console.log("Vehicle image uploaded successfully:", fileName);
 
-    let imageBase64: string | null = null;
-    let mimeType = "image/png";
-
-    for (const part of parts) {
-      if (part.inlineData) {
-        imageBase64 = part.inlineData.data;
-        mimeType = part.inlineData.mimeType || "image/png";
-        break;
-      }
-    }
-
-    if (!imageBase64) {
-      console.error("No image in response parts:", JSON.stringify(parts).substring(0, 500));
-      throw new Error("No image generated by Gemini");
-    }
-
-    const imageBytes = decode(imageBase64);
-    return await uploadAndReturn(imageBytes, mimeType);
+    return new Response(JSON.stringify({ imageUrl: publicUrlData.publicUrl }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
 
   } catch (e) {
     console.error("generate-vehicle error:", e);
@@ -159,38 +142,3 @@ serve(async (req) => {
     });
   }
 });
-
-async function uploadAndReturn(imageBytes: Uint8Array, mimeType: string): Promise<Response> {
-  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-  const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-  const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-  const ext = mimeType === "image/jpeg" ? "jpg" : "png";
-  const fileName = `vehicle_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${ext}`;
-  
-  const { error: uploadError } = await supabase.storage
-    .from('vehicle-images')
-    .upload(fileName, imageBytes, {
-      contentType: mimeType,
-      upsert: false,
-    });
-
-  if (uploadError) {
-    console.error("Storage upload error:", uploadError);
-    // Fallback: return as data URL
-    const b64 = btoa(String.fromCharCode(...imageBytes));
-    return new Response(JSON.stringify({ imageUrl: `data:${mimeType};base64,${b64}` }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
-
-  const { data: publicUrlData } = supabase.storage
-    .from('vehicle-images')
-    .getPublicUrl(fileName);
-
-  console.log("Vehicle image uploaded:", fileName);
-
-  return new Response(JSON.stringify({ imageUrl: publicUrlData.publicUrl }), {
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
-}
