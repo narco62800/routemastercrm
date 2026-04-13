@@ -83,9 +83,7 @@ serve(async (req) => {
     console.log("Generating vehicle with Gemini API directly, prompt:", prompt.substring(0, 100) + "...");
 
     // Use Gemini API directly with the user's own API key
-    // Try gemini-2.0-flash with image generation
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent?key=${GEMINI_API_KEY}`;
-    
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${GEMINI_API_KEY}`;
     const response = await fetch(geminiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
