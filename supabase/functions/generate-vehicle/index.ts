@@ -100,8 +100,8 @@ serve(async (req) => {
       console.error("Gemini API error:", response.status, errorText);
       
       // Fallback: try Imagen 3
-      console.log("Trying Imagen 3 as fallback...");
-      const imagenUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${GEMINI_API_KEY}`;
+      console.log("Trying Imagen 4 Fast as fallback...");
+      const imagenUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-fast-generate-001:predict?key=${GEMINI_API_KEY}`;
       const imagenResponse = await fetch(imagenUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
