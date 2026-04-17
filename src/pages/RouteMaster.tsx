@@ -1551,7 +1551,6 @@ export default function RouteMaster() {
             {isResetting ? 'En cours...' : 'Réinitialiser'}
           </button>
         </div>
-        </div>
 
         {profTab === 'subjects' && (
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 md:p-6">
