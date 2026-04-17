@@ -44,6 +44,7 @@ import { ALL_QUESTIONS, INITIAL_CHAPTERS, INITIAL_SUBJECT_NAMES } from '../data/
 import { FUEL_PER_CORRECT_ANSWER, POINTS_PER_CORRECT_ANSWER, STREAK_BONUS_FUEL, STREAK_BONUS_POINTS, INITIAL_FUEL, MAX_FUEL, MAX_POINTS } from '../constants';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfiles } from '@/hooks/useProfiles';
+import { useQuestionsChapters } from '@/hooks/useQuestionsChapters';
 
 const LEVELS = ['2ndes CRM', '1ères CRM', 'Terminales CRM'];
 
@@ -119,6 +120,13 @@ function shuffleArray<T>(arr: T[]): T[] {
 
 export default function RouteMaster() {
   const { fetchAllUsers, fetchUserByPseudo, upsertUser, deleteUser: deleteProfile } = useProfiles();
+  const {
+    fetchAllQuestions, fetchAllChapters,
+    upsertQuestion, deleteQuestion: deleteQuestionDB,
+    upsertChapter, deleteChapter: deleteChapterDB,
+    seedIfEmpty, resetFromCode,
+  } = useQuestionsChapters();
+
   const [view, setView] = useState<'identification' | 'home' | 'levels' | 'subjects' | 'chapters' | 'quiz' | 'prof' | 'ranking' | 'shop'>(() => {
     return (sessionStorage.getItem('routemaster_view') as any) || 'identification';
   });
@@ -135,14 +143,12 @@ export default function RouteMaster() {
     const saved = localStorage.getItem('routemaster_subject_names');
     return saved ? JSON.parse(saved) : INITIAL_SUBJECT_NAMES;
   });
-  const [chapters, setChapters] = useState<Chapter[]>(() => {
-    const saved = localStorage.getItem('routemaster_chapters_v3');
-    return saved ? JSON.parse(saved) : INITIAL_CHAPTERS;
-  });
-  const [questions, setQuestions] = useState<Question[]>(() => {
-    const saved = localStorage.getItem('routemaster_questions_v3');
-    return saved ? JSON.parse(saved) : ALL_QUESTIONS;
-  });
+
+  // Questions et chapitres chargés depuis Supabase (source de vérité unique)
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [dataLoaded, setDataLoaded] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
 
   const [users, setUsers] = useState<User[]>([]);
   const [usersLoaded, setUsersLoaded] = useState(false);
@@ -150,21 +156,25 @@ export default function RouteMaster() {
   // Modal to view another user's vehicle
   const [viewingUser, setViewingUser] = useState<User | null>(null);
 
-  // Load users from database on mount
+  // Chargement initial depuis Supabase
   useEffect(() => {
-    fetchAllUsers().then(dbUsers => {
+    const init = async () => {
+      // Seed si tables vides (premier lancement)
+      await seedIfEmpty(ALL_QUESTIONS, INITIAL_CHAPTERS);
+      // Charger questions, chapitres et utilisateurs en parallèle
+      const [dbQuestions, dbChapters, dbUsers] = await Promise.all([
+        fetchAllQuestions(),
+        fetchAllChapters(),
+        fetchAllUsers(),
+      ]);
+      setQuestions(dbQuestions);
+      setChapters(dbChapters);
       setUsers(dbUsers);
       setUsersLoaded(true);
-    });
-  }, [fetchAllUsers]);
-
-  useEffect(() => {
-    localStorage.setItem('routemaster_chapters_v3', JSON.stringify(chapters));
-  }, [chapters]);
-
-  useEffect(() => {
-    localStorage.setItem('routemaster_questions_v3', JSON.stringify(questions));
-  }, [questions]);
+      setDataLoaded(true);
+    };
+    init();
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('routemaster_subject_names', JSON.stringify(subjectNames));
@@ -266,9 +276,10 @@ export default function RouteMaster() {
   const [chapterEditingQuestion, setChapterEditingQuestion] = useState<Question | null>(null);
   const [chapterDraggedIdx, setChapterDraggedIdx] = useState<number | null>(null);
 
-  const handleSaveEditQuestion = () => {
+  const handleSaveEditQuestion = async () => {
     if (!editingQuestion) return;
     setQuestions(prev => prev.map(q => q.id === editingQuestion.id ? editingQuestion : q));
+    await upsertQuestion(editingQuestion);
     setEditingQuestion(null);
   };
 
@@ -483,23 +494,28 @@ export default function RouteMaster() {
     setEditingSubject(null);
   };
 
-  const handleAddChapter = () => {
+  const handleAddChapter = async () => {
     if (!newChapter.title.trim()) return;
-    setChapters(prev => [...prev, { ...newChapter }]);
+    const chapter = { ...newChapter };
+    setChapters(prev => [...prev, chapter]);
+    await upsertChapter(chapter);
     setNewChapter({ ...newChapter, title: '' });
   };
 
-  const handleDeleteChapter = (title: string) => {
+  const handleDeleteChapter = async (title: string) => {
+    const chapter = chapters.find(c => c.title === title);
     setChapters(prev => prev.filter(c => c.title !== title));
+    if (chapter) await deleteChapterDB(chapter.level, chapter.subject, chapter.title);
   };
 
-  const handleAddQuestion = () => {
+  const handleAddQuestion = async () => {
     if (!newQuestion.text?.trim()) return;
     const q: Question = {
       ...newQuestion as Question,
       id: Math.random().toString(36).substr(2, 9)
     };
     setQuestions(prev => [...prev, q]);
+    await upsertQuestion(q);
     setNewQuestion({
       ...newQuestion,
       text: '',
@@ -508,8 +524,9 @@ export default function RouteMaster() {
     });
   };
 
-  const handleDeleteQuestion = (id: string) => {
+  const handleDeleteQuestion = async (id: string) => {
     setQuestions(prev => prev.filter(q => q.id !== id));
+    await deleteQuestionDB(id);
   };
 
   const handleDeleteUser = async (userId: string) => {
@@ -1511,6 +1528,31 @@ export default function RouteMaster() {
           ))}
         </div>
 
+        {/* Bouton reset global */}
+        <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-3 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-red-400 text-xs font-bold">⚠️ Réinitialiser depuis le code</p>
+            <p className="text-zinc-500 text-[10px]">Remet toutes les questions et chapitres d'origine. Vos modifications seront perdues.</p>
+          </div>
+          <button
+            onClick={async () => {
+              if (!window.confirm('Réinitialiser TOUTES les questions et chapitres depuis le code source ? Cette action est irréversible.')) return;
+              setIsResetting(true);
+              await resetFromCode(ALL_QUESTIONS, INITIAL_CHAPTERS);
+              const [dbQ, dbC] = await Promise.all([fetchAllQuestions(), fetchAllChapters()]);
+              setQuestions(dbQ);
+              setChapters(dbC);
+              setIsResetting(false);
+              alert('Réinitialisation terminée !');
+            }}
+            disabled={isResetting}
+            className="px-3 py-2 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg text-xs font-bold hover:bg-red-500/30 transition-colors whitespace-nowrap disabled:opacity-50"
+          >
+            {isResetting ? 'En cours...' : 'Réinitialiser'}
+          </button>
+        </div>
+        </div>
+
         {profTab === 'subjects' && (
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 md:p-6">
             <h3 className="text-lg font-bold text-white mb-4 md:mb-6 flex items-center gap-2">
@@ -2131,8 +2173,17 @@ export default function RouteMaster() {
   return (
     <div className="min-h-screen bg-black text-zinc-300 font-sans selection:bg-emerald-500/30">
       {Header()}
+
+      {/* Écran de chargement initial */}
+      {!dataLoaded && (
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+          <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
+          <p className="text-zinc-400 text-sm">Chargement des données...</p>
+        </div>
+      )}
       
       <main className="max-w-4xl mx-auto px-4 pb-20">
+        {dataLoaded && (
         <AnimatePresence mode="wait">
           <motion.div
             key={view}
@@ -2152,6 +2203,7 @@ export default function RouteMaster() {
             {view === 'shop' && ShopView()}
           </motion.div>
         </AnimatePresence>
+        )}
       </main>
 
       {/* Vehicle viewer modal */}
