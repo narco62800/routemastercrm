@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { supabase } from '@/lib/client'
+import { supabase } from '@/integrations/supabase/client'
 
 interface VehicleParams {
   vehicle_type: string
