@@ -1,5 +1,4 @@
-// @ts-nocheck
-import puter from '@heyputer/puter.js'
+/* eslint-disable */
 import { supabase } from '@/lib/client'
 
 interface VehicleParams {
@@ -31,7 +30,9 @@ function buildVehiclePrompt(params: VehicleParams): string {
 }
 
 async function generateWithPuter(prompt: string): Promise<Blob> {
-  const imgElement = await puter.ai.txt2img(prompt, {
+  const p = (window as any).puter
+  if (!p?.ai?.txt2img) throw new Error('Puter not loaded')
+  const imgElement = await p.ai.txt2img(prompt, {
     model: 'gemini-3.1-flash-image-preview'
   })
   const res = await fetch(imgElement.src)
