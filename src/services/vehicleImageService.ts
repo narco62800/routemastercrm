@@ -1,0 +1,78 @@
+import puter from '@heyputer/puter.js'
+import { supabase } from '@/lib/client'
+
+interface VehicleParams {
+  vehicle_type: string
+  vehicle_model: string
+  color: string
+  accessories?: string[]
+}
+
+function buildCacheKey(params: VehicleParams): string {
+  const acc = (params.accessories ?? []).sort().join('-')
+  const raw = `${params.vehicle_type}_${params.vehicle_model}_${params.color}_${acc}`
+  return raw.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '') + '.webp'
+}
+
+async function getCachedImageUrl(cacheKey: string): Promise<string | null> {
+  try {
+    const { data } = supabase.storage.from('vehicle-images').getPublicUrl(cacheKey)
+    const res = await fetch(data.publicUrl, { method: 'HEAD' })
+    return res.ok ? data.publicUrl : null
+  } catch {
+    return null
+  }
+}
+
+function buildVehiclePrompt(params: VehicleParams): string {
+  const acc = params.accessories?.join(', ') ?? 'standard'
+  return `Professional photo of a ${params.vehicle_type} truck ${params.vehicle_model}, color ${params.color}, accessories: ${acc}, on a French highway, sunny day, photorealistic, high quality, side view, 4K resolution`
+}
+
+async function generateWithPuter(prompt: string): Promise<Blob> {
+  const imgElement = await (puter.ai as any).txt2img(prompt, {
+    model: 'gemini-3.1-flash-image-preview'
+  }) as HTMLImageElement
+  const res = await fetch(imgElement.src)
+  return res.blob()
+}
+
+async function generateWithPollinations(prompt: string): Promise<Blob> {
+  const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=flux&width=1024&height=768&nologo=true`
+  const res = await fetch(url)
+  if (!res.ok) throw new Error('Pollinations failed')
+  return res.blob()
+}
+
+export async function getVehicleImage(params: VehicleParams): Promise<string> {
+  const cacheKey = buildCacheKey(params)
+
+  // 1. Vérifier le cache
+  const cached = await getCachedImageUrl(cacheKey)
+  if (cached) return cached
+
+  // 2. Générer avec Puter.js (Nano Banana 2)
+  const prompt = buildVehiclePrompt(params)
+  let imageBlob: Blob
+
+  try {
+    imageBlob = await generateWithPuter(prompt)
+  } catch (err) {
+    console.warn('Puter.js failed, fallback Pollinations:', err)
+    imageBlob = await generateWithPollinations(prompt)
+  }
+
+  // 3. Uploader dans Supabase Storage
+  const { error } = await supabase.storage
+    .from('vehicle-images')
+    .upload(cacheKey, imageBlob, {
+      contentType: 'image/webp',
+      upsert: false
+    })
+
+  if (error) console.error('Upload cache failed:', error)
+
+  // 4. Retourner l'URL publique
+  const { data } = supabase.storage.from('vehicle-images').getPublicUrl(cacheKey)
+  return data.publicUrl
+}
