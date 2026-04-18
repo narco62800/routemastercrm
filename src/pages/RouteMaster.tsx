@@ -545,32 +545,33 @@ export default function RouteMaster() {
   const [isGeneratingVehicle, setIsGeneratingVehicle] = useState(false);
   const [vehicleGenError, setVehicleGenError] = useState<string | null>(null);
 
-  const generateVehicleImage = useCallback(async (vehicleType: string, customize: User['customize']) => {
+const generateVehicleImage = useCallback(async (vehicleType: string, customize: User['customize']) => {
     setIsGeneratingVehicle(true);
     setVehicleGenError(null);
     try {
-      const { data, error } = await supabase.functions.invoke('generate-vehicle', {
-        body: {
-          vehicleType,
-          paintColor: customize.paintColor,
-          hasBullbar: customize.hasBullbar,
-          hasBeacons: customize.hasBeacons,
-          hasLightBar: customize.hasLightBar,
-          hasXenon: customize.hasXenon,
-          hasSpoiler: customize.hasSpoiler,
-          hasRunningBoard: customize.hasRunningBoard,
-          hasVisor: customize.hasVisor,
-          wheelType: customize.wheelType,
-          hasTuningBumper: customize.hasTuningBumper,
-          hasNeonKit: customize.hasNeonKit,
-          hasWideBodyKit: customize.hasWideBodyKit,
-          hasHood: customize.hasHood,
-          hasExhaust: customize.hasExhaust,
-        }
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      return data?.imageUrl || null;
+      const accessories = [
+        customize?.hasBullbar ? 'bullbar' : null,
+        customize?.hasBeacons ? 'beacons' : null,
+        customize?.hasLightBar ? 'lightbar' : null,
+        customize?.hasXenon ? 'xenon' : null,
+        customize?.hasSpoiler ? 'spoiler' : null,
+        customize?.hasRunningBoard ? 'runningboard' : null,
+        customize?.hasVisor ? 'visor' : null,
+        customize?.hasTuningBumper ? 'tuningbumper' : null,
+        customize?.hasNeonKit ? 'neonkit' : null,
+        customize?.hasWideBodyKit ? 'widebodykit' : null,
+        customize?.hasHood ? 'hood' : null,
+        customize?.hasExhaust ? 'exhaust' : null,
+      ].filter(Boolean) as string[]
+
+      const imageUrl = await getVehicleImage({
+        vehicle_type: vehicleType,
+        vehicle_model: customize?.vehicleModel ?? vehicleType,
+        color: customize?.paintColor ?? '#ffffff',
+        accessories,
+      })
+
+      return imageUrl || null;
     } catch (err) {
       console.error('Vehicle generation error:', err);
       setVehicleGenError(err instanceof Error ? err.message : 'Erreur de génération');
