@@ -53,13 +53,20 @@ export async function getVehicleImage(params: VehicleParams): Promise<string> {
   if (cached) return cached
 
   const prompt = buildVehiclePrompt(params)
-  let imageBlob: Blob
-
+  let imageBlob: Blob | null = null
   try {
     imageBlob = await generateWithPuter(prompt)
   } catch (err) {
     console.warn('Puter.js failed, fallback Pollinations:', err)
-    imageBlob = await generateWithPollinations(prompt)
+    try {
+      imageBlob = await generateWithPollinations(prompt)
+    } catch {
+      console.error('Both generators failed')
+    }
+  }
+
+  if (!imageBlob) {
+    return 'https://via.placeholder.com/1024x768?text=Vehicle'
   }
 
   const { error } = await supabase.storage
