@@ -1536,15 +1536,20 @@ export default function RouteMaster() {
           </div>
           <button
             onClick={async () => {
-              if (!window.confirm('Réinitialiser TOUTES les questions et chapitres depuis le code source ? Cette action est irréversible.')) return;
-              setIsResetting(true);
-              await resetFromCode(ALL_QUESTIONS, INITIAL_CHAPTERS);
-              const [dbQ, dbC] = await Promise.all([fetchAllQuestions(), fetchAllChapters()]);
-              setQuestions(dbQ);
-              setChapters(dbC);
-              setIsResetting(false);
-              alert('Réinitialisation terminée !');
-            }}
+  const code = window.prompt("Code de réinitialisation :");
+  if (code !== "16052018") {
+    alert("Code incorrect !");
+    return;
+  }
+  if (!window.confirm('Réinitialiser TOUTES les questions et chapitres depuis le code ?')) return;
+  setIsResetting(true);
+  await resetFromCode(ALL_QUESTIONS, INITIAL_CHAPTERS);
+  const [dbQ, dbC] = await Promise.all([fetchAllQuestions(), fetchAllChapters()]);
+  setQuestions(dbQ);
+  setChapters(dbC);
+  setIsResetting(false);
+  alert('Réinitialisation terminée !');
+}}
             disabled={isResetting}
             className="px-3 py-2 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg text-xs font-bold hover:bg-red-500/30 transition-colors whitespace-nowrap disabled:opacity-50"
           >
