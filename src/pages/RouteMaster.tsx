@@ -42,7 +42,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Question, Chapter, User } from '../types';
 import { ALL_QUESTIONS, INITIAL_CHAPTERS, INITIAL_SUBJECT_NAMES } from '../data/index';
 import { FUEL_PER_CORRECT_ANSWER, POINTS_PER_CORRECT_ANSWER, STREAK_BONUS_FUEL, STREAK_BONUS_POINTS, INITIAL_FUEL, MAX_FUEL, MAX_POINTS } from '../constants';
-import { supabase } from '@/integrations/supabase/client';
+import { getVehicleImage } from '@/services/vehicleImageService'
 import { useProfiles } from '@/hooks/useProfiles';
 import { useQuestionsChapters } from '@/hooks/useQuestionsChapters';
 
