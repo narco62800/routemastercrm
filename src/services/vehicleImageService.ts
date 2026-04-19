@@ -28,13 +28,6 @@ function buildVehiclePrompt(params: VehicleParams): string {
   return `Professional photo of a ${params.vehicle_type} truck ${params.vehicle_model}, color ${params.color}, accessories: ${acc}, on a French highway, sunny day, photorealistic, high quality, side view, 4K resolution`
 }
 
-async function generateWithPollinations(prompt: string): Promise<Blob> {
-  const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=flux&width=1024&height=768&nologo=true`
-  const res = await fetch(url)
-  if (!res.ok) throw new Error('Pollinations failed')
-  return res.blob()
-}
-
 export async function getVehicleImage(params: VehicleParams): Promise<string> {
   const cacheKey = buildCacheKey(params)
 
@@ -42,9 +35,12 @@ export async function getVehicleImage(params: VehicleParams): Promise<string> {
   if (cached) return cached
 
   const prompt = buildVehiclePrompt(params)
+  const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=flux&width=1024&height=768&nologo=true`
 
   try {
-    const imageBlob = await generateWithPollinations(prompt)
+    const res = await fetch(url)
+    if (!res.ok) throw new Error('Pollinations failed')
+    const imageBlob = await res.blob()
 
     const { error } = await supabase.storage
       .from('vehicle-images')
@@ -56,6 +52,6 @@ export async function getVehicleImage(params: VehicleParams): Promise<string> {
     return data.publicUrl
   } catch (err) {
     console.error('Image generation failed:', err)
-    return 'https://via.placeholder.com/1024x768?text=Vehicle'
+    return 'https://placehold.co/1024x768?text=Vehicle'
   }
 }
