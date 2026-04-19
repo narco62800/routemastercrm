@@ -689,9 +689,9 @@ const generateVehicleImage = useCallback(async (vehicleType: string, customize: 
       vehicleImageUrl: imageUrl || prev.vehicleImageUrl,
     } : null);
   };
-
-  const handleProfAccess = () => {
-    if (profCodeInput === '021285') {
+const handleProfAccess = async () => {
+    const { data } = await supabase.from('settings').select('value').eq('key', 'prof_code').single();
+if (data?.value === profCodeInput) {
       setIsProfAuthenticated(true);
       sessionStorage.setItem('routemaster_prof_auth', 'true');
     } else {
