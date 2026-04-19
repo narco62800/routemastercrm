@@ -35,17 +35,22 @@ function hexToColorName(hex: string): string {
   return map[hex.toLowerCase()] ?? 'white'
 }
 
+// Marques aléatoires par type de véhicule
+function getRandomBrand(vehicleType: string): string {
+  const brands: Record<string, string[]> = {
+    car: ['Mercedes-Benz C-Class', 'BMW 3 Series', 'Audi A4', 'Peugeot 508', 'Renault Talisman', 'Volkswagen Passat'],
+    truck: ['Renault T High 2024', 'Volvo FH 2024', 'Scania R 2024', 'DAF XG 2024', 'Mercedes-Benz Actros 2024', 'MAN TGX 2024'],
+    articulated: ['Volvo FH16 2024 with curtainsider trailer', 'Scania R650 2024 with refrigerated trailer', 'Renault T520 2024 with semi-trailer', 'DAF XG+ 2024 with tanker trailer', 'Mercedes Actros 1863 2024 with flatbed trailer'],
+  }
+  const list = brands[vehicleType] ?? brands['truck']
+  return list[Math.floor(Math.random() * list.length)]
+}
+
 function buildVehiclePrompt(params: VehicleParams): string {
   const colorName = hexToColorName(params.color)
-  const acc = params.accessories?.length ? params.accessories.join(', ') : 'no accessories'
-
-  const prompts: Record<string, string> = {
-    car: `${colorName} Renault Kangoo delivery van, ${acc}, parked on a French road, realistic photo, side view, cinematic lighting, 4K, clean background`,
-    truck: `${colorName} Renault Trucks D cab, rigid truck, ${acc}, French highway, realistic photo, side view, cinematic lighting, 4K`,
-    articulated: `${colorName} Volvo FH semi-truck with curtainsider trailer, ${acc}, French motorway, realistic photo, side view, cinematic lighting, 4K`,
-  }
-
-  return prompts[params.vehicle_type] ?? `${colorName} truck on a French road, ${acc}, realistic photo, side view, 4K`
+  const brand = getRandomBrand(params.vehicle_type)
+  const acc = params.accessories?.length ? `, equipped with ${params.accessories.join(', ')}` : ''
+  return `${colorName} ${brand}${acc}, driving on a French motorway, golden hour lighting, photorealistic, ultra detailed, 8K, side view, clean sky background, professional automotive photography`
 }
 
 export async function getVehicleImage(params: VehicleParams): Promise<string> {
