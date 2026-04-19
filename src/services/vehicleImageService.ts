@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { supabase } from '@/integrations/supabase/client'
 
 interface VehicleParams {
@@ -29,16 +28,6 @@ function buildVehiclePrompt(params: VehicleParams): string {
   return `Professional photo of a ${params.vehicle_type} truck ${params.vehicle_model}, color ${params.color}, accessories: ${acc}, on a French highway, sunny day, photorealistic, high quality, side view, 4K resolution`
 }
 
-async function generateWithPuter(prompt: string): Promise<Blob> {
-  const p = (window as any).puter
-  if (!p?.ai?.txt2img) throw new Error('Puter not loaded')
-  const imgElement = await p.ai.txt2img(prompt, {
-    model: 'gemini-3.1-flash-image-preview'
-  })
-  const res = await fetch(imgElement.src)
-  return res.blob()
-}
-
 async function generateWithPollinations(prompt: string): Promise<Blob> {
   const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=flux&width=1024&height=768&nologo=true`
   const res = await fetch(url)
@@ -53,28 +42,20 @@ export async function getVehicleImage(params: VehicleParams): Promise<string> {
   if (cached) return cached
 
   const prompt = buildVehiclePrompt(params)
-  let imageBlob: Blob | null = null
-  try {
-    imageBlob = await generateWithPuter(prompt)
-  } catch (err) {
-    console.warn('Puter.js failed, fallback Pollinations:', err)
-    try {
-      imageBlob = await generateWithPollinations(prompt)
-    } catch {
-      console.error('Both generators failed')
-    }
-  }
 
-  if (!imageBlob) {
+  try {
+    const imageBlob = await generateWithPollinations(prompt)
+
+    const { error } = await supabase.storage
+      .from('vehicle-images')
+      .upload(cacheKey, imageBlob, { contentType: 'image/webp', upsert: false })
+
+    if (error) console.error('Upload cache failed:', error)
+
+    const { data } = supabase.storage.from('vehicle-images').getPublicUrl(cacheKey)
+    return data.publicUrl
+  } catch (err) {
+    console.error('Image generation failed:', err)
     return 'https://via.placeholder.com/1024x768?text=Vehicle'
   }
-
-  const { error } = await supabase.storage
-    .from('vehicle-images')
-    .upload(cacheKey, imageBlob, { contentType: 'image/webp', upsert: false })
-
-  if (error) console.error('Upload cache failed:', error)
-
-  const { data } = supabase.storage.from('vehicle-images').getPublicUrl(cacheKey)
-  return data.publicUrl
 }
