@@ -23,9 +23,28 @@ async function getCachedImageUrl(cacheKey: string): Promise<string | null> {
   }
 }
 
+function hexToColorName(hex: string): string {
+  const map: Record<string, string> = {
+    '#ffffff': 'white', '#000000': 'black', '#ff0000': 'red',
+    '#0000ff': 'blue', '#ffd700': 'gold', '#00ff00': 'bright green',
+    '#ff8800': 'orange', '#c0c0c0': 'silver', '#9900ff': 'purple',
+    '#1a1a1a': 'matte black', '#cc0033': 'dark red', '#0044cc': 'electric blue',
+    '#39ff14': 'neon green', '#ff6600': 'pearl orange', '#e8e8e8': 'chrome',
+    '#4b0082': 'midnight purple', '#32cd32': 'lime green', '#1a237e': 'deep blue',
+  }
+  return map[hex.toLowerCase()] ?? 'white'
+}
+
 function buildVehiclePrompt(params: VehicleParams): string {
-  const acc = params.accessories?.join(', ') ?? 'standard'
-  return `Professional photo of a ${params.vehicle_type} truck ${params.vehicle_model}, color ${params.color}, accessories: ${acc}, on a French highway, sunny day, photorealistic, high quality, side view, 4K resolution`
+  const colorName = hexToColorName(params.color)
+  const acc = params.accessories?.length ? params.accessories.join(', ') : 'no accessories'
+  const typeMap: Record<string, string> = {
+    car: 'modern delivery car',
+    truck: 'heavy truck',
+    articulated: 'semi-truck with trailer',
+  }
+  const vehicleDesc = typeMap[params.vehicle_type] ?? params.vehicle_type
+  return `${colorName} ${vehicleDesc}, ${params.vehicle_model}, ${acc}, parked on a French highway, cinematic lighting, photorealistic, ultra detailed, 4K, side view, clean background`
 }
 
 export async function getVehicleImage(params: VehicleParams): Promise<string> {
