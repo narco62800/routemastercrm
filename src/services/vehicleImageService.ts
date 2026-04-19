@@ -39,8 +39,8 @@ function hexToColorName(hex: string): string {
 function getRandomBrand(vehicleType: string): string {
   const brands: Record<string, string[]> = {
     car: ['Mercedes-Benz C-Class', 'BMW 3 Series', 'Audi A4', 'Peugeot 508', 'Renault Talisman', 'Volkswagen Passat'],
-    truck: ['Renault T High 2024', 'Volvo FH 2024', 'Scania R 2024', 'DAF XG 2024', 'Mercedes-Benz Actros 2024', 'MAN TGX 2024'],
-    articulated: ['Volvo FH16 2024 with curtainsider trailer', 'Scania R650 2024 with refrigerated trailer', 'Renault T520 2024 with semi-trailer', 'DAF XG+ 2024 with tanker trailer', 'Mercedes Actros 1863 2024 with flatbed trailer'],
+    truck: ['Renault T High 2026', 'Volvo FH 2026', 'Scania R 2026', 'DAF XG 2026', 'Mercedes-Benz Actros 2026', 'MAN TGX 2026'],
+    articulated: ['Volvo FH16 2026 with curtainsider trailer', 'Scania R650 2026 with refrigerated trailer', 'Renault T520 2026 with semi-trailer', 'DAF XG+ 2024 with tanker trailer', 'Mercedes Actros 1863 2026 with flatbed trailer'],
   }
   const list = brands[vehicleType] ?? brands['truck']
   return list[Math.floor(Math.random() * list.length)]
