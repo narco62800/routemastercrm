@@ -38,13 +38,14 @@ function hexToColorName(hex: string): string {
 function buildVehiclePrompt(params: VehicleParams): string {
   const colorName = hexToColorName(params.color)
   const acc = params.accessories?.length ? params.accessories.join(', ') : 'no accessories'
-  const typeMap: Record<string, string> = {
-    car: 'modern delivery car',
-    truck: 'heavy truck',
-    articulated: 'semi-truck with trailer',
+
+  const prompts: Record<string, string> = {
+    car: `${colorName} Renault Kangoo delivery van, ${acc}, parked on a French road, realistic photo, side view, cinematic lighting, 4K, clean background`,
+    truck: `${colorName} Renault Trucks D cab, rigid truck, ${acc}, French highway, realistic photo, side view, cinematic lighting, 4K`,
+    articulated: `${colorName} Volvo FH semi-truck with curtainsider trailer, ${acc}, French motorway, realistic photo, side view, cinematic lighting, 4K`,
   }
-  const vehicleDesc = typeMap[params.vehicle_type] ?? params.vehicle_type
-  return `${colorName} ${vehicleDesc}, ${params.vehicle_model}, ${acc}, parked on a French highway, cinematic lighting, photorealistic, ultra detailed, 4K, side view, clean background`
+
+  return prompts[params.vehicle_type] ?? `${colorName} truck on a French road, ${acc}, realistic photo, side view, 4K`
 }
 
 export async function getVehicleImage(params: VehicleParams): Promise<string> {
