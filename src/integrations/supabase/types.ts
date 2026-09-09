@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      chapter_meta: {
+        Row: {
+          created_at: string
+          document_url: string | null
+          est_visible: boolean
+          id: string
+          level: string
+          subject: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          document_url?: string | null
+          est_visible?: boolean
+          id?: string
+          level: string
+          subject: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          document_url?: string | null
+          est_visible?: boolean
+          id?: string
+          level?: string
+          subject?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           answered_questions: Json
