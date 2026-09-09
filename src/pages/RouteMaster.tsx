@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Truck, 
   BookOpen, 
@@ -8,29 +8,97 @@ import {
   CheckCircle2, 
   XCircle, 
   Fuel, 
-  Trophy, 
-  Home, 
-  GraduationCap, 
-  Edit3, 
-  Save, 
-  Plus, 
-  Trash2, 
-  Lock, 
-  Eye, 
-  X, 
-  Paperclip, 
-  EyeOff, 
-  FileText,
-  Loader2
+  Trophy,
+  User as UserIcon,
+  Home,
+  GraduationCap,
+  Edit3,
+  Save,
+  ShoppingBag,
+  ListOrdered,
+  Plus,
+  Trash2,
+  Lock,
+  Unlock,
+  Share2,
+  QrCode,
+  LogOut,
+  Download,
+  Loader2,
+  Paintbrush,
+  Eye,
+  X,
+  Clock,
+  GripVertical,
+  Filter,
+  Search,
+  RefreshCw,
+  ToggleLeft,
+  ToggleRight,
+  AlertTriangle,
+  Paperclip,
+  EyeOff,
+  FileText
 } from 'lucide-react';
+import { QRCodeCanvas } from 'qrcode.react';
 import { Question, Chapter, User } from '../types';
 import { ALL_QUESTIONS, INITIAL_CHAPTERS, INITIAL_SUBJECT_NAMES } from '../data/index';
-import { FUEL_PER_CORRECT_ANSWER, POINTS_PER_CORRECT_ANSWER, INITIAL_FUEL, MAX_FUEL, MAX_POINTS } from '../constants';
+import { FUEL_PER_CORRECT_ANSWER, POINTS_PER_CORRECT_ANSWER, STREAK_BONUS_FUEL, STREAK_BONUS_POINTS, INITIAL_FUEL, MAX_FUEL, MAX_POINTS } from '../constants';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfiles } from '@/hooks/useProfiles';
 
 const LEVELS = ['2ndes CRM', '1ères CRM', 'Terminales CRM'];
 const COOLDOWN_MS = 48 * 60 * 60 * 1000;
+
+// Boutique complète
+const SHOP_ITEMS = [
+  { id: 'veh_car', name: 'Voiture de Tourisme', price: 1000, type: 'vehicle', vehicleType: 'car' },
+  { id: 'veh_truck', name: 'Porteur (Camion)', price: 5000, type: 'vehicle', vehicleType: 'truck' },
+  { id: 'veh_articulated', name: 'Ensemble Articulé', price: 15000, type: 'vehicle', vehicleType: 'articulated' },
+  { id: 'paint_red', name: 'Peinture Rouge', price: 500, type: 'paint', color: '#ff0000' },
+  { id: 'paint_blue', name: 'Peinture Bleue', price: 500, type: 'paint', color: '#0000ff' },
+  { id: 'paint_gold', name: 'Peinture Or', price: 2000, type: 'paint', color: '#ffd700' },
+  { id: 'paint_black', name: 'Peinture Noir Brillant', price: 300, type: 'paint', color: '#000000' },
+  { id: 'paint_green', name: 'Peinture Vert Racing', price: 800, type: 'paint', color: '#00ff00' },
+  { id: 'paint_orange', name: 'Peinture Orange Flamme', price: 700, type: 'paint', color: '#ff8800' },
+  { id: 'paint_silver', name: 'Peinture Argent Métallisé', price: 1000, type: 'paint', color: '#c0c0c0' },
+  { id: 'paint_purple', name: 'Peinture Violet Cosmique', price: 1500, type: 'paint', color: '#9900ff' },
+  { id: 'paint_matte_black', name: 'Peinture Noir Mat', price: 1200, type: 'paint', color: '#1a1a1a' },
+  { id: 'paint_candy_red', name: 'Peinture Rouge Candy', price: 2500, type: 'paint', color: '#cc0033' },
+  { id: 'paint_ff_blue_flames', name: '🔥 Bleu Flammes (F&F)', price: 4000, type: 'paint', color: '#0044cc' },
+  { id: 'paint_ff_green_neon', name: '🔥 Vert Néon (F&F)', price: 4000, type: 'paint', color: '#39ff14' },
+  { id: 'paint_ff_orange_pearl', name: '🔥 Orange Pearl (Supra)', price: 5000, type: 'paint', color: '#ff6600' },
+  { id: 'paint_ff_chrome_mirror', name: '🔥 Chrome Miroir', price: 8000, type: 'paint', color: '#e8e8e8' },
+  { id: 'paint_ff_midnight_purple', name: '🔥 Midnight Purple (Skyline)', price: 6000, type: 'paint', color: '#4b0082' },
+  { id: 'paint_ff_candy_lime', name: '🔥 Candy Lime Green', price: 5500, type: 'paint', color: '#32cd32' },
+  { id: 'paint_ff_galaxy_blue', name: '🔥 Bleu Galaxy Métal', price: 7000, type: 'paint', color: '#1a237e' },
+  { id: 'chrome_wheels', name: 'Jantes Chrome Standard', price: 2000, type: 'accessory' },
+  { id: 'wheels_bbs', name: 'Jantes BBS RS', price: 6000, type: 'accessory' },
+  { id: 'wheels_oz', name: 'Jantes OZ Racing', price: 5000, type: 'accessory' },
+  { id: 'wheels_vossen', name: 'Jantes Vossen CVT', price: 7000, type: 'accessory' },
+  { id: 'wheels_rotiform', name: 'Jantes Rotiform', price: 5500, type: 'accessory' },
+  { id: 'wheels_work', name: 'Jantes Work Meister', price: 8000, type: 'accessory' },
+  { id: 'beacons', name: 'Gyrophares', price: 1500, type: 'accessory' },
+  { id: 'bullbar', name: 'Pare-buffle', price: 1200, type: 'accessory' },
+  { id: 'lightbar', name: 'Rampe de phares', price: 1800, type: 'accessory' },
+  { id: 'xenon', name: 'Phares Xénon', price: 800, type: 'accessory' },
+  { id: 'spoiler', name: 'Aileron / Spoiler', price: 1000, type: 'accessory' },
+  { id: 'running_board', name: 'Marchepieds Latéraux', price: 900, type: 'accessory' },
+  { id: 'visor', name: 'Visière Pare-soleil', price: 600, type: 'accessory' },
+  { id: 'tuning_bumper', name: '🏎️ Pare-choc Tuning Sport', price: 3500, type: 'accessory' },
+  { id: 'neon_kit', name: '💡 Kit Néon Underglow', price: 4500, type: 'accessory' },
+  { id: 'widebody_kit', name: '🔧 Kit Widebody', price: 9000, type: 'accessory' },
+  { id: 'hood_scoop', name: '💨 Capot Racing / Prise d\'air', price: 3000, type: 'accessory' },
+  { id: 'exhaust', name: '🔊 Échappement Sport Double', price: 2500, type: 'accessory' },
+];
+
+function ownedKey(vehicleType: string, itemId: string) {
+  return vehicleType + ':' + itemId;
+}
+
+function ownsForVehicle(user: User, itemId: string): boolean {
+  return user.ownedItems.includes(ownedKey(user.vehicleType, itemId));
+}
 
 function shuffleArray<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -42,13 +110,13 @@ function shuffleArray<T>(arr: T[]): T[] {
 }
 
 export default function RouteMaster() {
-  const { fetchAllUsers, fetchUserByPseudo, upsertUser } = useProfiles();
-  const [view, setView] = useState<'identification' | 'home' | 'levels' | 'subjects' | 'chapters' | 'quiz' | 'prof'>('identification');
+  const { fetchAllUsers, fetchUserByPseudo, upsertUser, deleteUser: deleteProfile } = useProfiles();
+  const [view, setView] = useState<'identification' | 'home' | 'levels' | 'subjects' | 'chapters' | 'quiz' | 'prof' | 'ranking' | 'shop'>('identification');
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [selectedChapter, setSelectedChapter] = useState<string | null>(null);
 
-  const [subjectNames] = useState<Record<string, string>>(() => {
+  const [subjectNames, setSubjectNames] = useState<Record<string, string>>(() => {
     const saved = localStorage.getItem('routemaster_subject_names');
     return saved ? JSON.parse(saved) : INITIAL_SUBJECT_NAMES;
   });
@@ -63,6 +131,9 @@ export default function RouteMaster() {
     return saved ? JSON.parse(saved) : ALL_QUESTIONS;
   });
 
+  const [users, setUsers] = useState<User[]>([]);
+  const [viewingUser, setViewingUser] = useState<User | null>(null);
+
   const [chapterDocs, setChapterDocs] = useState<Record<string, { docUrl?: string; isVisible: boolean }>>(() => {
     const saved = localStorage.getItem('routemaster_chapter_meta');
     return saved ? JSON.parse(saved) : {};
@@ -73,12 +144,22 @@ export default function RouteMaster() {
   }, [chapterDocs]);
 
   useEffect(() => {
+    fetchAllUsers().then(dbUsers => {
+      setUsers(dbUsers);
+    });
+  }, [fetchAllUsers]);
+
+  useEffect(() => {
     localStorage.setItem('routemaster_chapters_v3', JSON.stringify(chapters));
   }, [chapters]);
 
   useEffect(() => {
     localStorage.setItem('routemaster_questions_v3', JSON.stringify(questions));
   }, [questions]);
+
+  useEffect(() => {
+    localStorage.setItem('routemaster_subject_names', JSON.stringify(subjectNames));
+  }, [subjectNames]);
 
   const [user, setUser] = useState<User | null>(() => {
     const saved = localStorage.getItem('routemaster_user');
@@ -111,8 +192,26 @@ export default function RouteMaster() {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [quizFinished, setQuizFinished] = useState(false);
   const [quizScore, setQuizScore] = useState(0);
+  const [correctStreak, setCorrectStreak] = useState(0);
 
-  // Actions Chapitres
+  // Prof Space State
+  const [editingSubject, setEditingSubject] = useState<string | null>(null);
+  const [newSubjectName, setNewSubjectName] = useState('');
+  const [profTab, setProfTab] = useState<'subjects' | 'chapters' | 'questions' | 'users' | 'share'>('chapters');
+  const [newChapter, setNewChapter] = useState({ level: '2ndes CRM', subject: 'ETG', title: '' });
+  const [newQuestion, setNewQuestion] = useState<Partial<Question>>({
+    type: 'qcm', level: '2ndes CRM', subject: 'ETG', chapter: '', text: '', options: ['', '', '', ''], correct: 0, explanation: ''
+  });
+
+  const [shareUrl, setShareUrl] = useState('https://routemastercrm.lovable.app');
+  const [profFilterSubject, setProfFilterSubject] = useState<string>('');
+  const [profFilterChapter, setProfFilterChapter] = useState<string>('');
+  const [profSearchText, setProfSearchText] = useState('');
+  const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
+  const [draggedOptionIndex, setDraggedOptionIndex] = useState<number | null>(null);
+  const [expandedChapter, setExpandedChapter] = useState<string | null>(null);
+
+  // Document & Visibility Actions
   const [pdfViewer, setPdfViewer] = useState<{ title: string; url: string } | null>(null);
   const [uploadingTitle, setUploadingTitle] = useState<string | null>(null);
   const [renamingTitle, setRenamingTitle] = useState<string | null>(null);
@@ -183,6 +282,154 @@ export default function RouteMaster() {
     setRenamingTitle(null);
   };
 
+  // Gestion Véhicule & Boutique
+  const [isGeneratingVehicle, setIsGeneratingVehicle] = useState(false);
+  const [vehicleGenError, setVehicleGenError] = useState<string | null>(null);
+
+  const generateVehicleImage = useCallback(async (vehicleType: string, customize: User['customize']) => {
+    setIsGeneratingVehicle(true);
+    setVehicleGenError(null);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-vehicle', {
+        body: {
+          vehicleType,
+          paintColor: customize.paintColor,
+          hasBullbar: customize.hasBullbar,
+          hasBeacons: customize.hasBeacons,
+          hasLightBar: customize.hasLightBar,
+          hasXenon: customize.hasXenon,
+          hasSpoiler: customize.hasSpoiler,
+          hasRunningBoard: customize.hasRunningBoard,
+          hasVisor: customize.hasVisor,
+          wheelType: customize.wheelType,
+          hasTuningBumper: customize.hasTuningBumper,
+          hasNeonKit: customize.hasNeonKit,
+          hasWideBodyKit: customize.hasWideBodyKit,
+          hasHood: customize.hasHood,
+          hasExhaust: customize.hasExhaust,
+        }
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data?.imageUrl || null;
+    } catch (err) {
+      console.error('Vehicle generation error:', err);
+      setVehicleGenError(err instanceof Error ? err.message : 'Erreur de génération');
+      return null;
+    } finally {
+      setIsGeneratingVehicle(false);
+    }
+  }, []);
+
+  const handleRegenerateImage = async () => {
+    if (!user || !user.vehicleOwned) return;
+    const imageUrl = await generateVehicleImage(user.vehicleType, user.customize);
+    setUser(prev => prev ? { ...prev, vehicleImageUrl: imageUrl || undefined } : null);
+  };
+
+  const WHEEL_IDS = ['chrome_wheels', 'wheels_bbs', 'wheels_oz', 'wheels_vossen', 'wheels_rotiform', 'wheels_work'];
+  const WHEEL_TYPE_MAP: Record<string, string> = {
+    chrome_wheels: 'chrome', wheels_bbs: 'bbs', wheels_oz: 'oz_racing',
+    wheels_vossen: 'vossen', wheels_rotiform: 'rotiform', wheels_work: 'work_meister'
+  };
+
+  const handleToggleItem = async (item: any) => {
+    if (!user || !user.vehicleOwned) return;
+    const newCustomize = { ...user.customize };
+    if (item.type === 'paint' && item.color) {
+      newCustomize.paintColor = newCustomize.paintColor === item.color ? '#ffffff' : item.color;
+    } else if (item.type === 'accessory') {
+      if (WHEEL_IDS.includes(item.id)) {
+        const wt = WHEEL_TYPE_MAP[item.id] || 'standard';
+        newCustomize.wheelType = newCustomize.wheelType === wt ? 'standard' : wt;
+      }
+      else if (item.id === 'beacons') newCustomize.hasBeacons = !newCustomize.hasBeacons;
+      else if (item.id === 'bullbar') newCustomize.hasBullbar = !newCustomize.hasBullbar;
+      else if (item.id === 'lightbar') newCustomize.hasLightBar = !newCustomize.hasLightBar;
+      else if (item.id === 'xenon') newCustomize.hasXenon = !newCustomize.hasXenon;
+      else if (item.id === 'spoiler') newCustomize.hasSpoiler = !newCustomize.hasSpoiler;
+      else if (item.id === 'running_board') newCustomize.hasRunningBoard = !newCustomize.hasRunningBoard;
+      else if (item.id === 'visor') newCustomize.hasVisor = !newCustomize.hasVisor;
+      else if (item.id === 'tuning_bumper') newCustomize.hasTuningBumper = !newCustomize.hasTuningBumper;
+      else if (item.id === 'neon_kit') newCustomize.hasNeonKit = !newCustomize.hasNeonKit;
+      else if (item.id === 'widebody_kit') newCustomize.hasWideBodyKit = !newCustomize.hasWideBodyKit;
+      else if (item.id === 'hood_scoop') newCustomize.hasHood = !newCustomize.hasHood;
+      else if (item.id === 'exhaust') newCustomize.hasExhaust = !newCustomize.hasExhaust;
+    }
+    const imageUrl = await generateVehicleImage(user.vehicleType, newCustomize);
+    setUser(prev => prev ? { ...prev, customize: newCustomize, vehicleImageUrl: imageUrl || prev.vehicleImageUrl } : null);
+  };
+
+  const isItemEquipped = (item: any): boolean => {
+    if (!user) return false;
+    if (item.type === 'paint' && item.color) return user.customize.paintColor === item.color;
+    if (WHEEL_IDS.includes(item.id)) return user.customize.wheelType === (WHEEL_TYPE_MAP[item.id] || 'standard');
+    if (item.id === 'beacons') return user.customize.hasBeacons;
+    if (item.id === 'bullbar') return user.customize.hasBullbar;
+    if (item.id === 'lightbar') return user.customize.hasLightBar;
+    if (item.id === 'xenon') return user.customize.hasXenon;
+    if (item.id === 'spoiler') return user.customize.hasSpoiler;
+    if (item.id === 'running_board') return user.customize.hasRunningBoard;
+    if (item.id === 'visor') return user.customize.hasVisor;
+    if (item.id === 'tuning_bumper') return !!user.customize.hasTuningBumper;
+    if (item.id === 'neon_kit') return !!user.customize.hasNeonKit;
+    if (item.id === 'widebody_kit') return !!user.customize.hasWideBodyKit;
+    if (item.id === 'hood_scoop') return !!user.customize.hasHood;
+    if (item.id === 'exhaust') return !!user.customize.hasExhaust;
+    return false;
+  };
+
+  const handleBuyItem = async (item: any) => {
+    if (!user || user.fuel < item.price) return;
+
+    if (item.type === 'vehicle') {
+      if (user.ownedItems.includes(item.id)) return;
+      const defaultCustomize: User['customize'] = {
+        paintColor: '#ffffff', paintFinish: 'glossy', wheelType: 'standard',
+        hasBullbar: false, hasSpoiler: false, hasRunningBoard: false, hasVisor: false,
+        hasBeacons: false, hasLightBar: false, hasXenon: false,
+        hasTuningBumper: false, hasNeonKit: false, hasWideBodyKit: false, hasHood: false, hasExhaust: false,
+        cabinStripe: null, cabinSticker: null, trailerColor: '#ffffff', trailerLogo: null
+      };
+      setUser(prev => prev ? { ...prev, vehicleImageUrl: undefined, vehicleType: item.vehicleType, vehicleModel: item.name } : null);
+      const imageUrl = await generateVehicleImage(item.vehicleType, defaultCustomize);
+      setUser(prev => prev ? {
+        ...prev, fuel: Math.max(0, prev.fuel - item.price),
+        ownedItems: [...prev.ownedItems.filter(i => i !== item.id), item.id],
+        vehicleOwned: true, vehicleType: item.vehicleType, vehicleModel: item.name,
+        customize: defaultCustomize, vehicleImageUrl: imageUrl || undefined,
+      } : null);
+      return;
+    }
+
+    const key = ownedKey(user.vehicleType, item.id);
+    if (user.ownedItems.includes(key)) return;
+    const newOwnedItems = [...user.ownedItems, key];
+    const newCustomize = { ...user.customize };
+    if (item.type === 'paint' && item.color) newCustomize.paintColor = item.color;
+    if (item.id === 'beacons') newCustomize.hasBeacons = true;
+    if (item.id === 'bullbar') newCustomize.hasBullbar = true;
+    if (item.id === 'lightbar') newCustomize.hasLightBar = true;
+    if (item.id === 'xenon') newCustomize.hasXenon = true;
+    if (item.id === 'spoiler') newCustomize.hasSpoiler = true;
+    if (WHEEL_IDS.includes(item.id)) newCustomize.wheelType = WHEEL_TYPE_MAP[item.id] || 'standard';
+    if (item.id === 'running_board') newCustomize.hasRunningBoard = true;
+    if (item.id === 'visor') newCustomize.hasVisor = true;
+    if (item.id === 'tuning_bumper') newCustomize.hasTuningBumper = true;
+    if (item.id === 'neon_kit') newCustomize.hasNeonKit = true;
+    if (item.id === 'widebody_kit') newCustomize.hasWideBodyKit = true;
+    if (item.id === 'hood_scoop') newCustomize.hasHood = true;
+    if (item.id === 'exhaust') newCustomize.hasExhaust = true;
+
+    let imageUrl: string | null = null;
+    if (user.vehicleOwned) imageUrl = await generateVehicleImage(user.vehicleType, newCustomize);
+    setUser(prev => prev ? {
+      ...prev, fuel: Math.max(0, prev.fuel - item.price),
+      ownedItems: newOwnedItems, customize: newCustomize,
+      vehicleImageUrl: imageUrl || prev.vehicleImageUrl,
+    } : null);
+  };
+
   const handleLogin = async () => {
     if (!pseudoInput.trim() || !passwordInput.trim()) return;
     const existingUser = await fetchUserByPseudo(pseudoInput);
@@ -240,6 +487,7 @@ export default function RouteMaster() {
     setCurrentQuestions(shuffleArray(available));
     setCurrentQuestionIndex(0);
     setQuizScore(0);
+    setCorrectStreak(0);
     setQuizFinished(false);
     setView('quiz');
   };
@@ -255,13 +503,22 @@ export default function RouteMaster() {
 
     if (correct) {
       setQuizScore(prev => prev + 1);
+      setCorrectStreak(prev => prev + 1);
+      const newStreak = correctStreak + 1;
+      let fuelGain = FUEL_PER_CORRECT_ANSWER;
+      let pointsGain = POINTS_PER_CORRECT_ANSWER;
+      if (newStreak > 1) {
+        fuelGain += STREAK_BONUS_FUEL;
+        pointsGain += STREAK_BONUS_POINTS;
+      }
       setUser(prev => prev ? ({
         ...prev,
-        fuel: Math.min(prev.fuel + FUEL_PER_CORRECT_ANSWER, MAX_FUEL),
-        points: Math.min(prev.points + POINTS_PER_CORRECT_ANSWER, MAX_POINTS),
+        fuel: Math.min(prev.fuel + fuelGain, MAX_FUEL),
+        points: Math.min(prev.points + pointsGain, MAX_POINTS),
         answeredQuestions: updatedAnswered
       }) : null);
     } else {
+      setCorrectStreak(0);
       setUser(prev => prev ? ({ ...prev, answeredQuestions: updatedAnswered }) : null);
     }
   };
@@ -290,14 +547,17 @@ export default function RouteMaster() {
       case 'subjects': setView('levels'); break;
       case 'chapters': setView('subjects'); break;
       case 'quiz': setView('chapters'); break;
+      case 'shop': setView('home'); break;
+      case 'ranking': setView('home'); break;
       case 'prof': setView(user ? 'home' : 'identification'); break;
       default: setView('home');
     }
   };
 
   return (
-    <div className="min-h-screen bg-black text-zinc-300 font-sans">
-      <header className="bg-zinc-900 border-b border-zinc-800 p-4 sticky top-0 z-50">
+    <div className="min-h-screen bg-black text-zinc-300 font-sans selection:bg-emerald-500/30">
+      {/* HEADER */}
+      <header className="bg-zinc-900 border-b border-zinc-800 p-3 md:p-4 sticky top-0 z-50">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-2">
             {view !== 'identification' && view !== 'home' && (
@@ -307,7 +567,7 @@ export default function RouteMaster() {
             )}
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => setView(user ? 'home' : 'identification')}>
               <Truck className="text-emerald-500 w-7 h-7" />
-              <h1 className="text-lg font-bold text-white uppercase italic">RouteMaster <span className="text-emerald-500">CRM</span></h1>
+              <h1 className="text-lg font-bold tracking-tighter text-white uppercase italic">RouteMaster <span className="text-emerald-500">CRM</span></h1>
             </div>
           </div>
           
@@ -331,6 +591,7 @@ export default function RouteMaster() {
         </div>
       </header>
 
+      {/* MAIN CONTAINER */}
       <main className="max-w-4xl mx-auto px-4 pb-24 pt-4">
         {view === 'identification' && (
           <div className="flex flex-col items-center justify-center py-12 gap-6 text-center max-w-sm mx-auto">
@@ -399,6 +660,87 @@ export default function RouteMaster() {
                       </button>
                     )}
                     <ChevronRight className="text-zinc-600 w-5 h-5 cursor-pointer" onClick={() => handleChapterSelect(c.title)} />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* CLASSEMENT */}
+        {view === 'ranking' && (
+          <div className="space-y-6 py-4">
+            <h2 className="text-2xl font-bold text-white">Classement Général</h2>
+            <p className="text-zinc-500 text-xs">Cliquez sur un joueur pour inspecter son véhicule</p>
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+              {[...users].sort((a, b) => b.points - a.points).map((r, i) => (
+                <div 
+                  key={r.id} 
+                  className="flex items-center justify-between p-4 border-b border-zinc-800 last:border-0 cursor-pointer hover:bg-zinc-800/50"
+                  onClick={() => setViewingUser(r)}
+                >
+                  <div className="flex items-center gap-4">
+                    <span className={'font-bold ' + (i === 0 ? 'text-yellow-500' : i === 1 ? 'text-zinc-400' : i === 2 ? 'text-orange-500' : 'text-zinc-600')}>
+                      #{i + 1}
+                    </span>
+                    <div>
+                      <p className="text-white font-bold">{r.pseudo}</p>
+                      <p className="text-zinc-500 text-xs">{r.level}</p>
+                    </div>
+                  </div>
+                  <span className="text-emerald-500 font-mono font-bold">{r.points} pts</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* BOUTIQUE */}
+        {view === 'shop' && (
+          <div className="space-y-6 py-4">
+            <h2 className="text-2xl font-bold text-white">Boutique RouteMaster</h2>
+            {user?.vehicleOwned && (
+              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+                <h3 className="text-lg font-bold text-white mb-4">Mon Véhicule — {user.vehicleModel}</h3>
+                <div className="w-full aspect-video bg-zinc-800 rounded-xl overflow-hidden flex items-center justify-center relative">
+                  {isGeneratingVehicle ? (
+                    <div className="flex flex-col items-center gap-2 text-zinc-400">
+                      <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+                      <span>Génération de votre véhicule...</span>
+                    </div>
+                  ) : user.vehicleImageUrl ? (
+                    <img src={user.vehicleImageUrl} alt={user.vehicleModel} className="w-full h-full object-cover" />
+                  ) : (
+                    <Truck className="w-16 h-16 text-zinc-700" />
+                  )}
+                </div>
+                <button onClick={handleRegenerateImage} disabled={isGeneratingVehicle} className="mt-3 flex items-center gap-2 px-4 py-2 bg-zinc-800 text-emerald-500 rounded-xl border border-zinc-700 text-sm font-bold">
+                  <RefreshCw className={'w-4 h-4 ' + (isGeneratingVehicle ? 'animate-spin' : '')} /> Régénérer l'image
+                </button>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {SHOP_ITEMS.map(item => {
+                const isVeh = item.type === 'vehicle';
+                const owned = isVeh ? user?.ownedItems.includes(item.id) : (user ? ownsForVehicle(user, item.id) : false);
+                const equipped = !isVeh && owned ? isItemEquipped(item) : false;
+
+                return (
+                  <div key={item.id} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex flex-col justify-between gap-4">
+                    <div>
+                      <h4 className="text-lg font-bold text-white">{item.name}</h4>
+                      <p className="text-orange-500 font-bold">{item.price} L</p>
+                    </div>
+                    {owned && !isVeh ? (
+                      <button onClick={() => handleToggleItem(item)} className={'w-full py-2.5 rounded-xl font-bold ' + (equipped ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400')}>
+                        {equipped ? 'RETIRER' : 'ÉQUIPER'}
+                      </button>
+                    ) : (
+                      <button onClick={() => handleBuyItem(item)} disabled={!user || user.fuel < item.price} className="w-full py-2.5 bg-emerald-500 text-black font-bold rounded-xl disabled:bg-zinc-800 disabled:text-zinc-600">
+                        ACHETER
+                      </button>
+                    )}
                   </div>
                 );
               })}
@@ -523,6 +865,27 @@ export default function RouteMaster() {
         )}
       </main>
 
+      {/* MODAL VÉHICULE JOUEUR */}
+      {viewingUser && (
+        <div className="fixed inset-0 z-[120] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setViewingUser(null)}>
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 max-w-lg w-full" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <Truck className="text-emerald-500 w-5 h-5" /> Véhicule de {viewingUser.pseudo}
+              </h3>
+              <button onClick={() => setViewingUser(null)} className="p-1 text-zinc-400 hover:text-white"><X className="w-5 h-5" /></button>
+            </div>
+            {viewingUser.vehicleOwned ? (
+              <div className="w-full aspect-video bg-zinc-800 rounded-xl overflow-hidden mb-2">
+                {viewingUser.vehicleImageUrl ? <img src={viewingUser.vehicleImageUrl} alt="Véhicule" className="w-full h-full object-cover" /> : <Truck className="w-12 h-12 text-zinc-700 m-auto mt-12" />}
+              </div>
+            ) : (
+              <p className="text-zinc-500 text-center py-6">Ce joueur n'a pas encore de véhicule.</p>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* LISEUSE PDF SÉCURISÉE */}
       {pdfViewer && (
         <div className="fixed inset-0 z-[120] bg-black/90 backdrop-blur-md flex flex-col p-3 md:p-6" onClick={() => setPdfViewer(null)}>
@@ -538,10 +901,13 @@ export default function RouteMaster() {
         </div>
       )}
 
+      {/* NAVIGATION DU BAS (TOUTES LES ICÔNES) */}
       {user && (
         <nav className="fixed bottom-0 left-0 right-0 bg-zinc-900/90 backdrop-blur-md border-t border-zinc-800 p-3 flex justify-around z-50">
           <button onClick={() => setView('home')} className={'p-2 ' + (view === 'home' ? 'text-emerald-500' : 'text-zinc-500')}><Home className="w-6 h-6" /></button>
           <button onClick={() => setView('levels')} className={'p-2 ' + (['levels', 'subjects', 'chapters', 'quiz'].includes(view) ? 'text-emerald-500' : 'text-zinc-500')}><GraduationCap className="w-6 h-6" /></button>
+          <button onClick={() => setView('ranking')} className={'p-2 ' + (view === 'ranking' ? 'text-emerald-500' : 'text-zinc-500')}><ListOrdered className="w-6 h-6" /></button>
+          <button onClick={() => setView('shop')} className={'p-2 ' + (view === 'shop' ? 'text-emerald-500' : 'text-zinc-500')}><ShoppingBag className="w-6 h-6" /></button>
           <button onClick={() => setView('prof')} className={'p-2 ' + (view === 'prof' ? 'text-emerald-500' : 'text-zinc-500')}><Settings className="w-6 h-6" /></button>
         </nav>
       )}
