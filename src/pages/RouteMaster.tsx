@@ -1038,13 +1038,15 @@ export default function RouteMaster() {
               return (now - answeredAt) >= COOLDOWN_MS;
             }).length;
             
+            const ckey = chapterKey(chapter);
+            const hasDoc = !!metaMap[ckey]?.documentUrl;
+
             return (
-              <button
+              <div
                 key={chapter.title}
-                onClick={() => handleChapterSelect(chapter.title)}
-                className="flex items-center justify-between p-3 md:p-4 bg-zinc-900/50 border border-zinc-800 rounded-xl hover:bg-zinc-800 transition-colors text-left"
+                className="flex items-center justify-between gap-2 p-3 md:p-4 bg-zinc-900/50 border border-zinc-800 rounded-xl hover:bg-zinc-800 transition-colors text-left"
               >
-                <div>
+                <button onClick={() => handleChapterSelect(chapter.title)} className="flex-1 text-left">
                   <span className="text-white font-medium text-sm md:text-base">{chapter.title}</span>
                   <div className="flex items-center gap-2 mt-1">
                     <span className="text-zinc-500 text-[10px]">{availableCount}/{chapterQuestions.length} questions disponibles</span>
@@ -1054,9 +1056,19 @@ export default function RouteMaster() {
                       </span>
                     )}
                   </div>
-                </div>
-                <ChevronRight className="text-zinc-600 w-4 h-4" />
-              </button>
+                </button>
+                {hasDoc && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); openChapterDocument(chapter); }}
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 bg-blue-500/10 border border-blue-500/30 text-blue-400 rounded-lg text-[10px] md:text-xs font-bold hover:bg-blue-500/20 transition-colors flex-shrink-0"
+                  >
+                    {pdfLoadingKey === ckey
+                      ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      : <FileText className="w-3.5 h-3.5" />}
+                    Consulter le cours
+                  </button>
+                )}
+                <ChevronRight className="text-zinc-600 w-4 h-4 flex-shrink-0" />
             );
           })}
         </div>
