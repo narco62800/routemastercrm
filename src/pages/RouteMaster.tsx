@@ -1,56 +1,42 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Truck, 
-  BookOpen, 
   Settings, 
   ChevronRight, 
   ChevronLeft, 
   CheckCircle2, 
-  XCircle, 
   Fuel, 
-  Trophy,
-  User as UserIcon,
-  Home,
-  GraduationCap,
-  Edit3,
-  Save,
-  ShoppingBag,
-  ListOrdered,
-  Plus,
-  Trash2,
-  Lock,
-  Unlock,
-  Share2,
-  QrCode,
-  LogOut,
-  Download,
-  Loader2,
-  Paintbrush,
-  Eye,
-  X,
-  Clock,
-  GripVertical,
-  Filter,
-  Search,
-  RefreshCw,
-  ToggleLeft,
-  ToggleRight,
-  AlertTriangle,
-  Paperclip,
-  EyeOff,
-  FileText
+  Trophy, 
+  Home, 
+  GraduationCap, 
+  Edit3, 
+  Save, 
+  ShoppingBag, 
+  ListOrdered, 
+  Plus, 
+  Trash2, 
+  Lock, 
+  Share2, 
+  QrCode, 
+  Download, 
+  Loader2, 
+  Eye, 
+  X, 
+  RefreshCw, 
+  Paperclip, 
+  EyeOff, 
+  FileText 
 } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { Question, Chapter, User } from '../types';
 import { ALL_QUESTIONS, INITIAL_CHAPTERS, INITIAL_SUBJECT_NAMES } from '../data/index';
-import { FUEL_PER_CORRECT_ANSWER, POINTS_PER_CORRECT_ANSWER, STREAK_BONUS_FUEL, STREAK_BONUS_POINTS, INITIAL_FUEL, MAX_FUEL, MAX_POINTS } from '../constants';
+import { FUEL_PER_CORRECT_ANSWER, POINTS_PER_CORRECT_ANSWER, INITIAL_FUEL, MAX_FUEL, MAX_POINTS } from '../constants';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfiles } from '@/hooks/useProfiles';
 
 const LEVELS = ['2ndes CRM', '1ères CRM', 'Terminales CRM'];
 const COOLDOWN_MS = 48 * 60 * 60 * 1000;
 
-// Boutique complète
 const SHOP_ITEMS = [
   { id: 'veh_car', name: 'Voiture de Tourisme', price: 1000, type: 'vehicle', vehicleType: 'car' },
   { id: 'veh_truck', name: 'Porteur (Camion)', price: 5000, type: 'vehicle', vehicleType: 'truck' },
@@ -65,40 +51,16 @@ const SHOP_ITEMS = [
   { id: 'paint_purple', name: 'Peinture Violet Cosmique', price: 1500, type: 'paint', color: '#9900ff' },
   { id: 'paint_matte_black', name: 'Peinture Noir Mat', price: 1200, type: 'paint', color: '#1a1a1a' },
   { id: 'paint_candy_red', name: 'Peinture Rouge Candy', price: 2500, type: 'paint', color: '#cc0033' },
-  { id: 'paint_ff_blue_flames', name: '🔥 Bleu Flammes (F&F)', price: 4000, type: 'paint', color: '#0044cc' },
-  { id: 'paint_ff_green_neon', name: '🔥 Vert Néon (F&F)', price: 4000, type: 'paint', color: '#39ff14' },
-  { id: 'paint_ff_orange_pearl', name: '🔥 Orange Pearl (Supra)', price: 5000, type: 'paint', color: '#ff6600' },
-  { id: 'paint_ff_chrome_mirror', name: '🔥 Chrome Miroir', price: 8000, type: 'paint', color: '#e8e8e8' },
-  { id: 'paint_ff_midnight_purple', name: '🔥 Midnight Purple (Skyline)', price: 6000, type: 'paint', color: '#4b0082' },
-  { id: 'paint_ff_candy_lime', name: '🔥 Candy Lime Green', price: 5500, type: 'paint', color: '#32cd32' },
-  { id: 'paint_ff_galaxy_blue', name: '🔥 Bleu Galaxy Métal', price: 7000, type: 'paint', color: '#1a237e' },
   { id: 'chrome_wheels', name: 'Jantes Chrome Standard', price: 2000, type: 'accessory' },
   { id: 'wheels_bbs', name: 'Jantes BBS RS', price: 6000, type: 'accessory' },
   { id: 'wheels_oz', name: 'Jantes OZ Racing', price: 5000, type: 'accessory' },
-  { id: 'wheels_vossen', name: 'Jantes Vossen CVT', price: 7000, type: 'accessory' },
-  { id: 'wheels_rotiform', name: 'Jantes Rotiform', price: 5500, type: 'accessory' },
-  { id: 'wheels_work', name: 'Jantes Work Meister', price: 8000, type: 'accessory' },
   { id: 'beacons', name: 'Gyrophares', price: 1500, type: 'accessory' },
   { id: 'bullbar', name: 'Pare-buffle', price: 1200, type: 'accessory' },
   { id: 'lightbar', name: 'Rampe de phares', price: 1800, type: 'accessory' },
-  { id: 'xenon', name: 'Phares Xénon', price: 800, type: 'accessory' },
   { id: 'spoiler', name: 'Aileron / Spoiler', price: 1000, type: 'accessory' },
-  { id: 'running_board', name: 'Marchepieds Latéraux', price: 900, type: 'accessory' },
-  { id: 'visor', name: 'Visière Pare-soleil', price: 600, type: 'accessory' },
   { id: 'tuning_bumper', name: '🏎️ Pare-choc Tuning Sport', price: 3500, type: 'accessory' },
-  { id: 'neon_kit', name: '💡 Kit Néon Underglow', price: 4500, type: 'accessory' },
-  { id: 'widebody_kit', name: '🔧 Kit Widebody', price: 9000, type: 'accessory' },
-  { id: 'hood_scoop', name: '💨 Capot Racing / Prise d\'air', price: 3000, type: 'accessory' },
-  { id: 'exhaust', name: '🔊 Échappement Sport Double', price: 2500, type: 'accessory' },
+  { id: 'neon_kit', name: '💡 Kit Néon Underglow', price: 4500, type: 'accessory' }
 ];
-
-function ownedKey(vehicleType: string, itemId: string) {
-  return vehicleType + ':' + itemId;
-}
-
-function ownsForVehicle(user: User, itemId: string): boolean {
-  return user.ownedItems.includes(ownedKey(user.vehicleType, itemId));
-}
 
 function shuffleArray<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -110,7 +72,7 @@ function shuffleArray<T>(arr: T[]): T[] {
 }
 
 export default function RouteMaster() {
-  const { fetchAllUsers, fetchUserByPseudo, upsertUser, deleteUser: deleteProfile } = useProfiles();
+  const { fetchAllUsers, fetchUserByPseudo, upsertUser } = useProfiles();
   const [view, setView] = useState<'identification' | 'home' | 'levels' | 'subjects' | 'chapters' | 'quiz' | 'prof' | 'ranking' | 'shop'>('identification');
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
@@ -131,23 +93,45 @@ export default function RouteMaster() {
     return saved ? JSON.parse(saved) : ALL_QUESTIONS;
   });
 
-  const [users, setUsers] = useState<User[]>([]);
-  const [viewingUser, setViewingUser] = useState<User | null>(null);
-
   const [chapterDocs, setChapterDocs] = useState<Record<string, { docUrl?: string; isVisible: boolean }>>(() => {
     const saved = localStorage.getItem('routemaster_chapter_meta');
     return saved ? JSON.parse(saved) : {};
   });
 
-  useEffect(() => {
-    localStorage.setItem('routemaster_chapter_meta', JSON.stringify(chapterDocs));
-  }, [chapterDocs]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [viewingUser, setViewingUser] = useState<User | null>(null);
 
+  // Synchronisation avec Supabase au démarrage
   useEffect(() => {
+    supabase.from('chapters').select('*').then(({ data }) => {
+      if (data && data.length > 0) {
+        const loadedChapters = data.map((d: any) => ({
+          level: d.level || '1ères CRM',
+          subject: d.subject || 'Cours',
+          title: d.title || d.titre || ''
+        }));
+        setChapters(loadedChapters);
+
+        const loadedDocs: Record<string, { docUrl?: string; isVisible: boolean }> = {};
+        data.forEach((d: any) => {
+          const key = (d.level || '1ères CRM') + '__' + (d.subject || 'Cours') + '__' + (d.title || d.titre || '');
+          loadedDocs[key] = {
+            docUrl: d.document_url || undefined,
+            isVisible: d.est_visible !== false
+          };
+        });
+        setChapterDocs(prev => ({ ...prev, ...loadedDocs }));
+      }
+    });
+
     fetchAllUsers().then(dbUsers => {
       setUsers(dbUsers);
     });
   }, [fetchAllUsers]);
+
+  useEffect(() => {
+    localStorage.setItem('routemaster_chapter_meta', JSON.stringify(chapterDocs));
+  }, [chapterDocs]);
 
   useEffect(() => {
     localStorage.setItem('routemaster_chapters_v3', JSON.stringify(chapters));
@@ -185,6 +169,12 @@ export default function RouteMaster() {
   const [profCodeInput, setProfCodeInput] = useState('');
   const [isProfAuthenticated, setIsProfAuthenticated] = useState(false);
 
+  // Espace Professeur
+  const [profTab, setProfTab] = useState<'subjects' | 'chapters' | 'users' | 'share'>('chapters');
+  const [newChapter, setNewChapter] = useState({ level: '2ndes CRM', subject: 'ETG', title: '' });
+  const [newSubjectInput, setNewSubjectInput] = useState('');
+  const [shareUrl] = useState('https://routemastercrm.lovable.app');
+
   // Quiz State
   const [currentQuestions, setCurrentQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -192,26 +182,8 @@ export default function RouteMaster() {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [quizFinished, setQuizFinished] = useState(false);
   const [quizScore, setQuizScore] = useState(0);
-  const [correctStreak, setCorrectStreak] = useState(0);
 
-  // Prof Space State
-  const [editingSubject, setEditingSubject] = useState<string | null>(null);
-  const [newSubjectName, setNewSubjectName] = useState('');
-  const [profTab, setProfTab] = useState<'subjects' | 'chapters' | 'questions' | 'users' | 'share'>('chapters');
-  const [newChapter, setNewChapter] = useState({ level: '2ndes CRM', subject: 'ETG', title: '' });
-  const [newQuestion, setNewQuestion] = useState<Partial<Question>>({
-    type: 'qcm', level: '2ndes CRM', subject: 'ETG', chapter: '', text: '', options: ['', '', '', ''], correct: 0, explanation: ''
-  });
-
-  const [shareUrl, setShareUrl] = useState('https://routemastercrm.lovable.app');
-  const [profFilterSubject, setProfFilterSubject] = useState<string>('');
-  const [profFilterChapter, setProfFilterChapter] = useState<string>('');
-  const [profSearchText, setProfSearchText] = useState('');
-  const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
-  const [draggedOptionIndex, setDraggedOptionIndex] = useState<number | null>(null);
-  const [expandedChapter, setExpandedChapter] = useState<string | null>(null);
-
-  // Document & Visibility Actions
+  // Actions Chapitres
   const [pdfViewer, setPdfViewer] = useState<{ title: string; url: string } | null>(null);
   const [uploadingTitle, setUploadingTitle] = useState<string | null>(null);
   const [renamingTitle, setRenamingTitle] = useState<string | null>(null);
@@ -221,7 +193,33 @@ export default function RouteMaster() {
     return c.level + '__' + c.subject + '__' + c.title;
   };
 
-  const toggleChapterVisibility = (c: Chapter) => {
+  const handleAddChapter = async () => {
+    if (!newChapter.title.trim()) return;
+    const chapterObj = { ...newChapter, title: newChapter.title.trim() };
+
+    setChapters(prev => [...prev, chapterObj]);
+
+    const key = getChapterKey(chapterObj);
+    setChapterDocs(prev => ({
+      ...prev,
+      [key]: { isVisible: true }
+    }));
+
+    try {
+      await (supabase.from('chapters') as any).insert({
+        level: chapterObj.level,
+        subject: chapterObj.subject,
+        title: chapterObj.title,
+        est_visible: true
+      });
+    } catch (e) {
+      console.warn('Sync add chapter', e);
+    }
+
+    setNewChapter({ ...newChapter, title: '' });
+  };
+
+  const toggleChapterVisibility = async (c: Chapter) => {
     const key = getChapterKey(c);
     const current = chapterDocs[key]?.isVisible ?? true;
     const nextVal = !current;
@@ -230,6 +228,12 @@ export default function RouteMaster() {
       ...prev,
       [key]: { ...prev[key], isVisible: nextVal }
     }));
+
+    try {
+      await (supabase.from('chapters') as any).update({ est_visible: nextVal }).eq('title', c.title);
+    } catch (e) {
+      console.warn('Sync est_visible', e);
+    }
   };
 
   const handleUploadPDF = async (c: Chapter, file: File) => {
@@ -248,6 +252,12 @@ export default function RouteMaster() {
         [key]: { ...prev[key], docUrl: publicUrl, isVisible: prev[key]?.isVisible ?? true }
       }));
 
+      try {
+        await (supabase.from('chapters') as any).update({ document_url: publicUrl }).eq('title', c.title);
+      } catch (e) {
+        console.warn('Sync upload', e);
+      }
+
       alert('Document PDF joint avec succès !');
     } catch (err: any) {
       console.error(err);
@@ -257,7 +267,7 @@ export default function RouteMaster() {
     }
   };
 
-  const handleRenameChapter = (c: Chapter, newTitle: string) => {
+  const handleRenameChapter = async (c: Chapter, newTitle: string) => {
     const title = newTitle.trim();
     if (!title || title === c.title) { setRenamingTitle(null); return; }
 
@@ -279,16 +289,31 @@ export default function RouteMaster() {
       return next;
     });
 
+    try {
+      await (supabase.from('chapters') as any).update({ title: title }).eq('title', c.title);
+      await (supabase.from('questions') as any).update({ chapter: title }).eq('chapter', c.title);
+    } catch (e) {
+      console.warn('Sync rename', e);
+    }
+
     setRenamingTitle(null);
   };
 
-  // Gestion Véhicule & Boutique
+  const handleDeleteChapter = async (c: Chapter) => {
+    if (!window.confirm('Supprimer ce chapitre ?')) return;
+    setChapters(prev => prev.filter(ch => ch.title !== c.title));
+    try {
+      await (supabase.from('chapters') as any).delete().eq('title', c.title);
+    } catch (e) {
+      console.warn('Sync delete', e);
+    }
+  };
+
+  // Véhicule IA
   const [isGeneratingVehicle, setIsGeneratingVehicle] = useState(false);
-  const [vehicleGenError, setVehicleGenError] = useState<string | null>(null);
 
   const generateVehicleImage = useCallback(async (vehicleType: string, customize: User['customize']) => {
     setIsGeneratingVehicle(true);
-    setVehicleGenError(null);
     try {
       const { data, error } = await supabase.functions.invoke('generate-vehicle', {
         body: {
@@ -297,138 +322,18 @@ export default function RouteMaster() {
           hasBullbar: customize.hasBullbar,
           hasBeacons: customize.hasBeacons,
           hasLightBar: customize.hasLightBar,
-          hasXenon: customize.hasXenon,
-          hasSpoiler: customize.hasSpoiler,
-          hasRunningBoard: customize.hasRunningBoard,
-          hasVisor: customize.hasVisor,
           wheelType: customize.wheelType,
-          hasTuningBumper: customize.hasTuningBumper,
-          hasNeonKit: customize.hasNeonKit,
-          hasWideBodyKit: customize.hasWideBodyKit,
-          hasHood: customize.hasHood,
-          hasExhaust: customize.hasExhaust,
         }
       });
       if (error) throw error;
-      if (data?.error) throw new Error(data.error);
       return data?.imageUrl || null;
     } catch (err) {
-      console.error('Vehicle generation error:', err);
-      setVehicleGenError(err instanceof Error ? err.message : 'Erreur de génération');
+      console.error('Erreur véhicule:', err);
       return null;
     } finally {
       setIsGeneratingVehicle(false);
     }
   }, []);
-
-  const handleRegenerateImage = async () => {
-    if (!user || !user.vehicleOwned) return;
-    const imageUrl = await generateVehicleImage(user.vehicleType, user.customize);
-    setUser(prev => prev ? { ...prev, vehicleImageUrl: imageUrl || undefined } : null);
-  };
-
-  const WHEEL_IDS = ['chrome_wheels', 'wheels_bbs', 'wheels_oz', 'wheels_vossen', 'wheels_rotiform', 'wheels_work'];
-  const WHEEL_TYPE_MAP: Record<string, string> = {
-    chrome_wheels: 'chrome', wheels_bbs: 'bbs', wheels_oz: 'oz_racing',
-    wheels_vossen: 'vossen', wheels_rotiform: 'rotiform', wheels_work: 'work_meister'
-  };
-
-  const handleToggleItem = async (item: any) => {
-    if (!user || !user.vehicleOwned) return;
-    const newCustomize = { ...user.customize };
-    if (item.type === 'paint' && item.color) {
-      newCustomize.paintColor = newCustomize.paintColor === item.color ? '#ffffff' : item.color;
-    } else if (item.type === 'accessory') {
-      if (WHEEL_IDS.includes(item.id)) {
-        const wt = WHEEL_TYPE_MAP[item.id] || 'standard';
-        newCustomize.wheelType = newCustomize.wheelType === wt ? 'standard' : wt;
-      }
-      else if (item.id === 'beacons') newCustomize.hasBeacons = !newCustomize.hasBeacons;
-      else if (item.id === 'bullbar') newCustomize.hasBullbar = !newCustomize.hasBullbar;
-      else if (item.id === 'lightbar') newCustomize.hasLightBar = !newCustomize.hasLightBar;
-      else if (item.id === 'xenon') newCustomize.hasXenon = !newCustomize.hasXenon;
-      else if (item.id === 'spoiler') newCustomize.hasSpoiler = !newCustomize.hasSpoiler;
-      else if (item.id === 'running_board') newCustomize.hasRunningBoard = !newCustomize.hasRunningBoard;
-      else if (item.id === 'visor') newCustomize.hasVisor = !newCustomize.hasVisor;
-      else if (item.id === 'tuning_bumper') newCustomize.hasTuningBumper = !newCustomize.hasTuningBumper;
-      else if (item.id === 'neon_kit') newCustomize.hasNeonKit = !newCustomize.hasNeonKit;
-      else if (item.id === 'widebody_kit') newCustomize.hasWideBodyKit = !newCustomize.hasWideBodyKit;
-      else if (item.id === 'hood_scoop') newCustomize.hasHood = !newCustomize.hasHood;
-      else if (item.id === 'exhaust') newCustomize.hasExhaust = !newCustomize.hasExhaust;
-    }
-    const imageUrl = await generateVehicleImage(user.vehicleType, newCustomize);
-    setUser(prev => prev ? { ...prev, customize: newCustomize, vehicleImageUrl: imageUrl || prev.vehicleImageUrl } : null);
-  };
-
-  const isItemEquipped = (item: any): boolean => {
-    if (!user) return false;
-    if (item.type === 'paint' && item.color) return user.customize.paintColor === item.color;
-    if (WHEEL_IDS.includes(item.id)) return user.customize.wheelType === (WHEEL_TYPE_MAP[item.id] || 'standard');
-    if (item.id === 'beacons') return user.customize.hasBeacons;
-    if (item.id === 'bullbar') return user.customize.hasBullbar;
-    if (item.id === 'lightbar') return user.customize.hasLightBar;
-    if (item.id === 'xenon') return user.customize.hasXenon;
-    if (item.id === 'spoiler') return user.customize.hasSpoiler;
-    if (item.id === 'running_board') return user.customize.hasRunningBoard;
-    if (item.id === 'visor') return user.customize.hasVisor;
-    if (item.id === 'tuning_bumper') return !!user.customize.hasTuningBumper;
-    if (item.id === 'neon_kit') return !!user.customize.hasNeonKit;
-    if (item.id === 'widebody_kit') return !!user.customize.hasWideBodyKit;
-    if (item.id === 'hood_scoop') return !!user.customize.hasHood;
-    if (item.id === 'exhaust') return !!user.customize.hasExhaust;
-    return false;
-  };
-
-  const handleBuyItem = async (item: any) => {
-    if (!user || user.fuel < item.price) return;
-
-    if (item.type === 'vehicle') {
-      if (user.ownedItems.includes(item.id)) return;
-      const defaultCustomize: User['customize'] = {
-        paintColor: '#ffffff', paintFinish: 'glossy', wheelType: 'standard',
-        hasBullbar: false, hasSpoiler: false, hasRunningBoard: false, hasVisor: false,
-        hasBeacons: false, hasLightBar: false, hasXenon: false,
-        hasTuningBumper: false, hasNeonKit: false, hasWideBodyKit: false, hasHood: false, hasExhaust: false,
-        cabinStripe: null, cabinSticker: null, trailerColor: '#ffffff', trailerLogo: null
-      };
-      setUser(prev => prev ? { ...prev, vehicleImageUrl: undefined, vehicleType: item.vehicleType, vehicleModel: item.name } : null);
-      const imageUrl = await generateVehicleImage(item.vehicleType, defaultCustomize);
-      setUser(prev => prev ? {
-        ...prev, fuel: Math.max(0, prev.fuel - item.price),
-        ownedItems: [...prev.ownedItems.filter(i => i !== item.id), item.id],
-        vehicleOwned: true, vehicleType: item.vehicleType, vehicleModel: item.name,
-        customize: defaultCustomize, vehicleImageUrl: imageUrl || undefined,
-      } : null);
-      return;
-    }
-
-    const key = ownedKey(user.vehicleType, item.id);
-    if (user.ownedItems.includes(key)) return;
-    const newOwnedItems = [...user.ownedItems, key];
-    const newCustomize = { ...user.customize };
-    if (item.type === 'paint' && item.color) newCustomize.paintColor = item.color;
-    if (item.id === 'beacons') newCustomize.hasBeacons = true;
-    if (item.id === 'bullbar') newCustomize.hasBullbar = true;
-    if (item.id === 'lightbar') newCustomize.hasLightBar = true;
-    if (item.id === 'xenon') newCustomize.hasXenon = true;
-    if (item.id === 'spoiler') newCustomize.hasSpoiler = true;
-    if (WHEEL_IDS.includes(item.id)) newCustomize.wheelType = WHEEL_TYPE_MAP[item.id] || 'standard';
-    if (item.id === 'running_board') newCustomize.hasRunningBoard = true;
-    if (item.id === 'visor') newCustomize.hasVisor = true;
-    if (item.id === 'tuning_bumper') newCustomize.hasTuningBumper = true;
-    if (item.id === 'neon_kit') newCustomize.hasNeonKit = true;
-    if (item.id === 'widebody_kit') newCustomize.hasWideBodyKit = true;
-    if (item.id === 'hood_scoop') newCustomize.hasHood = true;
-    if (item.id === 'exhaust') newCustomize.hasExhaust = true;
-
-    let imageUrl: string | null = null;
-    if (user.vehicleOwned) imageUrl = await generateVehicleImage(user.vehicleType, newCustomize);
-    setUser(prev => prev ? {
-      ...prev, fuel: Math.max(0, prev.fuel - item.price),
-      ownedItems: newOwnedItems, customize: newCustomize,
-      vehicleImageUrl: imageUrl || prev.vehicleImageUrl,
-    } : null);
-  };
 
   const handleLogin = async () => {
     if (!pseudoInput.trim() || !passwordInput.trim()) return;
@@ -487,7 +392,6 @@ export default function RouteMaster() {
     setCurrentQuestions(shuffleArray(available));
     setCurrentQuestionIndex(0);
     setQuizScore(0);
-    setCorrectStreak(0);
     setQuizFinished(false);
     setView('quiz');
   };
@@ -503,22 +407,13 @@ export default function RouteMaster() {
 
     if (correct) {
       setQuizScore(prev => prev + 1);
-      setCorrectStreak(prev => prev + 1);
-      const newStreak = correctStreak + 1;
-      let fuelGain = FUEL_PER_CORRECT_ANSWER;
-      let pointsGain = POINTS_PER_CORRECT_ANSWER;
-      if (newStreak > 1) {
-        fuelGain += STREAK_BONUS_FUEL;
-        pointsGain += STREAK_BONUS_POINTS;
-      }
       setUser(prev => prev ? ({
         ...prev,
-        fuel: Math.min(prev.fuel + fuelGain, MAX_FUEL),
-        points: Math.min(prev.points + pointsGain, MAX_POINTS),
+        fuel: Math.min(prev.fuel + FUEL_PER_CORRECT_ANSWER, MAX_FUEL),
+        points: Math.min(prev.points + POINTS_PER_CORRECT_ANSWER, MAX_POINTS),
         answeredQuestions: updatedAnswered
       }) : null);
     } else {
-      setCorrectStreak(0);
       setUser(prev => prev ? ({ ...prev, answeredQuestions: updatedAnswered }) : null);
     }
   };
@@ -554,10 +449,11 @@ export default function RouteMaster() {
     }
   };
 
+  const subjectsList = Array.from(new Set([...Object.keys(subjectNames), ...chapters.map(c => c.subject)]));
+
   return (
     <div className="min-h-screen bg-black text-zinc-300 font-sans selection:bg-emerald-500/30">
-      {/* HEADER */}
-      <header className="bg-zinc-900 border-b border-zinc-800 p-3 md:p-4 sticky top-0 z-50">
+      <header className="bg-zinc-900 border-b border-zinc-800 p-4 sticky top-0 z-50">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-2">
             {view !== 'identification' && view !== 'home' && (
@@ -567,7 +463,7 @@ export default function RouteMaster() {
             )}
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => setView(user ? 'home' : 'identification')}>
               <Truck className="text-emerald-500 w-7 h-7" />
-              <h1 className="text-lg font-bold tracking-tighter text-white uppercase italic">RouteMaster <span className="text-emerald-500">CRM</span></h1>
+              <h1 className="text-lg font-bold text-white uppercase italic">RouteMaster <span className="text-emerald-500">CRM</span></h1>
             </div>
           </div>
           
@@ -591,7 +487,6 @@ export default function RouteMaster() {
         </div>
       </header>
 
-      {/* MAIN CONTAINER */}
       <main className="max-w-4xl mx-auto px-4 pb-24 pt-4">
         {view === 'identification' && (
           <div className="flex flex-col items-center justify-center py-12 gap-6 text-center max-w-sm mx-auto">
@@ -671,7 +566,6 @@ export default function RouteMaster() {
         {view === 'ranking' && (
           <div className="space-y-6 py-4">
             <h2 className="text-2xl font-bold text-white">Classement Général</h2>
-            <p className="text-zinc-500 text-xs">Cliquez sur un joueur pour inspecter son véhicule</p>
             <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
               {[...users].sort((a, b) => b.points - a.points).map((r, i) => (
                 <div 
@@ -699,51 +593,18 @@ export default function RouteMaster() {
         {view === 'shop' && (
           <div className="space-y-6 py-4">
             <h2 className="text-2xl font-bold text-white">Boutique RouteMaster</h2>
-            {user?.vehicleOwned && (
-              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-                <h3 className="text-lg font-bold text-white mb-4">Mon Véhicule — {user.vehicleModel}</h3>
-                <div className="w-full aspect-video bg-zinc-800 rounded-xl overflow-hidden flex items-center justify-center relative">
-                  {isGeneratingVehicle ? (
-                    <div className="flex flex-col items-center gap-2 text-zinc-400">
-                      <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
-                      <span>Génération de votre véhicule...</span>
-                    </div>
-                  ) : user.vehicleImageUrl ? (
-                    <img src={user.vehicleImageUrl} alt={user.vehicleModel} className="w-full h-full object-cover" />
-                  ) : (
-                    <Truck className="w-16 h-16 text-zinc-700" />
-                  )}
-                </div>
-                <button onClick={handleRegenerateImage} disabled={isGeneratingVehicle} className="mt-3 flex items-center gap-2 px-4 py-2 bg-zinc-800 text-emerald-500 rounded-xl border border-zinc-700 text-sm font-bold">
-                  <RefreshCw className={'w-4 h-4 ' + (isGeneratingVehicle ? 'animate-spin' : '')} /> Régénérer l'image
-                </button>
-              </div>
-            )}
-
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {SHOP_ITEMS.map(item => {
-                const isVeh = item.type === 'vehicle';
-                const owned = isVeh ? user?.ownedItems.includes(item.id) : (user ? ownsForVehicle(user, item.id) : false);
-                const equipped = !isVeh && owned ? isItemEquipped(item) : false;
-
-                return (
-                  <div key={item.id} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex flex-col justify-between gap-4">
-                    <div>
-                      <h4 className="text-lg font-bold text-white">{item.name}</h4>
-                      <p className="text-orange-500 font-bold">{item.price} L</p>
-                    </div>
-                    {owned && !isVeh ? (
-                      <button onClick={() => handleToggleItem(item)} className={'w-full py-2.5 rounded-xl font-bold ' + (equipped ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400')}>
-                        {equipped ? 'RETIRER' : 'ÉQUIPER'}
-                      </button>
-                    ) : (
-                      <button onClick={() => handleBuyItem(item)} disabled={!user || user.fuel < item.price} className="w-full py-2.5 bg-emerald-500 text-black font-bold rounded-xl disabled:bg-zinc-800 disabled:text-zinc-600">
-                        ACHETER
-                      </button>
-                    )}
+              {SHOP_ITEMS.map(item => (
+                <div key={item.id} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex flex-col justify-between gap-4">
+                  <div>
+                    <h4 className="text-lg font-bold text-white">{item.name}</h4>
+                    <p className="text-orange-500 font-bold">{item.price} L</p>
                   </div>
-                );
-              })}
+                  <button disabled={!user || user.fuel < item.price} className="w-full py-2.5 bg-emerald-500 text-black font-bold rounded-xl disabled:bg-zinc-800 disabled:text-zinc-600">
+                    ACHETER
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -761,71 +622,164 @@ export default function RouteMaster() {
             ) : (
               <div className="space-y-6">
                 <h2 className="text-2xl font-bold text-white">Espace Professeur</h2>
-                
-                <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-4">
-                  <h3 className="text-lg font-bold text-white">Gestion des Chapitres</h3>
-                  <div className="divide-y divide-zinc-800">
-                    {chapters.map(c => {
-                      const key = getChapterKey(c);
-                      const isVis = chapterDocs[key]?.isVisible ?? true;
-                      const hasDoc = !!chapterDocs[key]?.docUrl;
-                      const isRenaming = renamingTitle === c.title;
 
-                      return (
-                        <div key={c.title} className="py-3 flex items-center justify-between gap-2">
-                          <div className="flex-1">
-                            {isRenaming ? (
-                              <div className="flex items-center gap-2">
-                                <input type="text" value={renameValue} onChange={e => setRenameValue(e.target.value)} className="bg-zinc-800 border border-emerald-500 px-3 py-1 text-white rounded-lg text-sm" autoFocus />
-                                <button onClick={() => handleRenameChapter(c, renameValue)} className="p-1 bg-emerald-500 text-black rounded"><Save className="w-4 h-4" /></button>
-                                <button onClick={() => setRenamingTitle(null)} className="p-1 bg-zinc-700 text-white rounded"><X className="w-4 h-4" /></button>
-                              </div>
-                            ) : (
-                              <div>
-                                <p className="text-white font-medium text-sm md:text-base">{c.title}</p>
-                                <p className="text-zinc-500 text-[11px] uppercase tracking-wider">{c.level} • {c.subject}</p>
-                              </div>
-                            )}
-                          </div>
-
-                          <div className="flex items-center gap-1">
-                            <button 
-                              onClick={() => toggleChapterVisibility(c)}
-                              className={'p-2 rounded-lg transition-colors ' + (isVis ? 'text-emerald-400 hover:bg-emerald-500/10' : 'text-zinc-600 hover:bg-zinc-800')}
-                              title={isVis ? "Visible (cliquer pour masquer)" : "Masqué (cliquer pour publier)"}
-                            >
-                              {isVis ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                            </button>
-
-                            <label 
-                              className={'p-2 rounded-lg cursor-pointer transition-colors ' + (hasDoc ? 'text-blue-400 hover:bg-blue-500/10' : 'text-zinc-500 hover:bg-zinc-800')}
-                              title={hasDoc ? "Document joint (cliquer pour remplacer)" : "Joindre un PDF"}
-                            >
-                              {uploadingTitle === c.title ? <Loader2 className="w-4 h-4 animate-spin text-emerald-400" /> : <Paperclip className="w-4 h-4" />}
-                              <input type="file" accept=".pdf" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleUploadPDF(c, f); }} />
-                            </label>
-
-                            <button 
-                              onClick={() => { setRenamingTitle(c.title); setRenameValue(c.title); }}
-                              className="p-2 text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800 rounded-lg"
-                              title="Renommer"
-                            >
-                              <Edit3 className="w-4 h-4" />
-                            </button>
-
-                            <button 
-                              onClick={() => setChapters(prev => prev.filter(ch => ch.title !== c.title))}
-                              className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg"
-                              title="Supprimer"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                {/* ONGLETS PROF */}
+                <div className="flex gap-2 p-1 bg-zinc-900 rounded-xl border border-zinc-800">
+                  <button onClick={() => setProfTab('chapters')} className={'flex-1 py-2 rounded-lg font-bold text-sm ' + (profTab === 'chapters' ? 'bg-emerald-500 text-black' : 'text-zinc-500')}>Chapitres</button>
+                  <button onClick={() => setProfTab('subjects')} className={'flex-1 py-2 rounded-lg font-bold text-sm ' + (profTab === 'subjects' ? 'bg-emerald-500 text-black' : 'text-zinc-500')}>Matières</button>
+                  <button onClick={() => setProfTab('share')} className={'flex-1 py-2 rounded-lg font-bold text-sm ' + (profTab === 'share' ? 'bg-emerald-500 text-black' : 'text-zinc-500')}>Partager</button>
                 </div>
+
+                {/* ONGLET MATIERES */}
+                {profTab === 'subjects' && (
+                  <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-4">
+                    <h3 className="text-lg font-bold text-white">Ajouter une Matière</h3>
+                    <div className="flex gap-2">
+                      <input 
+                        type="text" 
+                        placeholder="Nom de la nouvelle matière (ex: Sécurité Routière)" 
+                        value={newSubjectInput} 
+                        onChange={e => setNewSubjectInput(e.target.value)} 
+                        className="flex-1 bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm" 
+                      />
+                      <button 
+                        onClick={() => {
+                          if (!newSubjectInput.trim()) return;
+                          setSubjectNames(prev => ({ ...prev, [newSubjectInput.trim()]: newSubjectInput.trim() }));
+                          setNewSubjectInput('');
+                          alert('Matière ajoutée !');
+                        }} 
+                        className="p-2.5 bg-emerald-500 text-black rounded-xl"
+                      >
+                        <Plus className="w-5 h-5" />
+                      </button>
+                    </div>
+                    <div className="divide-y divide-zinc-800 pt-4">
+                      {subjectsList.map(s => (
+                        <div key={s} className="py-2.5 flex justify-between items-center text-white">
+                          <span>{subjectNames[s] || s}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ONGLET CHAPITRES */}
+                {profTab === 'chapters' && (
+                  <div className="space-y-6">
+                    {/* FORMULAIRE AJOUTER UN CHAPITRE */}
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-4">
+                      <h3 className="text-lg font-bold text-white">Ajouter un Chapitre</h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <select 
+                          value={newChapter.level} 
+                          onChange={e => setNewChapter({ ...newChapter, level: e.target.value })}
+                          className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm"
+                        >
+                          {LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
+                        </select>
+                        <select 
+                          value={newChapter.subject} 
+                          onChange={e => setNewChapter({ ...newChapter, subject: e.target.value })}
+                          className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm"
+                        >
+                          {subjectsList.map(s => <option key={s} value={s}>{subjectNames[s] || s}</option>)}
+                        </select>
+                      </div>
+                      <div className="flex gap-2">
+                        <input 
+                          type="text" 
+                          placeholder="Titre du chapitre (ex: Fiche 21 ou Bilan annuel)" 
+                          value={newChapter.title} 
+                          onChange={e => setNewChapter({ ...newChapter, title: e.target.value })} 
+                          className="flex-1 bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm" 
+                        />
+                        <button onClick={handleAddChapter} className="p-2.5 bg-emerald-500 text-black rounded-xl hover:bg-emerald-400">
+                          <Plus className="w-6 h-6" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* LISTE DES CHAPITRES AVEC BOUTONS ACTIONS */}
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-4">
+                      <h3 className="text-lg font-bold text-white">Gestion des Chapitres</h3>
+                      <div className="divide-y divide-zinc-800">
+                        {chapters.map(c => {
+                          const key = getChapterKey(c);
+                          const isVis = chapterDocs[key]?.isVisible ?? true;
+                          const hasDoc = !!chapterDocs[key]?.docUrl;
+                          const isRenaming = renamingTitle === c.title;
+
+                          return (
+                            <div key={c.title} className="py-3 flex items-center justify-between gap-2">
+                              <div className="flex-1">
+                                {isRenaming ? (
+                                  <div className="flex items-center gap-2">
+                                    <input type="text" value={renameValue} onChange={e => setRenameValue(e.target.value)} className="bg-zinc-800 border border-emerald-500 px-3 py-1 text-white rounded-lg text-sm" autoFocus />
+                                    <button onClick={() => handleRenameChapter(c, renameValue)} className="p-1 bg-emerald-500 text-black rounded"><Save className="w-4 h-4" /></button>
+                                    <button onClick={() => setRenamingTitle(null)} className="p-1 bg-zinc-700 text-white rounded"><X className="w-4 h-4" /></button>
+                                  </div>
+                                ) : (
+                                  <div>
+                                    <p className="text-white font-medium text-sm md:text-base">{c.title}</p>
+                                    <p className="text-zinc-500 text-[11px] uppercase tracking-wider">{c.level} • {c.subject}</p>
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="flex items-center gap-1">
+                                <button 
+                                  onClick={() => toggleChapterVisibility(c)}
+                                  className={'p-2 rounded-lg transition-colors ' + (isVis ? 'text-emerald-400 hover:bg-emerald-500/10' : 'text-zinc-600 hover:bg-zinc-800')}
+                                  title={isVis ? "Visible (cliquer pour masquer)" : "Masqué (cliquer pour publier)"}
+                                >
+                                  {isVis ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                                </button>
+
+                                <label 
+                                  className={'p-2 rounded-lg cursor-pointer transition-colors ' + (hasDoc ? 'text-blue-400 hover:bg-blue-500/10' : 'text-zinc-500 hover:bg-zinc-800')}
+                                  title={hasDoc ? "Document joint (cliquer pour remplacer)" : "Joindre un PDF"}
+                                >
+                                  {uploadingTitle === c.title ? <Loader2 className="w-4 h-4 animate-spin text-emerald-400" /> : <Paperclip className="w-4 h-4" />}
+                                  <input type="file" accept=".pdf" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleUploadPDF(c, f); }} />
+                                </label>
+
+                                <button 
+                                  onClick={() => { setRenamingTitle(c.title); setRenameValue(c.title); }}
+                                  className="p-2 text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800 rounded-lg"
+                                  title="Renommer"
+                                >
+                                  <Edit3 className="w-4 h-4" />
+                                </button>
+
+                                <button 
+                                  onClick={() => handleDeleteChapter(c)}
+                                  className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg"
+                                  title="Supprimer"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* ONGLET PARTAGER */}
+                {profTab === 'share' && (
+                  <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 flex flex-col items-center gap-6 text-center">
+                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                      <QrCode className="text-emerald-500" /> Partager l'application
+                    </h3>
+                    <div className="bg-white p-4 rounded-xl">
+                      <QRCodeCanvas value={shareUrl} size={200} />
+                    </div>
+                    <p className="text-zinc-400 text-sm">{shareUrl}</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -865,27 +819,6 @@ export default function RouteMaster() {
         )}
       </main>
 
-      {/* MODAL VÉHICULE JOUEUR */}
-      {viewingUser && (
-        <div className="fixed inset-0 z-[120] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setViewingUser(null)}>
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 max-w-lg w-full" onClick={e => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <Truck className="text-emerald-500 w-5 h-5" /> Véhicule de {viewingUser.pseudo}
-              </h3>
-              <button onClick={() => setViewingUser(null)} className="p-1 text-zinc-400 hover:text-white"><X className="w-5 h-5" /></button>
-            </div>
-            {viewingUser.vehicleOwned ? (
-              <div className="w-full aspect-video bg-zinc-800 rounded-xl overflow-hidden mb-2">
-                {viewingUser.vehicleImageUrl ? <img src={viewingUser.vehicleImageUrl} alt="Véhicule" className="w-full h-full object-cover" /> : <Truck className="w-12 h-12 text-zinc-700 m-auto mt-12" />}
-              </div>
-            ) : (
-              <p className="text-zinc-500 text-center py-6">Ce joueur n'a pas encore de véhicule.</p>
-            )}
-          </div>
-        </div>
-      )}
-
       {/* LISEUSE PDF SÉCURISÉE */}
       {pdfViewer && (
         <div className="fixed inset-0 z-[120] bg-black/90 backdrop-blur-md flex flex-col p-3 md:p-6" onClick={() => setPdfViewer(null)}>
@@ -901,7 +834,7 @@ export default function RouteMaster() {
         </div>
       )}
 
-      {/* NAVIGATION DU BAS (TOUTES LES ICÔNES) */}
+      {/* NAVIGATION DU BAS */}
       {user && (
         <nav className="fixed bottom-0 left-0 right-0 bg-zinc-900/90 backdrop-blur-md border-t border-zinc-800 p-3 flex justify-around z-50">
           <button onClick={() => setView('home')} className={'p-2 ' + (view === 'home' ? 'text-emerald-500' : 'text-zinc-500')}><Home className="w-6 h-6" /></button>
