@@ -35,7 +35,10 @@ import {
   RefreshCw,
   ToggleLeft,
   ToggleRight,
-  AlertTriangle
+  AlertTriangle,
+  Paperclip,
+  EyeOff,
+  FileText
 } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -44,6 +47,7 @@ import { ALL_QUESTIONS, INITIAL_CHAPTERS, INITIAL_SUBJECT_NAMES } from '../data/
 import { FUEL_PER_CORRECT_ANSWER, POINTS_PER_CORRECT_ANSWER, STREAK_BONUS_FUEL, STREAK_BONUS_POINTS, INITIAL_FUEL, MAX_FUEL, MAX_POINTS } from '../constants';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfiles } from '@/hooks/useProfiles';
+import { useChapterMeta, chapterKey } from '@/hooks/useChapterMeta';
 
 const LEVELS = ['2ndes CRM', '1ères CRM', 'Terminales CRM'];
 
