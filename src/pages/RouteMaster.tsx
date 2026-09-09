@@ -21,7 +21,6 @@ import {
   Loader2, 
   Eye, 
   X, 
-  RefreshCw, 
   Paperclip, 
   EyeOff, 
   FileText 
@@ -78,7 +77,7 @@ export default function RouteMaster() {
   const [selectedChapter, setSelectedChapter] = useState<string | null>(null);
 
   const [subjectNames, setSubjectNames] = useState<Record<string, string>>(() => {
-    return INITIAL_SUBJECT_NAMES;
+    return { ...INITIAL_SUBJECT_NAMES, cours: 'Cours', Cours: 'Cours', COURS: 'Cours' };
   });
 
   const [chapters, setChapters] = useState<Chapter[]>(() => {
@@ -94,32 +93,48 @@ export default function RouteMaster() {
   const [users, setUsers] = useState<User[]>([]);
   const [viewingUser, setViewingUser] = useState<User | null>(null);
 
-  // Synchronisation directe avec Supabase (priorité absolue à la base de données)
+  const getChapterKey = (c: { level: string; subject: string; title: string }) => {
+    return c.level.trim() + '__' + c.subject.trim().toLowerCase() + '__' + c.title.trim();
+  };
+
+  // Chargement ultra-robuste depuis Supabase
   useEffect(() => {
-    supabase.from('chapters').select('*').then(({ data }) => {
-      if (data && data.length > 0) {
-        const loadedChapters = data.map((d: any) => ({
-          level: (d.level || '1ères CRM').trim(),
-          subject: (d.subject ? d.subject.trim() : 'Cours'),
+    const loadSupabaseData = async () => {
+      let result = await supabase.from('chapters').select('*');
+      if (!result.data || result.data.length === 0) {
+        result = await (supabase.from('Chapitres') as any).select('*');
+      }
+
+      if (result.data && result.data.length > 0) {
+        const loadedChapters = result.data.map((d: any) => ({
+          level: (d.level || d.niveau || '1ères CRM').trim(),
+          subject: (d.subject || d.sujet || 'Cours').trim(),
           title: (d.title || d.titre || '').trim()
         }));
-        setChapters(loadedChapters);
+
+        // Fusionner les données de Supabase avec les chapitres de base
+        setChapters(prev => {
+          const map = new Map();
+          [...prev, ...loadedChapters].forEach(item => {
+            map.set(item.level + '__' + item.subject.toLowerCase() + '__' + item.title, item);
+          });
+          return Array.from(map.values());
+        });
 
         const loadedDocs: Record<string, { docUrl?: string; isVisible: boolean }> = {};
-        data.forEach((d: any) => {
-          const key = (d.level || '1ères CRM').trim() + '__' + (d.subject ? d.subject.trim() : 'Cours').toLowerCase() + '__' + (d.title || d.titre || '').trim();
+        result.data.forEach((d: any) => {
+          const key = (d.level || d.niveau || '1ères CRM').trim() + '__' + (d.subject || d.sujet || 'Cours').trim().toLowerCase() + '__' + (d.title || d.titre || '').trim();
           loadedDocs[key] = {
             docUrl: d.document_url || undefined,
             isVisible: d.est_visible !== false
           };
         });
-        setChapterDocs(loadedDocs);
+        setChapterDocs(prev => ({ ...prev, ...loadedDocs }));
       }
-    });
+    };
 
-    fetchAllUsers().then(dbUsers => {
-      setUsers(dbUsers);
-    });
+    loadSupabaseData();
+    fetchAllUsers().then(dbUsers => setUsers(dbUsers));
   }, [fetchAllUsers]);
 
   const [user, setUser] = useState<User | null>(() => {
@@ -165,10 +180,6 @@ export default function RouteMaster() {
   const [uploadingTitle, setUploadingTitle] = useState<string | null>(null);
   const [renamingTitle, setRenamingTitle] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState('');
-
-  const getChapterKey = (c: { level: string; subject: string; title: string }) => {
-    return c.level.trim() + '__' + c.subject.trim().toLowerCase() + '__' + c.title.trim();
-  };
 
   const handleAddChapter = async () => {
     if (!newChapter.title.trim()) {
@@ -555,12 +566,14 @@ export default function RouteMaster() {
           </div>
         )}
 
-        {/* VUE MATIÈRES (FILTRAGE FIABILISÉ À 100%) */}
+        {/* AFFICHAGE DES MATIERES COMPLET ET DYNAMIQUE */}
         {view === 'subjects' && (() => {
+          const matchedChapters = chapters.filter(c => 
+            c.level.trim().toLowerCase() === selectedLevel?.trim().toLowerCase()
+          );
+
           const subjectsForThisLevel = Array.from(new Set(
-            chapters
-              .filter(c => c.level.trim().toLowerCase() === selectedLevel?.trim().toLowerCase())
-              .map(c => c.subject.trim())
+            matchedChapters.map(c => c.subject.trim())
           ));
 
           return (
@@ -568,8 +581,7 @@ export default function RouteMaster() {
               <h2 className="text-2xl font-bold text-white mb-4">Matières ({selectedLevel})</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {subjectsForThisLevel.map(subject => {
-                  const count = chapters.filter(c => 
-                    c.level.trim().toLowerCase() === selectedLevel?.trim().toLowerCase() && 
+                  const count = matchedChapters.filter(c => 
                     c.subject.trim().toLowerCase() === subject.toLowerCase() &&
                     (chapterDocs[getChapterKey(c)]?.isVisible !== false)
                   ).length;
