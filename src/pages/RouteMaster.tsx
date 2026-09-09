@@ -23,7 +23,9 @@ import {
   X, 
   Paperclip, 
   EyeOff, 
-  FileText 
+  FileText,
+  Copy,
+  Download
 } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { Question, Chapter, User } from '../types';
@@ -77,58 +79,84 @@ export default function RouteMaster() {
   const [selectedChapter, setSelectedChapter] = useState<string | null>(null);
 
   const [subjectNames, setSubjectNames] = useState<Record<string, string>>(() => {
-    return { ...INITIAL_SUBJECT_NAMES, Cours: 'Cours' };
+    const saved = localStorage.getItem('routemaster_subjects_v4');
+    return saved ? JSON.parse(saved) : { ...INITIAL_SUBJECT_NAMES, Cours: 'Cours', cours: 'Cours' };
   });
 
   const [chapters, setChapters] = useState<Chapter[]>(() => {
-    return INITIAL_CHAPTERS;
+    const saved = localStorage.getItem('routemaster_chapters_v4');
+    return saved ? JSON.parse(saved) : INITIAL_CHAPTERS;
   });
 
   const [questions, setQuestions] = useState<Question[]>(() => {
-    const saved = localStorage.getItem('routemaster_questions_v3');
+    const saved = localStorage.getItem('routemaster_questions_v4');
     return saved ? JSON.parse(saved) : ALL_QUESTIONS;
   });
 
-  const [chapterDocs, setChapterDocs] = useState<Record<string, { docUrl?: string; isVisible: boolean }>>({});
+  const [chapterDocs, setChapterDocs] = useState<Record<string, { docUrl?: string; isVisible: boolean }>>(() => {
+    const saved = localStorage.getItem('routemaster_docs_v4');
+    return saved ? JSON.parse(saved) : {};
+  });
+
   const [users, setUsers] = useState<User[]>([]);
   const [viewingUser, setViewingUser] = useState<User | null>(null);
+
+  // URL dynamique de partage (prend automatiquement l'adresse Vercel actuelle)
+  const appUrl = typeof window !== 'undefined' ? window.location.origin : 'https://routemastercrm.vercel.app';
 
   const getChapterKey = (c: { level: string; subject: string; title: string }) => {
     return c.level.trim() + '__' + c.subject.trim().toLowerCase() + '__' + c.title.trim();
   };
 
-  // Chargement depuis Supabase
+  // Synchronisation permanente dans le LocalStorage
+  useEffect(() => {
+    localStorage.setItem('routemaster_chapters_v4', JSON.stringify(chapters));
+  }, [chapters]);
+
+  useEffect(() => {
+    localStorage.setItem('routemaster_docs_v4', JSON.stringify(chapterDocs));
+  }, [chapterDocs]);
+
+  useEffect(() => {
+    localStorage.setItem('routemaster_subjects_v4', JSON.stringify(subjectNames));
+  }, [subjectNames]);
+
+  // Synchronisation avec Supabase
   useEffect(() => {
     const loadSupabaseData = async () => {
-      let result = await supabase.from('chapters').select('*');
-      if (!result.data || result.data.length === 0) {
-        result = await (supabase.from('Chapitres') as any).select('*');
-      }
+      try {
+        let result = await supabase.from('chapters').select('*');
+        if (!result.data || result.data.length === 0) {
+          result = await (supabase.from('Chapitres') as any).select('*');
+        }
 
-      if (result.data && result.data.length > 0) {
-        const loadedChapters = result.data.map((d: any) => ({
-          level: (d.level || d.niveau || '1ères CRM').trim(),
-          subject: (d.subject || d.sujet || 'Cours').trim(),
-          title: (d.title || d.titre || '').trim()
-        }));
+        if (result.data && result.data.length > 0) {
+          const loadedChapters = result.data.map((d: any) => ({
+            level: (d.level || d.niveau || '1ères CRM').trim(),
+            subject: (d.subject || d.sujet || 'Cours').trim(),
+            title: (d.title || d.titre || '').trim()
+          }));
 
-        setChapters(prev => {
-          const map = new Map();
-          [...prev, ...loadedChapters].forEach(item => {
-            map.set(item.level + '__' + item.subject.toLowerCase() + '__' + item.title, item);
+          setChapters(prev => {
+            const map = new Map();
+            [...prev, ...loadedChapters].forEach(item => {
+              map.set(item.level + '__' + item.subject.toLowerCase() + '__' + item.title, item);
+            });
+            return Array.from(map.values());
           });
-          return Array.from(map.values());
-        });
 
-        const loadedDocs: Record<string, { docUrl?: string; isVisible: boolean }> = {};
-        result.data.forEach((d: any) => {
-          const key = (d.level || d.niveau || '1ères CRM').trim() + '__' + (d.subject || d.sujet || 'Cours').trim().toLowerCase() + '__' + (d.title || d.titre || '').trim();
-          loadedDocs[key] = {
-            docUrl: d.document_url || undefined,
-            isVisible: d.est_visible !== false
-          };
-        });
-        setChapterDocs(prev => ({ ...prev, ...loadedDocs }));
+          const loadedDocs: Record<string, { docUrl?: string; isVisible: boolean }> = {};
+          result.data.forEach((d: any) => {
+            const key = (d.level || d.niveau || '1ères CRM').trim() + '__' + (d.subject || d.sujet || 'Cours').trim().toLowerCase() + '__' + (d.title || d.titre || '').trim();
+            loadedDocs[key] = {
+              docUrl: d.document_url || undefined,
+              isVisible: d.est_visible !== false
+            };
+          });
+          setChapterDocs(prev => ({ ...prev, ...loadedDocs }));
+        }
+      } catch (err) {
+        console.warn('Chargement Supabase fallback');
       }
     };
 
@@ -164,7 +192,6 @@ export default function RouteMaster() {
   const [profTab, setProfTab] = useState<'subjects' | 'chapters' | 'users' | 'share'>('chapters');
   const [newChapter, setNewChapter] = useState({ level: '2ndes CRM', subject: 'ETG', title: '' });
   const [newSubjectInput, setNewSubjectInput] = useState('');
-  const [shareUrl] = useState('https://routemastercrm.lovable.app');
 
   // Quiz State
   const [currentQuestions, setCurrentQuestions] = useState<Question[]>([]);
@@ -304,7 +331,6 @@ export default function RouteMaster() {
     }
   };
 
-  // Suppression d'une matière
   const handleDeleteSubject = (subj: string) => {
     if (!window.confirm('Supprimer la matière "' + subj + '" ?')) return;
     setSubjectNames(prev => {
@@ -503,7 +529,6 @@ export default function RouteMaster() {
     }
   };
 
-  // Liste unique de toutes les matières (sans doublons)
   const cleanSubjectsList = Array.from(new Set([
     ...Object.keys(subjectNames),
     ...chapters.map(c => c.subject)
@@ -580,12 +605,14 @@ export default function RouteMaster() {
           </div>
         )}
 
-        {/* VUE MATIERES ELEVE (AFFICHE TOUTES LES MATIERES CONTENANT DES COURS) */}
+        {/* VUE MATIERES ELEVE */}
         {view === 'subjects' && (() => {
+          const matchedChapters = chapters.filter(c => 
+            c.level.trim().toLowerCase() === selectedLevel?.trim().toLowerCase()
+          );
+
           const subjectsForThisLevel = Array.from(new Set(
-            chapters
-              .filter(c => c.level.trim().toLowerCase() === selectedLevel?.trim().toLowerCase())
-              .map(c => c.subject.trim())
+            matchedChapters.map(c => c.subject.trim())
           ));
 
           return (
@@ -598,8 +625,7 @@ export default function RouteMaster() {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {subjectsForThisLevel.map(subject => {
-                    const count = chapters.filter(c => 
-                      c.level.trim().toLowerCase() === selectedLevel?.trim().toLowerCase() && 
+                    const count = matchedChapters.filter(c => 
                       c.subject.trim().toLowerCase() === subject.toLowerCase() &&
                       (chapterDocs[getChapterKey(c)]?.isVisible !== false)
                     ).length;
@@ -852,7 +878,7 @@ export default function RouteMaster() {
                         <div className="flex gap-2">
                           <input 
                             type="text" 
-                            placeholder="Ex : Bilan de première, Fiche 21, Sécurité..." 
+                            placeholder="Ex : Bilan première, Fiche 21, Sécurité..." 
                             value={newChapter.title} 
                             onChange={e => setNewChapter({ ...newChapter, title: e.target.value })} 
                             className="flex-1 bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm" 
@@ -934,16 +960,58 @@ export default function RouteMaster() {
                   </div>
                 )}
 
-                {/* ONGLET PARTAGER */}
+                {/* ONGLET PARTAGER AVEC QR CODE DYNAMIQUE */}
                 {profTab === 'share' && (
-                  <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 flex flex-col items-center gap-6 text-center">
-                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                      <QrCode className="text-emerald-500" /> Partager l'application
-                    </h3>
-                    <div className="bg-white p-4 rounded-xl">
-                      <QRCodeCanvas value={shareUrl} size={200} />
+                  <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 md:p-8 flex flex-col items-center gap-6 text-center max-w-md mx-auto">
+                    <div className="space-y-2">
+                      <h3 className="text-xl font-bold text-white flex items-center justify-center gap-2">
+                        <QrCode className="text-emerald-500 w-6 h-6" /> Partager l'application
+                      </h3>
+                      <p className="text-zinc-400 text-xs md:text-sm">Affichez ce QR code en classe pour que vos élèves s'entraînent.</p>
                     </div>
-                    <p className="text-zinc-400 text-sm">{shareUrl}</p>
+
+                    <div className="bg-white p-4 rounded-2xl shadow-xl">
+                      <QRCodeCanvas 
+                        id="qr-code-canvas"
+                        value={appUrl} 
+                        size={220} 
+                        level="H" 
+                        includeMargin={true}
+                      />
+                    </div>
+
+                    <div className="space-y-3 w-full">
+                      <div className="p-3 bg-zinc-800 border border-zinc-700 rounded-xl text-xs text-zinc-300 font-mono break-all select-all">
+                        {appUrl}
+                      </div>
+
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => {
+                            navigator.clipboard.writeText(appUrl);
+                            alert('Lien copié dans le presse-papiers !');
+                          }}
+                          className="flex-1 py-2.5 bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5"
+                        >
+                          <Copy className="w-4 h-4" /> Copier le lien
+                        </button>
+                        <button 
+                          onClick={() => {
+                            const canvas = document.getElementById('qr-code-canvas') as HTMLCanvasElement;
+                            if (canvas) {
+                              const url = canvas.toDataURL('image/png');
+                              const a = document.createElement('a');
+                              a.download = 'routemaster-qrcode.png';
+                              a.href = url;
+                              a.click();
+                            }
+                          }}
+                          className="flex-1 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black rounded-xl text-xs font-bold flex items-center justify-center gap-1.5"
+                        >
+                          <Download className="w-4 h-4" /> Télécharger QR
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
