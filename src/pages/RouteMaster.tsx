@@ -101,14 +101,12 @@ export default function RouteMaster() {
   const [users, setUsers] = useState<User[]>([]);
   const [viewingUser, setViewingUser] = useState<User | null>(null);
 
-  // URL dynamique de partage (prend automatiquement l'adresse Vercel actuelle)
   const appUrl = typeof window !== 'undefined' ? window.location.origin : 'https://routemastercrm.vercel.app';
 
   const getChapterKey = (c: { level: string; subject: string; title: string }) => {
     return c.level.trim() + '__' + c.subject.trim().toLowerCase() + '__' + c.title.trim();
   };
 
-  // Synchronisation permanente dans le LocalStorage
   useEffect(() => {
     localStorage.setItem('routemaster_chapters_v4', JSON.stringify(chapters));
   }, [chapters]);
@@ -188,12 +186,10 @@ export default function RouteMaster() {
   const [profCodeInput, setProfCodeInput] = useState('');
   const [isProfAuthenticated, setIsProfAuthenticated] = useState(false);
 
-  // Espace Professeur
   const [profTab, setProfTab] = useState<'subjects' | 'chapters' | 'users' | 'share'>('chapters');
   const [newChapter, setNewChapter] = useState({ level: '2ndes CRM', subject: 'ETG', title: '' });
   const [newSubjectInput, setNewSubjectInput] = useState('');
 
-  // Quiz State
   const [currentQuestions, setCurrentQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [showResult, setShowResult] = useState(false);
@@ -201,11 +197,34 @@ export default function RouteMaster() {
   const [quizFinished, setQuizFinished] = useState(false);
   const [quizScore, setQuizScore] = useState(0);
 
-  // Actions Chapitres
   const [pdfViewer, setPdfViewer] = useState<{ title: string; url: string } | null>(null);
   const [uploadingTitle, setUploadingTitle] = useState<string | null>(null);
   const [renamingTitle, setRenamingTitle] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState('');
+
+  // Fonction universelle d'ouverture de cours PDF
+  const handleOpenDoc = async (c: Chapter) => {
+    let url = chapterDocs[getChapterKey(c)]?.docUrl;
+
+    // Si l'URL n'est pas en cache, on interroge Supabase en direct
+    if (!url) {
+      try {
+        let res = await supabase.from('chapters').select('document_url').eq('title', c.title).maybeSingle();
+        if (!res.data?.document_url) {
+          res = await (supabase.from('Chapitres') as any).select('document_url').eq('titre', c.title).maybeSingle();
+        }
+        url = res.data?.document_url;
+      } catch (e) {
+        console.warn('Erreur récupération direct doc');
+      }
+    }
+
+    if (url) {
+      setPdfViewer({ title: c.title, url: url + '#toolbar=0&navpanes=0&scrollbar=0' });
+    } else {
+      alert('Aucun document PDF n\'est encore attaché à ce chapitre. Vous pouvez le joindre depuis l\'Espace Professeur avec le trombone 📎.');
+    }
+  };
 
   const handleAddChapter = async () => {
     if (!newChapter.title.trim()) {
@@ -607,12 +626,10 @@ export default function RouteMaster() {
 
         {/* VUE MATIERES ELEVE */}
         {view === 'subjects' && (() => {
-          const matchedChapters = chapters.filter(c => 
-            c.level.trim().toLowerCase() === selectedLevel?.trim().toLowerCase()
-          );
-
           const subjectsForThisLevel = Array.from(new Set(
-            matchedChapters.map(c => c.subject.trim())
+            chapters
+              .filter(c => c.level.trim().toLowerCase() === selectedLevel?.trim().toLowerCase())
+              .map(c => c.subject.trim())
           ));
 
           return (
@@ -625,7 +642,8 @@ export default function RouteMaster() {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {subjectsForThisLevel.map(subject => {
-                    const count = matchedChapters.filter(c => 
+                    const count = chapters.filter(c => 
+                      c.level.trim().toLowerCase() === selectedLevel?.trim().toLowerCase() && 
                       c.subject.trim().toLowerCase() === subject.toLowerCase() &&
                       (chapterDocs[getChapterKey(c)]?.isVisible !== false)
                     ).length;
@@ -650,7 +668,7 @@ export default function RouteMaster() {
           );
         })()}
 
-        {/* VUE CHAPITRES ELEVE */}
+        {/* VUE CHAPITRES & COURS ELEVE AVEC CLIC DIRECT */}
         {view === 'chapters' && (
           <div className="space-y-4">
             <h2 className="text-2xl font-bold text-white mb-4">Chapitres & Cours</h2>
@@ -660,7 +678,6 @@ export default function RouteMaster() {
                 c.subject.trim().toLowerCase() === selectedSubject?.trim().toLowerCase() && 
                 (chapterDocs[getChapterKey(c)]?.isVisible !== false)
               ).map(c => {
-                const doc = chapterDocs[getChapterKey(c)]?.docUrl;
                 const chapterQuestions = questions.filter(q => 
                   q.level.trim().toLowerCase() === selectedLevel?.trim().toLowerCase() && 
                   q.subject.trim().toLowerCase() === selectedSubject?.trim().toLowerCase() && 
@@ -668,31 +685,42 @@ export default function RouteMaster() {
                 );
 
                 return (
-                  <div key={c.title} className="flex items-center justify-between p-4 bg-zinc-900 border border-zinc-800 rounded-xl hover:bg-zinc-850">
+                  <div 
+                    key={c.title} 
+                    onClick={() => {
+                      if (chapterQuestions.length > 0) {
+                        handleChapterSelect(c.title);
+                      } else {
+                        handleOpenDoc(c);
+                      }
+                    }}
+                    className="flex items-center justify-between p-4 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-emerald-500/50 hover:bg-zinc-850 cursor-pointer transition-all group"
+                  >
                     <div className="flex-1">
-                      <p className="text-white font-bold">{c.title}</p>
+                      <p className="text-white font-bold group-hover:text-emerald-400 transition-colors">{c.title}</p>
                       {chapterQuestions.length > 0 ? (
                         <p className="text-zinc-500 text-xs mt-0.5">{chapterQuestions.length} questions d'entraînement</p>
                       ) : (
-                        <p className="text-emerald-500 text-xs mt-0.5">📄 Support de cours disponible</p>
+                        <p className="text-emerald-400 text-xs mt-0.5 flex items-center gap-1">
+                          <FileText className="w-3.5 h-3.5" /> Support de cours disponible (Cliquer pour ouvrir)
+                        </p>
                       )}
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      {doc && (
-                        <button 
-                          onClick={() => setPdfViewer({ title: c.title, url: doc + '#toolbar=0&navpanes=0&scrollbar=0' })}
-                          className="flex items-center gap-1.5 px-3 py-2 bg-emerald-500 text-black rounded-lg text-xs font-bold hover:bg-emerald-400"
-                        >
-                          <FileText className="w-4 h-4" /> Consulter le cours
-                        </button>
-                      )}
+                    <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
+                      <button 
+                        onClick={() => handleOpenDoc(c)}
+                        className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-500 text-black rounded-lg text-xs font-bold hover:bg-emerald-400 transition-colors shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+                      >
+                        <FileText className="w-4 h-4" /> Consulter le cours
+                      </button>
+                      
                       {chapterQuestions.length > 0 && (
                         <button 
                           onClick={() => handleChapterSelect(c.title)}
                           className="px-3 py-2 bg-zinc-800 border border-zinc-700 text-white rounded-lg text-xs font-bold hover:border-emerald-500"
                         >
-                          Lancer le Quiz
+                          Quiz
                         </button>
                       )}
                     </div>
@@ -793,7 +821,7 @@ export default function RouteMaster() {
                   <button onClick={() => setProfTab('share')} className={'flex-1 py-2 rounded-lg font-bold text-sm ' + (profTab === 'share' ? 'bg-emerald-500 text-black' : 'text-zinc-500')}>Partager</button>
                 </div>
 
-                {/* ONGLET MATIERES AVEC BOUTON POUBELLE */}
+                {/* ONGLET MATIERES */}
                 {profTab === 'subjects' && (
                   <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-4">
                     <h3 className="text-lg font-bold text-white">Ajouter une Matière</h3>
@@ -960,7 +988,7 @@ export default function RouteMaster() {
                   </div>
                 )}
 
-                {/* ONGLET PARTAGER AVEC QR CODE DYNAMIQUE */}
+                {/* ONGLET PARTAGER */}
                 {profTab === 'share' && (
                   <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 md:p-8 flex flex-col items-center gap-6 text-center max-w-md mx-auto">
                     <div className="space-y-2">
