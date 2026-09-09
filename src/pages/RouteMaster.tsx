@@ -1005,7 +1005,11 @@ export default function RouteMaster() {
   };
 
   const ChaptersView = () => {
-    const currentChapters = chapters.filter(c => c.level === selectedLevel && c.subject === selectedSubject);
+    const currentChapters = chapters.filter(c =>
+      c.level === selectedLevel &&
+      c.subject === selectedSubject &&
+      (metaMap[chapterKey(c)]?.estVisible !== false)
+    );
     const now = Date.now();
     
     return (
