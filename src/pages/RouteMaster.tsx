@@ -270,6 +270,45 @@ export default function RouteMaster() {
   const [chapterEditingQuestion, setChapterEditingQuestion] = useState<Question | null>(null);
   const [chapterDraggedIdx, setChapterDraggedIdx] = useState<number | null>(null);
 
+  // Chapter documents / visibility (Lovable Cloud)
+  const { metaMap, uploadDocument, setVisibility, renameChapter: renameChapterMeta, getSignedUrl } = useChapterMeta();
+  const [pdfViewer, setPdfViewer] = useState<{ title: string; url: string } | null>(null);
+  const [pdfLoadingKey, setPdfLoadingKey] = useState<string | null>(null);
+  const [uploadingKey, setUploadingKey] = useState<string | null>(null);
+  const [renamingKey, setRenamingKey] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState('');
+
+  const openChapterDocument = async (c: Chapter) => {
+    const key = chapterKey(c);
+    const path = metaMap[key]?.documentUrl;
+    if (!path) return;
+    setPdfLoadingKey(key);
+    const url = await getSignedUrl(path);
+    setPdfLoadingKey(null);
+    if (url) setPdfViewer({ title: c.title, url: `${url}#toolbar=0&navpanes=0&scrollbar=0` });
+  };
+
+  const handleUploadChapterDoc = async (c: Chapter, file: File) => {
+    const key = chapterKey(c);
+    setUploadingKey(key);
+    await uploadDocument(c, file);
+    setUploadingKey(null);
+  };
+
+  const handleRenameChapter = async (c: Chapter, newTitle: string) => {
+    const title = newTitle.trim();
+    if (!title || title === c.title) { setRenamingKey(null); return; }
+    await renameChapterMeta(c, title);
+    setChapters(prev => prev.map(ch =>
+      ch.level === c.level && ch.subject === c.subject && ch.title === c.title ? { ...ch, title } : ch
+    ));
+    setQuestions(prev => prev.map(q =>
+      q.level === c.level && q.subject === c.subject && q.chapter === c.title ? { ...q, chapter: title } : q
+    ));
+    setRenamingKey(null);
+  };
+
+
   const handleSaveEditQuestion = () => {
     if (!editingQuestion) return;
     setQuestions(prev => prev.map(q => q.id === editingQuestion.id ? editingQuestion : q));
