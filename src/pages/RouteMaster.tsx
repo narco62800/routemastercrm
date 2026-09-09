@@ -36,7 +36,6 @@ import { useProfiles } from '@/hooks/useProfiles';
 const LEVELS = ['2ndes CRM', '1ères CRM', 'Terminales CRM'];
 const COOLDOWN_MS = 48 * 60 * 60 * 1000;
 
-// Boutique complète
 const SHOP_ITEMS = [
   { id: 'veh_car', name: 'Voiture de Tourisme', price: 1000, type: 'vehicle', vehicleType: 'car' },
   { id: 'veh_truck', name: 'Porteur (Camion)', price: 5000, type: 'vehicle', vehicleType: 'truck' },
@@ -92,24 +91,23 @@ export default function RouteMaster() {
   });
 
   const [chapterDocs, setChapterDocs] = useState<Record<string, { docUrl?: string; isVisible: boolean }>>({});
-
   const [users, setUsers] = useState<User[]>([]);
   const [viewingUser, setViewingUser] = useState<User | null>(null);
 
   // Synchronisation directe avec Supabase (priorité absolue à la base de données)
   useEffect(() => {
-    supabase.from('chapters').select('*').then(({ data, error }) => {
+    supabase.from('chapters').select('*').then(({ data }) => {
       if (data && data.length > 0) {
         const loadedChapters = data.map((d: any) => ({
-          level: d.level || '1ères CRM',
+          level: (d.level || '1ères CRM').trim(),
           subject: (d.subject ? d.subject.trim() : 'Cours'),
-          title: d.title || d.titre || ''
+          title: (d.title || d.titre || '').trim()
         }));
         setChapters(loadedChapters);
 
         const loadedDocs: Record<string, { docUrl?: string; isVisible: boolean }> = {};
         data.forEach((d: any) => {
-          const key = (d.level || '1ères CRM') + '__' + (d.subject ? d.subject.trim() : 'Cours') + '__' + (d.title || d.titre || '');
+          const key = (d.level || '1ères CRM').trim() + '__' + (d.subject ? d.subject.trim() : 'Cours').toLowerCase() + '__' + (d.title || d.titre || '').trim();
           loadedDocs[key] = {
             docUrl: d.document_url || undefined,
             isVisible: d.est_visible !== false
@@ -169,12 +167,19 @@ export default function RouteMaster() {
   const [renameValue, setRenameValue] = useState('');
 
   const getChapterKey = (c: { level: string; subject: string; title: string }) => {
-    return c.level + '__' + c.subject + '__' + c.title;
+    return c.level.trim() + '__' + c.subject.trim().toLowerCase() + '__' + c.title.trim();
   };
 
   const handleAddChapter = async () => {
-    if (!newChapter.title.trim()) return;
-    const chapterObj = { ...newChapter, title: newChapter.title.trim() };
+    if (!newChapter.title.trim()) {
+      alert('Veuillez entrer un titre pour ce chapitre.');
+      return;
+    }
+    const chapterObj = { 
+      level: newChapter.level.trim(),
+      subject: newChapter.subject.trim(),
+      title: newChapter.title.trim() 
+    };
 
     setChapters(prev => [...prev, chapterObj]);
 
@@ -196,6 +201,7 @@ export default function RouteMaster() {
     }
 
     setNewChapter({ ...newChapter, title: '' });
+    alert('✅ Chapitre "' + chapterObj.title + '" créé avec succès !');
   };
 
   const toggleChapterVisibility = async (c: Chapter) => {
@@ -254,10 +260,10 @@ export default function RouteMaster() {
     const newKey = getChapterKey({ ...c, title });
 
     setChapters(prev => prev.map(ch =>
-      ch.level === c.level && ch.subject === c.subject && ch.title === c.title ? { ...ch, title } : ch
+      ch.level === c.level && ch.subject.toLowerCase() === c.subject.toLowerCase() && ch.title === c.title ? { ...ch, title } : ch
     ));
     setQuestions(prev => prev.map(q =>
-      q.level === c.level && q.subject === c.subject && q.chapter === c.title ? { ...q, chapter: title } : q
+      q.level === c.level && q.subject.toLowerCase() === c.subject.toLowerCase() && q.chapter === c.title ? { ...q, chapter: title } : q
     ));
 
     setChapterDocs(prev => {
@@ -279,7 +285,7 @@ export default function RouteMaster() {
   };
 
   const handleDeleteChapter = async (c: Chapter) => {
-    if (!window.confirm('Supprimer ce chapitre ?')) return;
+    if (!window.confirm('Supprimer définitivement le chapitre "' + c.title + '" ?')) return;
     setChapters(prev => prev.filter(ch => ch.title !== c.title));
     try {
       await (supabase.from('chapters') as any).delete().eq('title', c.title);
@@ -288,7 +294,7 @@ export default function RouteMaster() {
     }
   };
 
-  // Générateur de Véhicule IA (Via Supabase)
+  // Véhicule IA
   const [isGeneratingVehicle, setIsGeneratingVehicle] = useState(false);
 
   const generateVehicleImage = useCallback(async (vehicleType: string, customize: User['customize']) => {
@@ -307,7 +313,7 @@ export default function RouteMaster() {
       if (error) throw error;
       return data?.imageUrl || null;
     } catch (err) {
-      console.error('Erreur génération véhicule IA:', err);
+      console.error('Erreur véhicule:', err);
       return null;
     } finally {
       setIsGeneratingVehicle(false);
@@ -320,7 +326,6 @@ export default function RouteMaster() {
       return;
     }
 
-    // Déduction des LITRES DE GAZOLE uniquement (les points ne changent pas)
     const newFuel = user.fuel - item.price;
 
     if (item.type === 'vehicle') {
@@ -344,7 +349,6 @@ export default function RouteMaster() {
         vehicleImageUrl: imageUrl || undefined
       }) : null);
     } else {
-      // Accessoire ou peinture
       const newCustomize = { ...user.customize };
       if (item.type === 'paint') newCustomize.paintColor = item.color;
       if (item.id === 'beacons') newCustomize.hasBeacons = true;
@@ -408,7 +412,9 @@ export default function RouteMaster() {
     setSelectedChapter(chapterTitle);
     const now = Date.now();
     const chapterQuestions = questions.filter(q => 
-      q.level === selectedLevel && q.subject.toLowerCase() === selectedSubject?.toLowerCase() && q.chapter === chapterTitle
+      q.level.trim().toLowerCase() === selectedLevel?.trim().toLowerCase() && 
+      q.subject.trim().toLowerCase() === selectedSubject?.trim().toLowerCase() && 
+      q.chapter === chapterTitle
     );
     const available = chapterQuestions.filter(q => {
       const answeredAt = user?.answeredQuestions[q.id];
@@ -476,7 +482,6 @@ export default function RouteMaster() {
     }
   };
 
-  // Liste unique de toutes les matières disponibles
   const subjectsList = Array.from(new Set([...Object.keys(subjectNames), ...chapters.map(c => c.subject)]));
 
   return (
@@ -550,32 +555,67 @@ export default function RouteMaster() {
           </div>
         )}
 
-        {view === 'subjects' && (
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-white mb-4">Matières ({selectedLevel})</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {Array.from(new Set(chapters.filter(c => c.level === selectedLevel).map(c => c.subject))).map(subject => (
-                <button key={subject} onClick={() => handleSubjectSelect(subject)} className="p-5 bg-zinc-900 border border-zinc-800 rounded-2xl hover:border-emerald-500 text-left font-bold text-lg text-white">
-                  {subjectNames[subject] || subject}
-                </button>
-              ))}
+        {/* VUE MATIÈRES (FILTRAGE FIABILISÉ À 100%) */}
+        {view === 'subjects' && (() => {
+          const subjectsForThisLevel = Array.from(new Set(
+            chapters
+              .filter(c => c.level.trim().toLowerCase() === selectedLevel?.trim().toLowerCase())
+              .map(c => c.subject.trim())
+          ));
+
+          return (
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold text-white mb-4">Matières ({selectedLevel})</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {subjectsForThisLevel.map(subject => {
+                  const count = chapters.filter(c => 
+                    c.level.trim().toLowerCase() === selectedLevel?.trim().toLowerCase() && 
+                    c.subject.trim().toLowerCase() === subject.toLowerCase() &&
+                    (chapterDocs[getChapterKey(c)]?.isVisible !== false)
+                  ).length;
+
+                  return (
+                    <button 
+                      key={subject} 
+                      onClick={() => handleSubjectSelect(subject)} 
+                      className="p-5 bg-zinc-900 border border-zinc-800 rounded-2xl hover:border-emerald-500 text-left font-bold text-lg text-white transition-all group flex justify-between items-center"
+                    >
+                      <div>
+                        <span>{subjectNames[subject] || subject.toUpperCase()}</span>
+                        <p className="text-xs text-zinc-500 font-normal mt-1">{count} chapitre(s) / cours</p>
+                      </div>
+                      <ChevronRight className="text-zinc-600 group-hover:text-emerald-500 transition-colors" />
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {view === 'chapters' && (
           <div className="space-y-4">
             <h2 className="text-2xl font-bold text-white mb-4">Chapitres</h2>
             <div className="space-y-3">
-              {chapters.filter(c => c.level === selectedLevel && c.subject.toLowerCase() === selectedSubject?.toLowerCase() && (chapterDocs[getChapterKey(c)]?.isVisible !== false)).map(c => {
+              {chapters.filter(c => 
+                c.level.trim().toLowerCase() === selectedLevel?.trim().toLowerCase() && 
+                c.subject.trim().toLowerCase() === selectedSubject?.trim().toLowerCase() && 
+                (chapterDocs[getChapterKey(c)]?.isVisible !== false)
+              ).map(c => {
                 const doc = chapterDocs[getChapterKey(c)]?.docUrl;
-                const chapterQuestions = questions.filter(q => q.level === selectedLevel && q.subject.toLowerCase() === selectedSubject?.toLowerCase() && q.chapter === c.title);
+                const chapterQuestions = questions.filter(q => 
+                  q.level.trim().toLowerCase() === selectedLevel?.trim().toLowerCase() && 
+                  q.subject.trim().toLowerCase() === selectedSubject?.trim().toLowerCase() && 
+                  q.chapter === c.title
+                );
 
                 return (
                   <div key={c.title} className="flex items-center justify-between p-4 bg-zinc-900 border border-zinc-800 rounded-xl hover:bg-zinc-850">
                     <button onClick={() => chapterQuestions.length > 0 && handleChapterSelect(c.title)} className="text-left flex-1 font-medium text-white">
                       {c.title}
-                      <span className="text-zinc-500 text-xs ml-2">({chapterQuestions.length} questions)</span>
+                      {chapterQuestions.length > 0 && (
+                        <span className="text-zinc-500 text-xs ml-2">({chapterQuestions.length} questions)</span>
+                      )}
                     </button>
                     {doc && (
                       <button 
@@ -723,40 +763,61 @@ export default function RouteMaster() {
                 {/* ONGLET CHAPITRES */}
                 {profTab === 'chapters' && (
                   <div className="space-y-6">
-                    {/* FORMULAIRE AJOUTER UN CHAPITRE */}
                     <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-4">
-                      <h3 className="text-lg font-bold text-white">Ajouter un Chapitre</h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <select 
-                          value={newChapter.level} 
-                          onChange={e => setNewChapter({ ...newChapter, level: e.target.value })}
-                          className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm"
-                        >
-                          {LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
-                        </select>
-                        <select 
-                          value={newChapter.subject} 
-                          onChange={e => setNewChapter({ ...newChapter, subject: e.target.value })}
-                          className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm"
-                        >
-                          {subjectsList.map(s => <option key={s} value={s}>{subjectNames[s] || s}</option>)}
-                        </select>
+                      <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                        <Plus className="text-emerald-500 w-5 h-5" /> Ajouter un nouveau Chapitre
+                      </h3>
+                      
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-xs font-bold text-zinc-400 block mb-1.5 uppercase tracking-wider">
+                            1. Choisissez la Classe / Niveau :
+                          </label>
+                          <select 
+                            value={newChapter.level} 
+                            onChange={e => setNewChapter({ ...newChapter, level: e.target.value })}
+                            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm focus:border-emerald-500"
+                          >
+                            {LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="text-xs font-bold text-zinc-400 block mb-1.5 uppercase tracking-wider">
+                            2. Choisissez la Matière (Discipline) :
+                          </label>
+                          <select 
+                            value={newChapter.subject} 
+                            onChange={e => setNewChapter({ ...newChapter, subject: e.target.value })}
+                            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm focus:border-emerald-500"
+                          >
+                            {subjectsList.map(s => <option key={s} value={s}>{subjectNames[s] || s}</option>)}
+                          </select>
+                        </div>
                       </div>
-                      <div className="flex gap-2">
-                        <input 
-                          type="text" 
-                          placeholder="Titre du chapitre (ex: Fiche 21 ou Bilan annuel)" 
-                          value={newChapter.title} 
-                          onChange={e => setNewChapter({ ...newChapter, title: e.target.value })} 
-                          className="flex-1 bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm" 
-                        />
-                        <button onClick={handleAddChapter} className="p-2.5 bg-emerald-500 text-black rounded-xl hover:bg-emerald-400">
-                          <Plus className="w-6 h-6" />
-                        </button>
+
+                      <div>
+                        <label className="text-xs font-bold text-zinc-400 block mb-1.5 uppercase tracking-wider">
+                          3. Titre du nouveau Chapitre (ou Fiche) :
+                        </label>
+                        <div className="flex gap-2">
+                          <input 
+                            type="text" 
+                            placeholder="Ex : Bilan de première, Fiche 21, Sécurité..." 
+                            value={newChapter.title} 
+                            onChange={e => setNewChapter({ ...newChapter, title: e.target.value })} 
+                            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm focus:border-emerald-500" 
+                          />
+                          <button 
+                            onClick={handleAddChapter} 
+                            className="px-5 py-2.5 bg-emerald-500 text-black font-bold rounded-xl hover:bg-emerald-400 flex items-center gap-1.5"
+                          >
+                            <Plus className="w-5 h-5" /> CRÉER
+                          </button>
+                        </div>
                       </div>
                     </div>
 
-                    {/* LISTE DES CHAPITRES AVEC BOUTONS ACTIONS */}
                     <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-4">
                       <h3 className="text-lg font-bold text-white">Gestion des Chapitres</h3>
                       <div className="divide-y divide-zinc-800">
