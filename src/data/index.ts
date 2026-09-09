@@ -32,7 +32,7 @@ export { INITIAL_CHAPTERS };
 export const INITIAL_SUBJECT_NAMES: Record<string, string> = {
   "ETG": "ETG",
   "Technologie véhicule": "Technologie véhicule",
-  "RSE": "RSE",
+  "RSE": "RSE","Cours": "Cours",
   "Fiches écrites C": "Fiches écrites C",
   "fiches orales C": "fiches orales C",
   "Fiches écrites CE": "Fiches écrites CE",
