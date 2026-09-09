@@ -1,5 +1,7 @@
 import { Question, Chapter } from '../types';
 import { INITIAL_CHAPTERS } from './chapters';
+{ level: "Terminales CRM", subject: "Cours", title: "Bilan première" },
+  { level: "1ères CRM", subject: "Cours", title: "Bilan première" },
 import { ETG_QUESTIONS } from './questions_etg';
 import { RSE_QUESTIONS } from './questions_rse';
 import { ECRITES_C_QUESTIONS } from './questions_ecrites_c';
