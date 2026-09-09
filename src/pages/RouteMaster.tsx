@@ -1,3 +1,4 @@
+```tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Truck, 
@@ -51,15 +52,15 @@ import { useChapterMeta, chapterKey } from '@/hooks/useChapterMeta';
 
 const LEVELS = ['2ndes CRM', '1ères CRM', 'Terminales CRM'];
 
-const COOLDOWN_MS = 48 * 60 * 60 * 1000; // 48 hours in ms
+const COOLDOWN_MS = 48 * 60 * 60 * 1000; // 48 heures en millisecondes
 
-// Shop items with vehicleType restriction for paint/accessories
+// Articles de la boutique
 const SHOP_ITEMS = [
-  // Vehicles
+  // Véhicules
   { id: 'veh_car', name: 'Voiture de Tourisme', price: 1000, type: 'vehicle', vehicleType: 'car' },
   { id: 'veh_truck', name: 'Porteur (Camion)', price: 5000, type: 'vehicle', vehicleType: 'truck' },
   { id: 'veh_articulated', name: 'Ensemble Articulé', price: 15000, type: 'vehicle', vehicleType: 'articulated' },
-  // Paints — Standard
+  // Peintures
   { id: 'paint_red', name: 'Peinture Rouge', price: 500, type: 'paint', color: '#ff0000' },
   { id: 'paint_blue', name: 'Peinture Bleue', price: 500, type: 'paint', color: '#0000ff' },
   { id: 'paint_gold', name: 'Peinture Or', price: 2000, type: 'paint', color: '#ffd700' },
@@ -70,7 +71,7 @@ const SHOP_ITEMS = [
   { id: 'paint_purple', name: 'Peinture Violet Cosmique', price: 1500, type: 'paint', color: '#9900ff' },
   { id: 'paint_matte_black', name: 'Peinture Noir Mat', price: 1200, type: 'paint', color: '#1a1a1a' },
   { id: 'paint_candy_red', name: 'Peinture Rouge Candy', price: 2500, type: 'paint', color: '#cc0033' },
-  // Paints — Fast & Furious style
+  // Peintures Fast & Furious
   { id: 'paint_ff_blue_flames', name: '🔥 Bleu Flammes (F&F)', price: 4000, type: 'paint', color: '#0044cc' },
   { id: 'paint_ff_green_neon', name: '🔥 Vert Néon (F&F)', price: 4000, type: 'paint', color: '#39ff14' },
   { id: 'paint_ff_orange_pearl', name: '🔥 Orange Pearl (Supra)', price: 5000, type: 'paint', color: '#ff6600' },
@@ -78,14 +79,14 @@ const SHOP_ITEMS = [
   { id: 'paint_ff_midnight_purple', name: '🔥 Midnight Purple (Skyline)', price: 6000, type: 'paint', color: '#4b0082' },
   { id: 'paint_ff_candy_lime', name: '🔥 Candy Lime Green', price: 5500, type: 'paint', color: '#32cd32' },
   { id: 'paint_ff_galaxy_blue', name: '🔥 Bleu Galaxy Métal', price: 7000, type: 'paint', color: '#1a237e' },
-  // Wheels — Premium brands
+  // Jantes
   { id: 'chrome_wheels', name: 'Jantes Chrome Standard', price: 2000, type: 'accessory' },
   { id: 'wheels_bbs', name: 'Jantes BBS RS', price: 6000, type: 'accessory' },
   { id: 'wheels_oz', name: 'Jantes OZ Racing', price: 5000, type: 'accessory' },
   { id: 'wheels_vossen', name: 'Jantes Vossen CVT', price: 7000, type: 'accessory' },
   { id: 'wheels_rotiform', name: 'Jantes Rotiform', price: 5500, type: 'accessory' },
   { id: 'wheels_work', name: 'Jantes Work Meister', price: 8000, type: 'accessory' },
-  // Accessories — Classic
+  // Accessoires
   { id: 'beacons', name: 'Gyrophares', price: 1500, type: 'accessory' },
   { id: 'bullbar', name: 'Pare-buffle', price: 1200, type: 'accessory' },
   { id: 'lightbar', name: 'Rampe de phares', price: 1800, type: 'accessory' },
@@ -93,7 +94,6 @@ const SHOP_ITEMS = [
   { id: 'spoiler', name: 'Aileron / Spoiler', price: 1000, type: 'accessory' },
   { id: 'running_board', name: 'Marchepieds Latéraux', price: 900, type: 'accessory' },
   { id: 'visor', name: 'Visière Pare-soleil', price: 600, type: 'accessory' },
-  // Accessories — Tuning
   { id: 'tuning_bumper', name: '🏎️ Pare-choc Tuning Sport', price: 3500, type: 'accessory' },
   { id: 'neon_kit', name: '💡 Kit Néon Underglow', price: 4500, type: 'accessory' },
   { id: 'widebody_kit', name: '🔧 Kit Widebody', price: 9000, type: 'accessory' },
@@ -101,17 +101,14 @@ const SHOP_ITEMS = [
   { id: 'exhaust', name: '🔊 Échappement Sport Double', price: 2500, type: 'accessory' },
 ];
 
-// Helper: get owned item key for a vehicle type
 function ownedKey(vehicleType: string, itemId: string) {
   return `${vehicleType}:${itemId}`;
 }
 
-// Helper: check if user owns an item for their current vehicle type
 function ownsForVehicle(user: User, itemId: string): boolean {
   return user.ownedItems.includes(ownedKey(user.vehicleType, itemId));
 }
 
-// Shuffle array (Fisher-Yates)
 function shuffleArray<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -150,11 +147,8 @@ export default function RouteMaster() {
 
   const [users, setUsers] = useState<User[]>([]);
   const [usersLoaded, setUsersLoaded] = useState(false);
-
-  // Modal to view another user's vehicle
   const [viewingUser, setViewingUser] = useState<User | null>(null);
 
-  // Load users from database on mount
   useEffect(() => {
     fetchAllUsers().then(dbUsers => {
       setUsers(dbUsers);
@@ -212,7 +206,7 @@ export default function RouteMaster() {
     return sessionStorage.getItem('routemaster_prof_auth') === 'true';
   });
 
-  // Quiz State
+  // État du Quiz
   const [currentQuestions, setCurrentQuestions] = useState<Question[]>(() => {
     const saved = sessionStorage.getItem('routemaster_current_questions');
     return saved ? JSON.parse(saved) : [];
@@ -232,7 +226,7 @@ export default function RouteMaster() {
   });
   const [correctStreak, setCorrectStreak] = useState(0);
 
-  // Prof Space State
+  // État de l'Espace Professeur
   const [editingSubject, setEditingSubject] = useState<string | null>(null);
   const [newSubjectName, setNewSubjectName] = useState('');
   const [profTab, setProfTab] = useState<'subjects' | 'chapters' | 'questions' | 'share' | 'users'>(() => {
@@ -260,7 +254,7 @@ export default function RouteMaster() {
   const [shortUrl, setShortUrl] = useState('');
   const [isGeneratingShortUrl, setIsGeneratingShortUrl] = useState(false);
 
-  // Question editor state
+  // Éditeur de questions
   const [profFilterSubject, setProfFilterSubject] = useState<string>('');
   const [profFilterChapter, setProfFilterChapter] = useState<string>('');
   const [profSearchText, setProfSearchText] = useState('');
@@ -270,7 +264,7 @@ export default function RouteMaster() {
   const [chapterEditingQuestion, setChapterEditingQuestion] = useState<Question | null>(null);
   const [chapterDraggedIdx, setChapterDraggedIdx] = useState<number | null>(null);
 
-  // Chapter documents / visibility (Lovable Cloud)
+  // Gestion des documents et de la visibilité des chapitres
   const { metaMap, uploadDocument, setVisibility, renameChapter: renameChapterMeta, getSignedUrl } = useChapterMeta();
   const [pdfViewer, setPdfViewer] = useState<{ title: string; url: string } | null>(null);
   const [pdfLoadingKey, setPdfLoadingKey] = useState<string | null>(null);
@@ -285,7 +279,9 @@ export default function RouteMaster() {
     setPdfLoadingKey(key);
     const url = await getSignedUrl(path);
     setPdfLoadingKey(null);
-    if (url) setPdfViewer({ title: c.title, url: `${url}#toolbar=0&navpanes=0&scrollbar=0` });
+    if (url) {
+      setPdfViewer({ title: c.title, url: `${url}#toolbar=0&navpanes=0&scrollbar=0` });
+    }
   };
 
   const handleUploadChapterDoc = async (c: Chapter, file: File) => {
@@ -308,7 +304,6 @@ export default function RouteMaster() {
     setRenamingKey(null);
   };
 
-
   const handleSaveEditQuestion = () => {
     if (!editingQuestion) return;
     setQuestions(prev => prev.map(q => q.id === editingQuestion.id ? editingQuestion : q));
@@ -320,7 +315,6 @@ export default function RouteMaster() {
     const newOptions = [...editingQuestion.options];
     const [moved] = newOptions.splice(fromIdx, 1);
     newOptions.splice(toIdx, 0, moved);
-    // Adjust correct answer index
     let newCorrect = editingQuestion.correct;
     if (editingQuestion.correct === fromIdx) {
       newCorrect = toIdx;
@@ -375,7 +369,6 @@ export default function RouteMaster() {
     sessionStorage.setItem('routemaster_new_question', JSON.stringify(newQuestion));
   }, [newQuestion]);
 
-  // Handlers
   const handleLogin = async () => {
     if (!pseudoInput.trim() || !passwordInput.trim()) return;
     
@@ -452,14 +445,12 @@ export default function RouteMaster() {
       q.chapter === chapterTitle
     );
     
-    // Filter out questions on 48h cooldown
     const availableQuestions = chapterQuestions.filter(q => {
       const answeredAt = user?.answeredQuestions[q.id];
       if (!answeredAt || typeof answeredAt !== 'number') return true;
       return (now - answeredAt) >= COOLDOWN_MS;
     });
 
-    // Shuffle randomly
     const shuffled = shuffleArray(availableQuestions);
     
     setCurrentQuestions(shuffled);
@@ -478,17 +469,14 @@ export default function RouteMaster() {
     setIsCorrect(correct);
     setShowResult(true);
 
-    // Record timestamp for 48h cooldown
     const updatedAnswered = { ...user.answeredQuestions, [question.id]: Date.now() };
 
     if (correct) {
       setQuizScore(prev => prev + 1);
       setCorrectStreak(prev => prev + 1);
       const newStreak = correctStreak + 1;
-      // Base reward: 15L + 50pts per correct answer
       let fuelGain = FUEL_PER_CORRECT_ANSWER;
       let pointsGain = POINTS_PER_CORRECT_ANSWER;
-      // Streak bonus: every answer in a streak without error gives +20L +50pts
       if (newStreak > 1) {
         fuelGain += STREAK_BONUS_FUEL;
         pointsGain += STREAK_BONUS_POINTS;
@@ -742,7 +730,7 @@ export default function RouteMaster() {
     }
   };
 
-  // Components
+  // Vue Identification
   const IdentificationView = () => (
     <div className="flex flex-col items-center justify-center py-8 md:py-12 gap-6 md:gap-8 text-center min-h-[80vh] px-4">
       <motion.div 
@@ -1026,7 +1014,6 @@ export default function RouteMaster() {
 
         <div className="grid grid-cols-1 gap-2 md:gap-3">
           {currentChapters.map((chapter) => {
-            // Count available questions (not on cooldown)
             const chapterQuestions = questions.filter(q => 
               q.level === selectedLevel && 
               q.subject === selectedSubject && 
@@ -1060,11 +1047,12 @@ export default function RouteMaster() {
                 {hasDoc && (
                   <button
                     onClick={(e) => { e.stopPropagation(); openChapterDocument(chapter); }}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 bg-blue-500/10 border border-blue-500/30 text-blue-400 rounded-lg text-[10px] md:text-xs font-bold hover:bg-blue-500/20 transition-colors flex-shrink-0"
+                    className="flex items-center gap-1.5 px-3 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-lg text-xs font-bold hover:bg-emerald-500/20 transition-colors flex-shrink-0"
+                    title="Lire le cours"
                   >
                     {pdfLoadingKey === ckey
-                      ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      : <FileText className="w-3.5 h-3.5" />}
+                      ? <Loader2 className="w-4 h-4 animate-spin" />
+                      : <FileText className="w-4 h-4" />}
                     Consulter le cours
                   </button>
                 )}
@@ -1142,7 +1130,7 @@ export default function RouteMaster() {
         </div>
 
         <div className="bg-zinc-900 border border-zinc-800 p-5 md:p-8 rounded-2xl md:rounded-3xl shadow-xl">
-          <h3 className="text-lg md:text-2xl font-bold text-white mb-6 md:mb-8 leading-tight">{question.text}</h3>
+          <h3 className="text-lg md:2xl font-bold text-white mb-6 md:mb-8 leading-tight">{question.text}</h3>
           
           <div className="grid grid-cols-1 gap-3">
             {question.options.map((option, idx) => (
@@ -1195,7 +1183,7 @@ export default function RouteMaster() {
     );
   };
 
-  // Vehicle viewer modal
+  // Modal du véhicule d'un joueur
   const VehicleModal = ({ targetUser, onClose }: { targetUser: User; onClose: () => void }) => (
     <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
       <motion.div 
@@ -1308,7 +1296,6 @@ export default function RouteMaster() {
   };
 
   const ShopView = () => {
-    // Show vehicles always; show paint/accessories only for current vehicle type
     const availableItems = SHOP_ITEMS.filter(item => {
       if (item.type === 'vehicle') return true;
       if (!user?.vehicleOwned) return false;
@@ -1330,7 +1317,6 @@ export default function RouteMaster() {
           <h2 className="text-xl md:text-2xl font-bold text-white">Boutique</h2>
         </div>
 
-        {/* Vehicle Display */}
         {user?.vehicleOwned && (
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 md:p-6">
             <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
@@ -1358,7 +1344,6 @@ export default function RouteMaster() {
                 </div>
               )}
             </div>
-            {/* Regenerate button */}
             <div className="mt-3 flex items-center gap-2">
               <button
                 onClick={handleRegenerateImage}
@@ -1378,25 +1363,6 @@ export default function RouteMaster() {
                 </span>
               )}
             </div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <span className="text-[10px] bg-zinc-800 text-zinc-400 px-2 py-1 rounded-full border border-zinc-700">
-                <Paintbrush className="w-3 h-3 inline mr-1" />
-                {user.customize.paintColor}
-              </span>
-              {user.customize.hasBullbar && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Pare-buffle</span>}
-              {user.customize.hasBeacons && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Gyrophares</span>}
-              {user.customize.hasLightBar && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Rampe phares</span>}
-              {user.customize.hasXenon && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Xénon</span>}
-              {user.customize.hasSpoiler && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Spoiler</span>}
-               {user.customize.wheelType && user.customize.wheelType !== 'standard' && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Jantes {user.customize.wheelType}</span>}
-              {user.customize.hasRunningBoard && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Marchepieds</span>}
-              {user.customize.hasVisor && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Visière</span>}
-              {user.customize.hasTuningBumper && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Pare-choc Tuning</span>}
-              {user.customize.hasNeonKit && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Néon</span>}
-              {user.customize.hasWideBodyKit && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Widebody</span>}
-              {user.customize.hasHood && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Capot Racing</span>}
-              {user.customize.hasExhaust && <span className="text-[10px] bg-zinc-800 text-emerald-400 px-2 py-1 rounded-full border border-zinc-700">Échappement Sport</span>}
-            </div>
           </div>
         )}
 
@@ -1408,7 +1374,7 @@ export default function RouteMaster() {
 
         {user?.vehicleOwned && (
           <div className="bg-blue-500/10 border border-blue-500/30 p-3 rounded-xl text-blue-400 text-xs font-medium">
-            🔧 Les peintures et accessoires achetés sont liés à votre véhicule actuel ({vehicleTypeLabel[user.vehicleType] || user.vehicleType}). Changer de véhicule nécessitera de débloquer à nouveau les éléments.
+            🔧 Les peintures et accessoires achetés sont liés à votre véhicule actuel ({vehicleTypeLabel[user.vehicleType] || user.vehicleType}).
           </div>
         )}
 
@@ -1443,9 +1409,6 @@ export default function RouteMaster() {
                     <h3 className="text-lg font-bold text-white">{item.name}</h3>
                     <span className="text-orange-500 font-bold">{item.price} L</span>
                   </div>
-                  {isCurrentVehicle && !owned && (
-                    <span className="text-[10px] text-yellow-500 font-medium">Véhicule actuel</span>
-                  )}
                 </div>
                 {owned && !isVehicle ? (
                   <button
@@ -1662,27 +1625,124 @@ export default function RouteMaster() {
                 <div className="p-8 text-center text-zinc-500 text-sm">Aucun chapitre enregistré.</div>
               ) : (
                 chapters.map((c, i) => {
-                  const chapterKey = `${c.level}|${c.subject}|${c.title}`;
-                  const isExpanded = expandedChapter === chapterKey;
+                  const ckey = chapterKey(c);
+                  const isExpanded = expandedChapter === ckey;
+                  const isEditing = renamingKey === ckey;
+                  const isVisible = metaMap[ckey]?.estVisible !== false;
+                  const hasDoc = !!metaMap[ckey]?.documentUrl;
+                  const isUploading = uploadingKey === ckey;
                   const chapterQuestions = questions.filter(q => q.level === c.level && q.subject === c.subject && q.chapter === c.title);
+
                   return (
                     <div key={i} className="border-b border-zinc-800 last:border-0">
                       <div 
                         className="flex items-center justify-between p-4 hover:bg-zinc-800/50 transition-colors cursor-pointer select-none"
-                        onDoubleClick={() => setExpandedChapter(isExpanded ? null : chapterKey)}
+                        onDoubleClick={() => setExpandedChapter(isExpanded ? null : ckey)}
                       >
                         <div className="flex-1 pr-4">
-                          <p className="text-white font-medium text-sm md:text-base flex items-center gap-2">
-                            <ChevronRight className={`w-4 h-4 text-zinc-500 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
-                            {c.title}
-                            <span className="text-zinc-500 text-xs font-normal">({chapterQuestions.length} questions)</span>
-                          </p>
-                          <p className="text-zinc-500 text-[10px] md:text-xs uppercase tracking-wider ml-6">{c.level} • {c.subject}</p>
+                          {isEditing ? (
+                            <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
+                              <input
+                                type="text"
+                                value={renameValue}
+                                onChange={(e) => setRenameValue(e.target.value)}
+                                className="bg-zinc-800 border border-emerald-500 text-white rounded-lg px-3 py-1 text-sm flex-1 outline-none"
+                                autoFocus
+                              />
+                              <button 
+                                onClick={() => handleRenameChapter(c, renameValue)} 
+                                className="p-1.5 bg-emerald-500 text-black rounded-lg hover:bg-emerald-400"
+                              >
+                                <Save className="w-4 h-4" />
+                              </button>
+                              <button 
+                                onClick={() => setRenamingKey(null)} 
+                                className="p-1.5 bg-zinc-700 text-zinc-300 rounded-lg hover:bg-zinc-600"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ) : (
+                            <>
+                              <p className="text-white font-medium text-sm md:text-base flex items-center gap-2">
+                                <ChevronRight className={`w-4 h-4 text-zinc-500 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                                {c.title}
+                                <span className="text-zinc-500 text-xs font-normal">({chapterQuestions.length} questions)</span>
+                              </p>
+                              <p className="text-zinc-500 text-[10px] md:text-xs uppercase tracking-wider ml-6">{c.level} • {c.subject}</p>
+                            </>
+                          )}
                         </div>
-                        <button onClick={(e) => { e.stopPropagation(); handleDeleteChapter(c.title); }} className="text-red-500 hover:bg-red-500/10 p-2 rounded-lg transition-colors">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+
+                        {/* ACTIONS PROFESSEUR */}
+                        <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
+                          {/* Masquer / Publier */}
+                          <button
+                            onClick={() => setVisibility(c, !isVisible)}
+                            className={`p-2 rounded-lg transition-colors ${isVisible ? 'text-emerald-500 hover:bg-emerald-500/10' : 'text-zinc-600 hover:bg-zinc-800'}`}
+                            title={isVisible ? "Visible par les élèves (cliquer pour masquer)" : "Masqué aux élèves (cliquer pour publier)"}
+                          >
+                            {isVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                          </button>
+
+                          {/* Attacher PDF */}
+                          <label 
+                            className={`p-2 rounded-lg cursor-pointer transition-colors ${
+                              hasDoc ? 'text-blue-400 hover:bg-blue-500/10' : 'text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300'
+                            }`}
+                            title={hasDoc ? "Document PDF joint (cliquer pour remplacer)" : "Joindre un document (PDF)"}
+                          >
+                            {isUploading ? (
+                              <Loader2 className="w-4 h-4 animate-spin text-emerald-500" />
+                            ) : (
+                              <Paperclip className="w-4 h-4" />
+                            )}
+                            <input 
+                              type="file" 
+                              accept=".pdf" 
+                              className="hidden" 
+                              disabled={isUploading}
+                              onChange={(e) => {
+                                const f = e.target.files?.[0];
+                                if (f) handleUploadChapterDoc(c, f);
+                              }}
+                            />
+                          </label>
+
+                          {/* Lire le document */}
+                          {hasDoc && (
+                            <button
+                              onClick={() => openChapterDocument(c)}
+                              className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors"
+                              title="Lire le cours"
+                            >
+                              <FileText className="w-4 h-4" />
+                            </button>
+                          )}
+
+                          {/* Renommer */}
+                          <button
+                            onClick={() => {
+                              setRenamingKey(ckey);
+                              setRenameValue(c.title);
+                            }}
+                            className="text-zinc-400 hover:text-emerald-500 hover:bg-zinc-800 p-2 rounded-lg transition-colors"
+                            title="Renommer le chapitre"
+                          >
+                            <Edit3 className="w-4 h-4" />
+                          </button>
+
+                          {/* Supprimer */}
+                          <button 
+                            onClick={() => handleDeleteChapter(c.title)} 
+                            className="text-red-500 hover:bg-red-500/10 p-2 rounded-lg transition-colors"
+                            title="Supprimer"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
+
                       {isExpanded && (
                         <div className="bg-zinc-950/50 border-t border-zinc-800">
                           {chapterQuestions.length === 0 ? (
@@ -1777,7 +1837,6 @@ export default function RouteMaster() {
 
         {profTab === 'questions' && (
           <div className="space-y-4 md:space-y-6">
-            {/* Add question form */}
             <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 md:p-6">
               <h3 className="text-lg font-bold text-white mb-4">Ajouter une Question</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-4">
@@ -1846,7 +1905,6 @@ export default function RouteMaster() {
               </button>
             </div>
 
-            {/* Filter & search */}
             <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 md:p-6">
               <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                 <Filter className="text-emerald-500 w-5 h-5" />
@@ -1882,20 +1940,9 @@ export default function RouteMaster() {
                   />
                 </div>
               </div>
-              <p className="text-zinc-500 text-xs">
-                {(() => {
-                  const filtered = questions.filter(q => {
-                    if (profFilterSubject && q.subject !== profFilterSubject) return false;
-                    if (profFilterChapter && q.chapter !== profFilterChapter) return false;
-                    if (profSearchText && !q.text.toLowerCase().includes(profSearchText.toLowerCase())) return false;
-                    return true;
-                  });
-                  return `${filtered.length} question(s) trouvée(s)`;
-                })()}
-              </p>
             </div>
 
-            {/* Edit modal */}
+            {/* Modal de modification de question */}
             {editingQuestion && (
               <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={() => setEditingQuestion(null)}>
                 <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
@@ -1981,7 +2028,7 @@ export default function RouteMaster() {
               </div>
             )}
 
-            {/* Questions list */}
+            {/* Liste des questions filtrées */}
             <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
               {(() => {
                 const filtered = questions.filter(q => {
@@ -2013,22 +2060,10 @@ export default function RouteMaster() {
                   </div>
                 ));
               })()}
-              {(() => {
-                const filtered = questions.filter(q => {
-                  if (profFilterSubject && q.subject !== profFilterSubject) return false;
-                  if (profFilterChapter && q.chapter !== profFilterChapter) return false;
-                  if (profSearchText && !q.text.toLowerCase().includes(profSearchText.toLowerCase())) return false;
-                  return true;
-                });
-                return filtered.length > 50 ? (
-                  <div className="p-3 text-center text-zinc-500 text-xs border-t border-zinc-800">
-                    Affichage limité aux 50 premières questions. Utilisez les filtres pour affiner.
-                  </div>
-                ) : null;
-              })()}
             </div>
           </div>
         )}
+
         {profTab === 'users' && (
           <div className="space-y-4 md:space-y-6">
             <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 md:p-6">
@@ -2110,16 +2145,12 @@ export default function RouteMaster() {
                   className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2 text-white text-[10px] md:text-sm font-mono focus:outline-none focus:border-emerald-500"
                   placeholder="https://..."
                 />
-                <p className="text-[10px] text-zinc-500 mt-1 italic">
-                  Si le QR code donne une erreur sur iPhone, c'est souvent dû à la longueur du lien. Utilisez le lien court ci-dessous.
-                </p>
               </div>
 
               {shortUrl ? (
                 <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-center">
                   <p className="text-xs text-zinc-400 mb-1 uppercase tracking-wider font-bold">Lien court alternatif</p>
                   <p className="text-xl md:text-2xl font-bold text-emerald-500 tracking-wider select-all">{shortUrl}</p>
-                  <p className="text-[10px] text-zinc-500 mt-2">À écrire au tableau pour les élèves qui ne peuvent pas scanner le QR Code.</p>
                 </div>
               ) : (
                 <button 
@@ -2137,33 +2168,25 @@ export default function RouteMaster() {
                       }
                     } catch (error) {
                       console.error('Error generating short URL:', error);
-                      alert('Erreur lors de la génération du lien court. Veuillez réessayer.');
+                      alert('Erreur lors de la génération du lien court.');
                     } finally {
                       setIsGeneratingShortUrl(false);
                     }
                   }}
                   disabled={isGeneratingShortUrl}
-                  className={`w-full py-2 rounded-xl transition-colors font-bold text-sm border ${
-                    isGeneratingShortUrl 
-                      ? 'bg-zinc-800 text-zinc-500 border-zinc-700 cursor-not-allowed' 
-                      : 'bg-zinc-800 text-emerald-500 hover:bg-zinc-700 border-zinc-700'
-                  }`}
+                  className="w-full py-2 rounded-xl transition-colors font-bold text-sm border bg-zinc-800 text-emerald-500 hover:bg-zinc-700 border-zinc-700"
                 >
-                  {isGeneratingShortUrl ? 'Génération en cours...' : 'Générer un lien court (pour écrire au tableau)'}
+                  {isGeneratingShortUrl ? 'Génération...' : 'Générer un lien court (pour tableau)'}
                 </button>
               )}
               
               <div className="flex flex-col sm:flex-row gap-3">
                 <button 
-                  onClick={() => {
-                    navigator.clipboard.writeText(shareUrl);
-                  }}
-                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-zinc-800 text-white rounded-xl hover:bg-zinc-700 transition-colors font-bold text-sm md:text-base"
+                  onClick={() => navigator.clipboard.writeText(shareUrl)}
+                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-zinc-800 text-white rounded-xl hover:bg-zinc-700 transition-colors font-bold text-sm"
                 >
-                  <Share2 className="w-4 h-4 md:w-5 md:h-5" />
-                  Copier le lien
+                  <Share2 className="w-4 h-4" /> Copier le lien
                 </button>
-                
                 <button 
                   onClick={() => {
                     const canvas = document.getElementById('qr-code-canvas') as HTMLCanvasElement;
@@ -2175,10 +2198,9 @@ export default function RouteMaster() {
                       link.click();
                     }
                   }}
-                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-emerald-500 text-black rounded-xl hover:bg-emerald-400 transition-colors font-bold text-sm md:text-base"
+                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-emerald-500 text-black rounded-xl hover:bg-emerald-400 transition-colors font-bold text-sm"
                 >
-                  <Download className="w-4 h-4 md:w-5 md:h-5" />
-                  Télécharger
+                  <Download className="w-4 h-4" /> Télécharger QR
                 </button>
               </div>
             </div>
@@ -2214,11 +2236,47 @@ export default function RouteMaster() {
         </AnimatePresence>
       </main>
 
-      {/* Vehicle viewer modal */}
+      {/* MODAL DU LECTEUR PDF PROTÉGÉ */}
+      {pdfViewer && (
+        <div 
+          className="fixed inset-0 z-[110] bg-black/90 backdrop-blur-md flex flex-col p-2 md:p-6" 
+          onClick={() => setPdfViewer(null)}
+        >
+          <div 
+            className="flex justify-between items-center bg-zinc-900 border border-zinc-800 p-4 rounded-t-2xl max-w-5xl w-full mx-auto" 
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-2">
+              <FileText className="text-emerald-500 w-5 h-5" />
+              <h3 className="text-base md:text-lg font-bold text-white">{pdfViewer.title}</h3>
+            </div>
+            <button 
+              onClick={() => setPdfViewer(null)} 
+              className="p-1.5 hover:bg-zinc-800 rounded-full text-zinc-400 hover:text-white transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+          <div 
+            className="flex-1 bg-zinc-900 border-x border-b border-zinc-800 rounded-b-2xl overflow-hidden max-w-5xl w-full mx-auto relative select-none" 
+            onClick={e => e.stopPropagation()}
+          >
+            <iframe
+              src={pdfViewer.url}
+              className="w-full h-full border-0"
+              title={pdfViewer.title}
+              onContextMenu={e => e.preventDefault()}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Modal Véhicule */}
       {viewingUser && (
         <VehicleModal targetUser={viewingUser} onClose={() => setViewingUser(null)} />
       )}
 
+      {/* Barre de navigation inférieure */}
       {user && (
         <nav className="fixed bottom-0 left-0 right-0 bg-zinc-900/80 backdrop-blur-md border-t border-zinc-800 p-2 flex justify-around items-center z-50">
           <button onClick={() => setView('home')} className={`p-2 rounded-xl transition-all ${view === 'home' ? 'text-emerald-500 bg-emerald-500/10' : 'text-zinc-500 hover:text-white'}`}>
@@ -2241,3 +2299,4 @@ export default function RouteMaster() {
     </div>
   );
 }
+```
