@@ -77,7 +77,7 @@ export default function RouteMaster() {
   const [selectedChapter, setSelectedChapter] = useState<string | null>(null);
 
   const [subjectNames, setSubjectNames] = useState<Record<string, string>>(() => {
-    return { ...INITIAL_SUBJECT_NAMES, cours: 'Cours', Cours: 'Cours', COURS: 'Cours' };
+    return { ...INITIAL_SUBJECT_NAMES, Cours: 'Cours' };
   });
 
   const [chapters, setChapters] = useState<Chapter[]>(() => {
@@ -97,7 +97,7 @@ export default function RouteMaster() {
     return c.level.trim() + '__' + c.subject.trim().toLowerCase() + '__' + c.title.trim();
   };
 
-  // Chargement ultra-robuste depuis Supabase
+  // Chargement depuis Supabase
   useEffect(() => {
     const loadSupabaseData = async () => {
       let result = await supabase.from('chapters').select('*');
@@ -112,7 +112,6 @@ export default function RouteMaster() {
           title: (d.title || d.titre || '').trim()
         }));
 
-        // Fusionner les données de Supabase avec les chapitres de base
         setChapters(prev => {
           const map = new Map();
           [...prev, ...loadedChapters].forEach(item => {
@@ -305,6 +304,17 @@ export default function RouteMaster() {
     }
   };
 
+  // Suppression d'une matière
+  const handleDeleteSubject = (subj: string) => {
+    if (!window.confirm('Supprimer la matière "' + subj + '" ?')) return;
+    setSubjectNames(prev => {
+      const next = { ...prev };
+      delete next[subj];
+      return next;
+    });
+    setChapters(prev => prev.filter(c => c.subject.toLowerCase() !== subj.toLowerCase()));
+  };
+
   // Véhicule IA
   const [isGeneratingVehicle, setIsGeneratingVehicle] = useState(false);
 
@@ -493,7 +503,11 @@ export default function RouteMaster() {
     }
   };
 
-  const subjectsList = Array.from(new Set([...Object.keys(subjectNames), ...chapters.map(c => c.subject)]));
+  // Liste unique de toutes les matières (sans doublons)
+  const cleanSubjectsList = Array.from(new Set([
+    ...Object.keys(subjectNames),
+    ...chapters.map(c => c.subject)
+  ])).filter(Boolean);
 
   return (
     <div className="min-h-screen bg-black text-zinc-300 font-sans selection:bg-emerald-500/30">
@@ -566,48 +580,54 @@ export default function RouteMaster() {
           </div>
         )}
 
-        {/* AFFICHAGE DES MATIERES COMPLET ET DYNAMIQUE */}
+        {/* VUE MATIERES ELEVE (AFFICHE TOUTES LES MATIERES CONTENANT DES COURS) */}
         {view === 'subjects' && (() => {
-          const matchedChapters = chapters.filter(c => 
-            c.level.trim().toLowerCase() === selectedLevel?.trim().toLowerCase()
-          );
-
           const subjectsForThisLevel = Array.from(new Set(
-            matchedChapters.map(c => c.subject.trim())
+            chapters
+              .filter(c => c.level.trim().toLowerCase() === selectedLevel?.trim().toLowerCase())
+              .map(c => c.subject.trim())
           ));
 
           return (
             <div className="space-y-4">
               <h2 className="text-2xl font-bold text-white mb-4">Matières ({selectedLevel})</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {subjectsForThisLevel.map(subject => {
-                  const count = matchedChapters.filter(c => 
-                    c.subject.trim().toLowerCase() === subject.toLowerCase() &&
-                    (chapterDocs[getChapterKey(c)]?.isVisible !== false)
-                  ).length;
+              {subjectsForThisLevel.length === 0 ? (
+                <div className="p-8 text-center bg-zinc-900 border border-zinc-800 rounded-2xl text-zinc-400">
+                  Aucune matière disponible pour ce niveau pour le moment.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {subjectsForThisLevel.map(subject => {
+                    const count = chapters.filter(c => 
+                      c.level.trim().toLowerCase() === selectedLevel?.trim().toLowerCase() && 
+                      c.subject.trim().toLowerCase() === subject.toLowerCase() &&
+                      (chapterDocs[getChapterKey(c)]?.isVisible !== false)
+                    ).length;
 
-                  return (
-                    <button 
-                      key={subject} 
-                      onClick={() => handleSubjectSelect(subject)} 
-                      className="p-5 bg-zinc-900 border border-zinc-800 rounded-2xl hover:border-emerald-500 text-left font-bold text-lg text-white transition-all group flex justify-between items-center"
-                    >
-                      <div>
-                        <span>{subjectNames[subject] || subject.toUpperCase()}</span>
-                        <p className="text-xs text-zinc-500 font-normal mt-1">{count} chapitre(s) / cours</p>
-                      </div>
-                      <ChevronRight className="text-zinc-600 group-hover:text-emerald-500 transition-colors" />
-                    </button>
-                  );
-                })}
-              </div>
+                    return (
+                      <button 
+                        key={subject} 
+                        onClick={() => handleSubjectSelect(subject)} 
+                        className="p-5 bg-zinc-900 border border-zinc-800 rounded-2xl hover:border-emerald-500 text-left font-bold text-lg text-white transition-all group flex justify-between items-center"
+                      >
+                        <div>
+                          <span>{subjectNames[subject] || subject.toUpperCase()}</span>
+                          <p className="text-xs text-zinc-500 font-normal mt-1">{count} chapitre(s) / cours</p>
+                        </div>
+                        <ChevronRight className="text-zinc-600 group-hover:text-emerald-500 transition-colors" />
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           );
         })()}
 
+        {/* VUE CHAPITRES ELEVE */}
         {view === 'chapters' && (
           <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-white mb-4">Chapitres</h2>
+            <h2 className="text-2xl font-bold text-white mb-4">Chapitres & Cours</h2>
             <div className="space-y-3">
               {chapters.filter(c => 
                 c.level.trim().toLowerCase() === selectedLevel?.trim().toLowerCase() && 
@@ -623,23 +643,33 @@ export default function RouteMaster() {
 
                 return (
                   <div key={c.title} className="flex items-center justify-between p-4 bg-zinc-900 border border-zinc-800 rounded-xl hover:bg-zinc-850">
-                    <button onClick={() => chapterQuestions.length > 0 && handleChapterSelect(c.title)} className="text-left flex-1 font-medium text-white">
-                      {c.title}
-                      {chapterQuestions.length > 0 && (
-                        <span className="text-zinc-500 text-xs ml-2">({chapterQuestions.length} questions)</span>
+                    <div className="flex-1">
+                      <p className="text-white font-bold">{c.title}</p>
+                      {chapterQuestions.length > 0 ? (
+                        <p className="text-zinc-500 text-xs mt-0.5">{chapterQuestions.length} questions d'entraînement</p>
+                      ) : (
+                        <p className="text-emerald-500 text-xs mt-0.5">📄 Support de cours disponible</p>
                       )}
-                    </button>
-                    {doc && (
-                      <button 
-                        onClick={() => setPdfViewer({ title: c.title, url: doc + '#toolbar=0&navpanes=0&scrollbar=0' })}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-lg text-xs font-bold mr-3"
-                      >
-                        <FileText className="w-4 h-4" /> Consulter le cours
-                      </button>
-                    )}
-                    {chapterQuestions.length > 0 && (
-                      <ChevronRight className="text-zinc-600 w-5 h-5 cursor-pointer" onClick={() => handleChapterSelect(c.title)} />
-                    )}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {doc && (
+                        <button 
+                          onClick={() => setPdfViewer({ title: c.title, url: doc + '#toolbar=0&navpanes=0&scrollbar=0' })}
+                          className="flex items-center gap-1.5 px-3 py-2 bg-emerald-500 text-black rounded-lg text-xs font-bold hover:bg-emerald-400"
+                        >
+                          <FileText className="w-4 h-4" /> Consulter le cours
+                        </button>
+                      )}
+                      {chapterQuestions.length > 0 && (
+                        <button 
+                          onClick={() => handleChapterSelect(c.title)}
+                          className="px-3 py-2 bg-zinc-800 border border-zinc-700 text-white rounded-lg text-xs font-bold hover:border-emerald-500"
+                        >
+                          Lancer le Quiz
+                        </button>
+                      )}
+                    </div>
                   </div>
                 );
               })}
@@ -678,7 +708,6 @@ export default function RouteMaster() {
         {view === 'shop' && (
           <div className="space-y-6 py-4">
             <h2 className="text-2xl font-bold text-white">Boutique RouteMaster</h2>
-            
             {user?.vehicleOwned && (
               <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
                 <h3 className="text-lg font-bold text-white mb-3">Mon Véhicule — {user.vehicleModel}</h3>
@@ -731,14 +760,14 @@ export default function RouteMaster() {
               <div className="space-y-6">
                 <h2 className="text-2xl font-bold text-white">Espace Professeur</h2>
 
-                {/* ONGLETS PROF */}
+                {/* ONGLETS */}
                 <div className="flex gap-2 p-1 bg-zinc-900 rounded-xl border border-zinc-800">
                   <button onClick={() => setProfTab('chapters')} className={'flex-1 py-2 rounded-lg font-bold text-sm ' + (profTab === 'chapters' ? 'bg-emerald-500 text-black' : 'text-zinc-500')}>Chapitres</button>
                   <button onClick={() => setProfTab('subjects')} className={'flex-1 py-2 rounded-lg font-bold text-sm ' + (profTab === 'subjects' ? 'bg-emerald-500 text-black' : 'text-zinc-500')}>Matières</button>
                   <button onClick={() => setProfTab('share')} className={'flex-1 py-2 rounded-lg font-bold text-sm ' + (profTab === 'share' ? 'bg-emerald-500 text-black' : 'text-zinc-500')}>Partager</button>
                 </div>
 
-                {/* ONGLET MATIERES */}
+                {/* ONGLET MATIERES AVEC BOUTON POUBELLE */}
                 {profTab === 'subjects' && (
                   <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-4">
                     <h3 className="text-lg font-bold text-white">Ajouter une Matière</h3>
@@ -762,10 +791,18 @@ export default function RouteMaster() {
                         <Plus className="w-5 h-5" />
                       </button>
                     </div>
+
                     <div className="divide-y divide-zinc-800 pt-4">
-                      {subjectsList.map(s => (
-                        <div key={s} className="py-2.5 flex justify-between items-center text-white">
-                          <span>{subjectNames[s] || s}</span>
+                      {cleanSubjectsList.map(s => (
+                        <div key={s} className="py-3 flex justify-between items-center text-white">
+                          <span className="font-medium">{subjectNames[s] || s}</span>
+                          <button 
+                            onClick={() => handleDeleteSubject(s)} 
+                            className="p-1.5 text-zinc-500 hover:text-red-500 hover:bg-zinc-800 rounded-lg"
+                            title="Supprimer la matière"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
                       ))}
                     </div>
@@ -783,12 +820,12 @@ export default function RouteMaster() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                           <label className="text-xs font-bold text-zinc-400 block mb-1.5 uppercase tracking-wider">
-                            1. Choisissez la Classe / Niveau :
+                            1. Classe / Niveau :
                           </label>
                           <select 
                             value={newChapter.level} 
                             onChange={e => setNewChapter({ ...newChapter, level: e.target.value })}
-                            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm focus:border-emerald-500"
+                            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm"
                           >
                             {LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
                           </select>
@@ -796,21 +833,21 @@ export default function RouteMaster() {
 
                         <div>
                           <label className="text-xs font-bold text-zinc-400 block mb-1.5 uppercase tracking-wider">
-                            2. Choisissez la Matière (Discipline) :
+                            2. Matière :
                           </label>
                           <select 
                             value={newChapter.subject} 
                             onChange={e => setNewChapter({ ...newChapter, subject: e.target.value })}
-                            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm focus:border-emerald-500"
+                            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm"
                           >
-                            {subjectsList.map(s => <option key={s} value={s}>{subjectNames[s] || s}</option>)}
+                            {cleanSubjectsList.map(s => <option key={s} value={s}>{subjectNames[s] || s}</option>)}
                           </select>
                         </div>
                       </div>
 
                       <div>
                         <label className="text-xs font-bold text-zinc-400 block mb-1.5 uppercase tracking-wider">
-                          3. Titre du nouveau Chapitre (ou Fiche) :
+                          3. Titre du Chapitre :
                         </label>
                         <div className="flex gap-2">
                           <input 
@@ -818,7 +855,7 @@ export default function RouteMaster() {
                             placeholder="Ex : Bilan de première, Fiche 21, Sécurité..." 
                             value={newChapter.title} 
                             onChange={e => setNewChapter({ ...newChapter, title: e.target.value })} 
-                            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm focus:border-emerald-500" 
+                            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm" 
                           />
                           <button 
                             onClick={handleAddChapter} 
@@ -948,7 +985,7 @@ export default function RouteMaster() {
         )}
       </main>
 
-      {/* MODAL VÉHICULE JOUEUR */}
+      {/* MODAL VEHICULE */}
       {viewingUser && (
         <div className="fixed inset-0 z-[120] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setViewingUser(null)}>
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 max-w-lg w-full" onClick={e => e.stopPropagation()}>
@@ -969,7 +1006,7 @@ export default function RouteMaster() {
         </div>
       )}
 
-      {/* LISEUSE PDF SÉCURISÉE */}
+      {/* LISEUSE PDF SECURISEE */}
       {pdfViewer && (
         <div className="fixed inset-0 z-[120] bg-black/90 backdrop-blur-md flex flex-col p-3 md:p-6" onClick={() => setPdfViewer(null)}>
           <div className="flex justify-between items-center bg-zinc-900 border border-zinc-800 p-4 rounded-t-2xl max-w-5xl w-full mx-auto" onClick={e => e.stopPropagation()}>
@@ -984,7 +1021,7 @@ export default function RouteMaster() {
         </div>
       )}
 
-      {/* NAVIGATION DU BAS */}
+      {/* NAVIGATION BAS */}
       {user && (
         <nav className="fixed bottom-0 left-0 right-0 bg-zinc-900/90 backdrop-blur-md border-t border-zinc-800 p-3 flex justify-around z-50">
           <button onClick={() => setView('home')} className={'p-2 ' + (view === 'home' ? 'text-emerald-500' : 'text-zinc-500')}><Home className="w-6 h-6" /></button>
