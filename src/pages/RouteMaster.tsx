@@ -18,7 +18,6 @@ import {
   Lock, 
   Share2, 
   QrCode, 
-  Download, 
   Loader2, 
   Eye, 
   X, 
@@ -37,6 +36,7 @@ import { useProfiles } from '@/hooks/useProfiles';
 const LEVELS = ['2ndes CRM', '1ères CRM', 'Terminales CRM'];
 const COOLDOWN_MS = 48 * 60 * 60 * 1000;
 
+// Boutique complète
 const SHOP_ITEMS = [
   { id: 'veh_car', name: 'Voiture de Tourisme', price: 1000, type: 'vehicle', vehicleType: 'car' },
   { id: 'veh_truck', name: 'Porteur (Camion)', price: 5000, type: 'vehicle', vehicleType: 'truck' },
@@ -79,13 +79,11 @@ export default function RouteMaster() {
   const [selectedChapter, setSelectedChapter] = useState<string | null>(null);
 
   const [subjectNames, setSubjectNames] = useState<Record<string, string>>(() => {
-    const saved = localStorage.getItem('routemaster_subject_names');
-    return saved ? JSON.parse(saved) : INITIAL_SUBJECT_NAMES;
+    return INITIAL_SUBJECT_NAMES;
   });
 
   const [chapters, setChapters] = useState<Chapter[]>(() => {
-    const saved = localStorage.getItem('routemaster_chapters_v3');
-    return saved ? JSON.parse(saved) : INITIAL_CHAPTERS;
+    return INITIAL_CHAPTERS;
   });
 
   const [questions, setQuestions] = useState<Question[]>(() => {
@@ -93,34 +91,31 @@ export default function RouteMaster() {
     return saved ? JSON.parse(saved) : ALL_QUESTIONS;
   });
 
-  const [chapterDocs, setChapterDocs] = useState<Record<string, { docUrl?: string; isVisible: boolean }>>(() => {
-    const saved = localStorage.getItem('routemaster_chapter_meta');
-    return saved ? JSON.parse(saved) : {};
-  });
+  const [chapterDocs, setChapterDocs] = useState<Record<string, { docUrl?: string; isVisible: boolean }>>({});
 
   const [users, setUsers] = useState<User[]>([]);
   const [viewingUser, setViewingUser] = useState<User | null>(null);
 
-  // Synchronisation avec Supabase au démarrage
+  // Synchronisation directe avec Supabase (priorité absolue à la base de données)
   useEffect(() => {
-    supabase.from('chapters').select('*').then(({ data }) => {
+    supabase.from('chapters').select('*').then(({ data, error }) => {
       if (data && data.length > 0) {
         const loadedChapters = data.map((d: any) => ({
           level: d.level || '1ères CRM',
-          subject: d.subject || 'Cours',
+          subject: (d.subject ? d.subject.trim() : 'Cours'),
           title: d.title || d.titre || ''
         }));
         setChapters(loadedChapters);
 
         const loadedDocs: Record<string, { docUrl?: string; isVisible: boolean }> = {};
         data.forEach((d: any) => {
-          const key = (d.level || '1ères CRM') + '__' + (d.subject || 'Cours') + '__' + (d.title || d.titre || '');
+          const key = (d.level || '1ères CRM') + '__' + (d.subject ? d.subject.trim() : 'Cours') + '__' + (d.title || d.titre || '');
           loadedDocs[key] = {
             docUrl: d.document_url || undefined,
             isVisible: d.est_visible !== false
           };
         });
-        setChapterDocs(prev => ({ ...prev, ...loadedDocs }));
+        setChapterDocs(loadedDocs);
       }
     });
 
@@ -128,22 +123,6 @@ export default function RouteMaster() {
       setUsers(dbUsers);
     });
   }, [fetchAllUsers]);
-
-  useEffect(() => {
-    localStorage.setItem('routemaster_chapter_meta', JSON.stringify(chapterDocs));
-  }, [chapterDocs]);
-
-  useEffect(() => {
-    localStorage.setItem('routemaster_chapters_v3', JSON.stringify(chapters));
-  }, [chapters]);
-
-  useEffect(() => {
-    localStorage.setItem('routemaster_questions_v3', JSON.stringify(questions));
-  }, [questions]);
-
-  useEffect(() => {
-    localStorage.setItem('routemaster_subject_names', JSON.stringify(subjectNames));
-  }, [subjectNames]);
 
   const [user, setUser] = useState<User | null>(() => {
     const saved = localStorage.getItem('routemaster_user');
@@ -309,7 +288,7 @@ export default function RouteMaster() {
     }
   };
 
-  // Véhicule IA
+  // Générateur de Véhicule IA (Via Supabase)
   const [isGeneratingVehicle, setIsGeneratingVehicle] = useState(false);
 
   const generateVehicleImage = useCallback(async (vehicleType: string, customize: User['customize']) => {
@@ -328,12 +307,60 @@ export default function RouteMaster() {
       if (error) throw error;
       return data?.imageUrl || null;
     } catch (err) {
-      console.error('Erreur véhicule:', err);
+      console.error('Erreur génération véhicule IA:', err);
       return null;
     } finally {
       setIsGeneratingVehicle(false);
     }
   }, []);
+
+  const handleBuyVehicleItem = async (item: any) => {
+    if (!user || user.fuel < item.price) {
+      alert('Pas assez de gazole ! Répondez à des questions pour en gagner.');
+      return;
+    }
+
+    // Déduction des LITRES DE GAZOLE uniquement (les points ne changent pas)
+    const newFuel = user.fuel - item.price;
+
+    if (item.type === 'vehicle') {
+      const defaultCustomize: User['customize'] = {
+        paintColor: '#ffffff', paintFinish: 'glossy', wheelType: 'standard',
+        hasBullbar: false, hasSpoiler: false, hasRunningBoard: false, hasVisor: false,
+        hasBeacons: false, hasLightBar: false, hasXenon: false,
+        hasTuningBumper: false, hasNeonKit: false, hasWideBodyKit: false, hasHood: false, hasExhaust: false,
+        cabinStripe: null, cabinSticker: null, trailerColor: '#ffffff', trailerLogo: null
+      };
+
+      const imageUrl = await generateVehicleImage(item.vehicleType, defaultCustomize);
+
+      setUser(prev => prev ? ({
+        ...prev,
+        fuel: newFuel,
+        vehicleOwned: true,
+        vehicleType: item.vehicleType,
+        vehicleModel: item.name,
+        customize: defaultCustomize,
+        vehicleImageUrl: imageUrl || undefined
+      }) : null);
+    } else {
+      // Accessoire ou peinture
+      const newCustomize = { ...user.customize };
+      if (item.type === 'paint') newCustomize.paintColor = item.color;
+      if (item.id === 'beacons') newCustomize.hasBeacons = true;
+      if (item.id === 'bullbar') newCustomize.hasBullbar = true;
+      if (item.id === 'lightbar') newCustomize.hasLightBar = true;
+
+      const imageUrl = await generateVehicleImage(user.vehicleType, newCustomize);
+
+      setUser(prev => prev ? ({
+        ...prev,
+        fuel: newFuel,
+        customize: newCustomize,
+        vehicleImageUrl: imageUrl || prev.vehicleImageUrl
+      }) : null);
+    }
+  };
 
   const handleLogin = async () => {
     if (!pseudoInput.trim() || !passwordInput.trim()) return;
@@ -381,7 +408,7 @@ export default function RouteMaster() {
     setSelectedChapter(chapterTitle);
     const now = Date.now();
     const chapterQuestions = questions.filter(q => 
-      q.level === selectedLevel && q.subject === selectedSubject && q.chapter === chapterTitle
+      q.level === selectedLevel && q.subject.toLowerCase() === selectedSubject?.toLowerCase() && q.chapter === chapterTitle
     );
     const available = chapterQuestions.filter(q => {
       const answeredAt = user?.answeredQuestions[q.id];
@@ -449,6 +476,7 @@ export default function RouteMaster() {
     }
   };
 
+  // Liste unique de toutes les matières disponibles
   const subjectsList = Array.from(new Set([...Object.keys(subjectNames), ...chapters.map(c => c.subject)]));
 
   return (
@@ -539,12 +567,15 @@ export default function RouteMaster() {
           <div className="space-y-4">
             <h2 className="text-2xl font-bold text-white mb-4">Chapitres</h2>
             <div className="space-y-3">
-              {chapters.filter(c => c.level === selectedLevel && c.subject === selectedSubject && (chapterDocs[getChapterKey(c)]?.isVisible !== false)).map(c => {
+              {chapters.filter(c => c.level === selectedLevel && c.subject.toLowerCase() === selectedSubject?.toLowerCase() && (chapterDocs[getChapterKey(c)]?.isVisible !== false)).map(c => {
                 const doc = chapterDocs[getChapterKey(c)]?.docUrl;
+                const chapterQuestions = questions.filter(q => q.level === selectedLevel && q.subject.toLowerCase() === selectedSubject?.toLowerCase() && q.chapter === c.title);
+
                 return (
                   <div key={c.title} className="flex items-center justify-between p-4 bg-zinc-900 border border-zinc-800 rounded-xl hover:bg-zinc-850">
-                    <button onClick={() => handleChapterSelect(c.title)} className="text-left flex-1 font-medium text-white">
+                    <button onClick={() => chapterQuestions.length > 0 && handleChapterSelect(c.title)} className="text-left flex-1 font-medium text-white">
                       {c.title}
+                      <span className="text-zinc-500 text-xs ml-2">({chapterQuestions.length} questions)</span>
                     </button>
                     {doc && (
                       <button 
@@ -554,7 +585,9 @@ export default function RouteMaster() {
                         <FileText className="w-4 h-4" /> Consulter le cours
                       </button>
                     )}
-                    <ChevronRight className="text-zinc-600 w-5 h-5 cursor-pointer" onClick={() => handleChapterSelect(c.title)} />
+                    {chapterQuestions.length > 0 && (
+                      <ChevronRight className="text-zinc-600 w-5 h-5 cursor-pointer" onClick={() => handleChapterSelect(c.title)} />
+                    )}
                   </div>
                 );
               })}
@@ -593,15 +626,38 @@ export default function RouteMaster() {
         {view === 'shop' && (
           <div className="space-y-6 py-4">
             <h2 className="text-2xl font-bold text-white">Boutique RouteMaster</h2>
+            
+            {user?.vehicleOwned && (
+              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
+                <h3 className="text-lg font-bold text-white mb-3">Mon Véhicule — {user.vehicleModel}</h3>
+                <div className="w-full aspect-video bg-zinc-800 rounded-xl overflow-hidden flex items-center justify-center relative">
+                  {isGeneratingVehicle ? (
+                    <div className="flex flex-col items-center gap-2 text-zinc-400">
+                      <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+                      <span>Génération IA en cours...</span>
+                    </div>
+                  ) : user.vehicleImageUrl ? (
+                    <img src={user.vehicleImageUrl} alt="Véhicule" className="w-full h-full object-cover" />
+                  ) : (
+                    <Truck className="w-16 h-16 text-zinc-700" />
+                  )}
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {SHOP_ITEMS.map(item => (
                 <div key={item.id} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex flex-col justify-between gap-4">
                   <div>
                     <h4 className="text-lg font-bold text-white">{item.name}</h4>
-                    <p className="text-orange-500 font-bold">{item.price} L</p>
+                    <p className="text-orange-500 font-bold">{item.price} L Gazole</p>
                   </div>
-                  <button disabled={!user || user.fuel < item.price} className="w-full py-2.5 bg-emerald-500 text-black font-bold rounded-xl disabled:bg-zinc-800 disabled:text-zinc-600">
-                    ACHETER
+                  <button 
+                    onClick={() => handleBuyVehicleItem(item)}
+                    disabled={!user || user.fuel < item.price || isGeneratingVehicle} 
+                    className="w-full py-2.5 bg-emerald-500 text-black font-bold rounded-xl disabled:bg-zinc-800 disabled:text-zinc-600"
+                  >
+                    {isGeneratingVehicle ? 'Chargement...' : 'ACHETER'}
                   </button>
                 </div>
               ))}
@@ -637,7 +693,7 @@ export default function RouteMaster() {
                     <div className="flex gap-2">
                       <input 
                         type="text" 
-                        placeholder="Nom de la nouvelle matière (ex: Sécurité Routière)" 
+                        placeholder="Nom de la nouvelle matière (ex: Cours ou Réglementation)" 
                         value={newSubjectInput} 
                         onChange={e => setNewSubjectInput(e.target.value)} 
                         className="flex-1 bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm" 
@@ -647,7 +703,7 @@ export default function RouteMaster() {
                           if (!newSubjectInput.trim()) return;
                           setSubjectNames(prev => ({ ...prev, [newSubjectInput.trim()]: newSubjectInput.trim() }));
                           setNewSubjectInput('');
-                          alert('Matière ajoutée !');
+                          alert('Matière ajoutée avec succès !');
                         }} 
                         className="p-2.5 bg-emerald-500 text-black rounded-xl"
                       >
@@ -818,6 +874,27 @@ export default function RouteMaster() {
           </div>
         )}
       </main>
+
+      {/* MODAL VÉHICULE JOUEUR */}
+      {viewingUser && (
+        <div className="fixed inset-0 z-[120] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setViewingUser(null)}>
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 max-w-lg w-full" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <Truck className="text-emerald-500 w-5 h-5" /> Véhicule de {viewingUser.pseudo}
+              </h3>
+              <button onClick={() => setViewingUser(null)} className="p-1 text-zinc-400 hover:text-white"><X className="w-6 h-6" /></button>
+            </div>
+            {viewingUser.vehicleOwned ? (
+              <div className="w-full aspect-video bg-zinc-800 rounded-xl overflow-hidden mb-2">
+                {viewingUser.vehicleImageUrl ? <img src={viewingUser.vehicleImageUrl} alt="Véhicule" className="w-full h-full object-cover" /> : <Truck className="w-12 h-12 text-zinc-700 m-auto mt-12" />}
+              </div>
+            ) : (
+              <p className="text-zinc-500 text-center py-6">Ce joueur n'a pas encore de véhicule.</p>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* LISEUSE PDF SÉCURISÉE */}
       {pdfViewer && (
