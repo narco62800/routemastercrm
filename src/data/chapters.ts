@@ -3,8 +3,6 @@ import { Chapter } from '../types';
 export const LEVELS = ['2ndes CRM', '1ères CRM', 'Terminales CRM'];
 
 export const INITIAL_CHAPTERS: Chapter[] = [
-  { level: "Terminales CRM", subject: "Cours", title: "Bilan première" },
-  { level: "1ères CRM", subject: "Cours", title: "Bilan première" },
   { level: "2ndes CRM", subject: "ETG", title: "Code de la route B" },
   { level: "2ndes CRM", subject: "Technologie véhicule", title: "Découverte des véhicules" },
   { level: "1ères CRM", subject: "RSE", title: "Chapitre 2 - Temps de conduite et repos" },
