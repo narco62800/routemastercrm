@@ -1662,26 +1662,69 @@ export default function RouteMaster() {
                 <div className="p-8 text-center text-zinc-500 text-sm">Aucun chapitre enregistré.</div>
               ) : (
                 chapters.map((c, i) => {
-                  const chapterKey = `${c.level}|${c.subject}|${c.title}`;
-                  const isExpanded = expandedChapter === chapterKey;
+                  const ckey = chapterKey(c);
+                  const isExpanded = expandedChapter === ckey;
                   const chapterQuestions = questions.filter(q => q.level === c.level && q.subject === c.subject && q.chapter === c.title);
+                  const meta = metaMap[ckey];
+                  const isVisible = meta?.estVisible !== false;
                   return (
                     <div key={i} className="border-b border-zinc-800 last:border-0">
-                      <div 
+                      <div
                         className="flex items-center justify-between p-4 hover:bg-zinc-800/50 transition-colors cursor-pointer select-none"
-                        onDoubleClick={() => setExpandedChapter(isExpanded ? null : chapterKey)}
+                        onDoubleClick={() => setExpandedChapter(isExpanded ? null : ckey)}
                       >
                         <div className="flex-1 pr-4">
-                          <p className="text-white font-medium text-sm md:text-base flex items-center gap-2">
-                            <ChevronRight className={`w-4 h-4 text-zinc-500 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
-                            {c.title}
-                            <span className="text-zinc-500 text-xs font-normal">({chapterQuestions.length} questions)</span>
-                          </p>
-                          <p className="text-zinc-500 text-[10px] md:text-xs uppercase tracking-wider ml-6">{c.level} • {c.subject}</p>
+                          {renamingKey === ckey ? (
+                            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                              <input
+                                autoFocus
+                                value={renameValue}
+                                onChange={(e) => setRenameValue(e.target.value)}
+                                onKeyDown={(e) => { if (e.key === 'Enter') handleRenameChapter(c, renameValue); if (e.key === 'Escape') setRenamingKey(null); }}
+                                className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-1.5 text-white text-sm"
+                              />
+                              <button onClick={() => handleRenameChapter(c, renameValue)} className="p-1.5 bg-emerald-500 text-black rounded-lg">
+                                <Save className="w-4 h-4" />
+                              </button>
+                              <button onClick={() => setRenamingKey(null)} className="p-1.5 text-zinc-400 hover:text-white">
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ) : (
+                            <>
+                              <p className="text-white font-medium text-sm md:text-base flex items-center gap-2">
+                                <ChevronRight className={`w-4 h-4 text-zinc-500 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                                {c.title}
+                                <span className="text-zinc-500 text-xs font-normal">({chapterQuestions.length} questions)</span>
+                                {meta?.documentUrl && <FileText className="w-3.5 h-3.5 text-blue-400" />}
+                                {!isVisible && <span className="text-orange-400 text-[10px] font-normal">masqué</span>}
+                              </p>
+                              <p className="text-zinc-500 text-[10px] md:text-xs uppercase tracking-wider ml-6">{c.level} • {c.subject}</p>
+                            </>
+                          )}
                         </div>
-                        <button onClick={(e) => { e.stopPropagation(); handleDeleteChapter(c.title); }} className="text-red-500 hover:bg-red-500/10 p-2 rounded-lg transition-colors">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                          <label className="text-blue-400 hover:bg-blue-500/10 p-2 rounded-lg transition-colors cursor-pointer" title="Téléverser un PDF">
+                            {uploadingKey === ckey
+                              ? <Loader2 className="w-4 h-4 animate-spin" />
+                              : <Paperclip className="w-4 h-4" />}
+                            <input
+                              type="file"
+                              accept="application/pdf"
+                              className="hidden"
+                              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUploadChapterDoc(c, f); e.target.value = ''; }}
+                            />
+                          </label>
+                          <button onClick={() => { setRenamingKey(ckey); setRenameValue(c.title); }} className="text-zinc-400 hover:text-emerald-500 hover:bg-emerald-500/10 p-2 rounded-lg transition-colors" title="Renommer">
+                            <Edit3 className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => setVisibility(c, !isVisible)} className={`p-2 rounded-lg transition-colors ${isVisible ? 'text-emerald-500 hover:bg-emerald-500/10' : 'text-orange-400 hover:bg-orange-500/10'}`} title={isVisible ? 'Masquer' : 'Rendre visible'}>
+                            {isVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                          </button>
+                          <button onClick={() => handleDeleteChapter(c.title)} className="text-red-500 hover:bg-red-500/10 p-2 rounded-lg transition-colors">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
                       {isExpanded && (
                         <div className="bg-zinc-950/50 border-t border-zinc-800">
