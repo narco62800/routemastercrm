@@ -2262,6 +2262,25 @@ export default function RouteMaster() {
         <VehicleModal targetUser={viewingUser} onClose={() => setViewingUser(null)} />
       )}
 
+      {/* Course PDF viewer */}
+      {pdfViewer && (
+        <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex flex-col p-3 md:p-6">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-white font-bold text-sm md:text-base flex items-center gap-2">
+              <FileText className="w-4 h-4 text-blue-400" /> {pdfViewer.title}
+            </p>
+            <button onClick={() => setPdfViewer(null)} className="p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-800">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <iframe
+            src={pdfViewer.url}
+            title={pdfViewer.title}
+            className="flex-1 w-full rounded-xl border border-zinc-800 bg-zinc-900"
+          />
+        </div>
+      )}
+
       {user && (
         <nav className="fixed bottom-0 left-0 right-0 bg-zinc-900/80 backdrop-blur-md border-t border-zinc-800 p-2 flex justify-around items-center z-50">
           <button onClick={() => setView('home')} className={`p-2 rounded-xl transition-all ${view === 'home' ? 'text-emerald-500 bg-emerald-500/10' : 'text-zinc-500 hover:text-white'}`}>
