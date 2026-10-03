@@ -104,7 +104,7 @@ export default function RouteMaster() {
   const [users, setUsers] = useState<User[]>([]);
   const [viewingUser, setViewingUser] = useState<User | null>(null);
 
-  const appUrl = typeof window !== 'undefined' ? window.location.origin : 'https://routemastercrm.vercel.app';
+  const appUrl = 'https://routemastercrm.lovable.app';
 
   const getChapterKey = (c: { level: string; subject: string; title: string }) => {
     return c.level.trim() + '__' + c.subject.trim().toLowerCase() + '__' + c.title.trim();
