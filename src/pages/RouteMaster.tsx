@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { Question, Chapter, User } from '../types';
+import ProfManager from '@/components/ProfManager';
 import { ALL_QUESTIONS, INITIAL_CHAPTERS, INITIAL_SUBJECT_NAMES } from '../data/index';
 import { FUEL_PER_CORRECT_ANSWER, POINTS_PER_CORRECT_ANSWER, INITIAL_FUEL, MAX_FUEL, MAX_POINTS } from '../constants';
 import { supabase } from '@/integrations/supabase/client';
@@ -84,12 +85,12 @@ export default function RouteMaster() {
   });
 
   const [chapters, setChapters] = useState<Chapter[]>(() => {
-    const saved = localStorage.getItem('routemaster_chapters_v5');
+    const saved = localStorage.getItem('routemaster_chapters_v6');
     return saved ? JSON.parse(saved) : INITIAL_CHAPTERS;
   });
 
   const [questions, setQuestions] = useState<Question[]>(() => {
-    const saved = localStorage.getItem('routemaster_questions_v5');
+    const saved = localStorage.getItem('routemaster_questions_v6');
     return saved ? JSON.parse(saved) : ALL_QUESTIONS;
   });
 
@@ -111,8 +112,12 @@ export default function RouteMaster() {
   };
 
   useEffect(() => {
-    localStorage.setItem('routemaster_chapters_v5', JSON.stringify(chapters));
+    localStorage.setItem('routemaster_chapters_v6', JSON.stringify(chapters));
   }, [chapters]);
+
+  useEffect(() => {
+    try { localStorage.setItem('routemaster_questions_v6', JSON.stringify(questions)); } catch (e) { console.error(e); }
+  }, [questions]);
 
   useEffect(() => {
     localStorage.setItem('routemaster_subjects_v5', JSON.stringify(subjectNames));
@@ -742,126 +747,18 @@ export default function RouteMaster() {
 
                 {/* ONGLET CHAPITRES */}
                 {profTab === 'chapters' && (
-                  <div className="space-y-6">
-                    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-4">
-                      <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                        <Plus className="text-emerald-500 w-5 h-5" /> Ajouter un nouveau Chapitre
-                      </h3>
-                      
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="text-xs font-bold text-zinc-400 block mb-1.5 uppercase tracking-wider">
-                            1. Classe / Niveau :
-                          </label>
-                          <select 
-                            value={newChapter.level} 
-                            onChange={e => setNewChapter({ ...newChapter, level: e.target.value })}
-                            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm"
-                          >
-                            {LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="text-xs font-bold text-zinc-400 block mb-1.5 uppercase tracking-wider">
-                            2. Matière :
-                          </label>
-                          <select 
-                            value={newChapter.subject} 
-                            onChange={e => setNewChapter({ ...newChapter, subject: e.target.value })}
-                            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm"
-                          >
-                            {cleanSubjectsList.map(s => <option key={s} value={s}>{subjectNames[s] || s}</option>)}
-                          </select>
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="text-xs font-bold text-zinc-400 block mb-1.5 uppercase tracking-wider">
-                          3. Titre du Chapitre :
-                        </label>
-                        <div className="flex gap-2">
-                          <input 
-                            type="text" 
-                            placeholder="Ex : Bilan première, Fiche 21, Sécurité..." 
-                            value={newChapter.title} 
-                            onChange={e => setNewChapter({ ...newChapter, title: e.target.value })} 
-                            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm" 
-                          />
-                          <button 
-                            onClick={handleAddChapter} 
-                            className="px-5 py-2.5 bg-emerald-500 text-black font-bold rounded-xl hover:bg-emerald-400 flex items-center gap-1.5"
-                          >
-                            <Plus className="w-5 h-5" /> CRÉER
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-4">
-                      <h3 className="text-lg font-bold text-white">Gestion des Chapitres</h3>
-                      <div className="divide-y divide-zinc-800">
-                        {chapters.map(c => {
-                          const key = getChapterKey(c);
-                          const isVis = chapterDocs[key]?.isVisible ?? true;
-                          const isRenaming = renamingTitle === c.title;
-
-                          return (
-                            <div key={c.title} className="py-3 flex items-center justify-between gap-2">
-                              <div className="flex-1">
-                                {isRenaming ? (
-                                  <div className="flex items-center gap-2">
-                                    <input type="text" value={renameValue} onChange={e => setRenameValue(e.target.value)} className="bg-zinc-800 border border-emerald-500 px-3 py-1 text-white rounded-lg text-sm" autoFocus />
-                                    <button onClick={() => handleRenameChapter(c, renameValue)} className="p-1 bg-emerald-500 text-black rounded"><Save className="w-4 h-4" /></button>
-                                    <button onClick={() => setRenamingTitle(null)} className="p-1 bg-zinc-700 text-white rounded"><X className="w-4 h-4" /></button>
-                                  </div>
-                                ) : (
-                                  <div>
-                                    <p className="text-white font-medium text-sm md:text-base">{c.title}</p>
-                                    <p className="text-zinc-500 text-[11px] uppercase tracking-wider">{c.level} • {c.subject}</p>
-                                  </div>
-                                )}
-                              </div>
-
-                              <div className="flex items-center gap-1">
-                                <button 
-                                  onClick={() => toggleChapterVisibility(c)}
-                                  className={'p-2 rounded-lg transition-colors ' + (isVis ? 'text-emerald-400 hover:bg-emerald-500/10' : 'text-zinc-600 hover:bg-zinc-800')}
-                                  title={isVis ? "Visible (cliquer pour masquer)" : "Masqué (cliquer pour publier)"}
-                                >
-                                  {isVis ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                                </button>
-
-                                <button 
-                                  onClick={() => handleOpenDoc(c)}
-                                  className="p-2 text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
-                                  title="Lire le cours"
-                                >
-                                  <FileText className="w-4 h-4" />
-                                </button>
-
-                                <button 
-                                  onClick={() => { setRenamingTitle(c.title); setRenameValue(c.title); }}
-                                  className="p-2 text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800 rounded-lg"
-                                  title="Renommer"
-                                >
-                                  <Edit3 className="w-4 h-4" />
-                                </button>
-
-                                <button 
-                                  onClick={() => handleDeleteChapter(c)}
-                                  className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg"
-                                  title="Supprimer"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
+                  <ProfManager
+                    levels={LEVELS}
+                    chapters={chapters}
+                    setChapters={setChapters}
+                    questions={questions}
+                    setQuestions={setQuestions}
+                    subjectNames={subjectNames}
+                    setSubjectNames={setSubjectNames}
+                    isVisible={(c) => chapterDocs[getChapterKey(c)]?.isVisible ?? true}
+                    toggleVisibility={toggleChapterVisibility}
+                    openDoc={handleOpenDoc}
+                  />
                 )}
 
                 {/* ONGLET PARTAGER */}
