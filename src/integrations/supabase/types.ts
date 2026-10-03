@@ -47,6 +47,24 @@ export type Database = {
         }
         Relationships: []
       }
+      content_state: {
+        Row: {
+          data: Json
+          key: string
+          updated_at: string
+        }
+        Insert: {
+          data: Json
+          key: string
+          updated_at?: string
+        }
+        Update: {
+          data?: Json
+          key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           answered_questions: Json
@@ -128,6 +146,27 @@ export type Database = {
           id?: string
           p256dh?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      question_overrides: {
+        Row: {
+          data: Json | null
+          deleted: boolean
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          data?: Json | null
+          deleted?: boolean
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          data?: Json | null
+          deleted?: boolean
+          id?: string
+          updated_at?: string
         }
         Relationships: []
       }
