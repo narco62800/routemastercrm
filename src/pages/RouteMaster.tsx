@@ -116,6 +116,10 @@ export default function RouteMaster() {
   }, [chapters]);
 
   useEffect(() => {
+    try { localStorage.setItem('routemaster_questions_v6', JSON.stringify(questions)); } catch (e) { console.error(e); }
+  }, [questions]);
+
+  useEffect(() => {
     localStorage.setItem('routemaster_subjects_v5', JSON.stringify(subjectNames));
   }, [subjectNames]);
 
