@@ -30,6 +30,7 @@ import {
 import { QRCodeCanvas } from 'qrcode.react';
 import { Question, Chapter, User } from '../types';
 import ProfManager from '@/components/ProfManager';
+import { fetchQuestionOverrides, syncQuestionDiff, fetchContentState, saveContentState } from '@/hooks/useContentSync';
 import { ALL_QUESTIONS, INITIAL_CHAPTERS, INITIAL_SUBJECT_NAMES } from '../data/index';
 import { FUEL_PER_CORRECT_ANSWER, POINTS_PER_CORRECT_ANSWER, INITIAL_FUEL, MAX_FUEL, MAX_POINTS } from '../constants';
 import { supabase } from '@/integrations/supabase/client';
@@ -101,6 +102,37 @@ export default function RouteMaster() {
       '1ères CRM__cours__Bilan première': { docUrl: '/bilan des acquis.pdf', isVisible: true }
     };
   });
+
+  // Synchronisation en ligne du contenu pédagogique
+  useEffect(() => {
+    fetchQuestionOverrides(ALL_QUESTIONS).then(q => { if (q) setQuestions(q); });
+    fetchContentState().then(st => {
+      if (Array.isArray(st.chapters)) setChapters(st.chapters);
+      if (st.subjects && typeof st.subjects === 'object') setSubjectNames(st.subjects);
+    });
+  }, []);
+
+  const profSetQuestions: React.Dispatch<React.SetStateAction<Question[]>> = (action) => {
+    setQuestions(prev => {
+      const next = typeof action === 'function' ? (action as (p: Question[]) => Question[])(prev) : action;
+      syncQuestionDiff(prev, next).then(ok => { if (!ok) alert("⚠️ La modification n'a pas pu être envoyée en ligne."); });
+      return next;
+    });
+  };
+  const profSetChapters: React.Dispatch<React.SetStateAction<Chapter[]>> = (action) => {
+    setChapters(prev => {
+      const next = typeof action === 'function' ? (action as (p: Chapter[]) => Chapter[])(prev) : action;
+      saveContentState('chapters', next);
+      return next;
+    });
+  };
+  const profSetSubjectNames: React.Dispatch<React.SetStateAction<Record<string, string>>> = (action) => {
+    setSubjectNames(prev => {
+      const next = typeof action === 'function' ? (action as (p: Record<string, string>) => Record<string, string>)(prev) : action;
+      saveContentState('subjects', next);
+      return next;
+    });
+  };
 
   const [users, setUsers] = useState<User[]>([]);
   const [viewingUser, setViewingUser] = useState<User | null>(null);
@@ -750,11 +782,11 @@ export default function RouteMaster() {
                   <ProfManager
                     levels={LEVELS}
                     chapters={chapters}
-                    setChapters={setChapters}
+                    setChapters={profSetChapters}
                     questions={questions}
-                    setQuestions={setQuestions}
+                    setQuestions={profSetQuestions}
                     subjectNames={subjectNames}
-                    setSubjectNames={setSubjectNames}
+                    setSubjectNames={profSetSubjectNames}
                     isVisible={(c) => chapterDocs[getChapterKey(c)]?.isVisible ?? true}
                     toggleVisibility={toggleChapterVisibility}
                     openDoc={handleOpenDoc}
